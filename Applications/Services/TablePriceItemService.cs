@@ -1,5 +1,5 @@
-﻿using Applications.Dtos.Pricing;
-using Applications.Interfaces;
+﻿using Applications.Contracts;
+using Applications.Dtos.Pricing;
 using Core.FactorySpecifications;
 using Core.Interfaces;
 using Core.Models.Pricing;
@@ -18,7 +18,6 @@ namespace Applications.Services
 
             // Atualiza os campos
             existing.WorkTypeId = dto.WorkTypeId;
-            existing.TablePriceId = dto.TablePriceId;
             existing.Price = dto.Price;
 
             // Passa o id e a entidade para o método Update

@@ -22,6 +22,36 @@ namespace Infra.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Core.Models.Billing.BillingInvoice", b =>
+                {
+                    b.Property<int>("BillingInvoiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BillingInvoiceId"));
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("BillingInvoiceId");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("BillingInvoice");
+                });
+
             modelBuilder.Entity("Core.Models.Clients.Client", b =>
                 {
                     b.Property<int>("ClientId")
@@ -32,6 +62,9 @@ namespace Infra.Migrations
 
                     b.Property<int>("BillingMode")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ClientCpf")
                         .HasColumnType("text");
@@ -46,6 +79,15 @@ namespace Infra.Migrations
                     b.Property<string>("ClientPhoneNumber")
                         .HasColumnType("text");
 
+                    b.Property<string>("Cnpj")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Cro")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
                     b.Property<int>("TablePriceId")
                         .HasColumnType("integer");
 
@@ -56,7 +98,7 @@ namespace Infra.Migrations
                     b.ToTable("Clients");
                 });
 
-            modelBuilder.Entity("Core.Models.Clients.ClientPayment", b =>
+            modelBuilder.Entity("Core.Models.Clients.PerClientPayment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,31 +123,6 @@ namespace Infra.Migrations
                     b.HasIndex("ClientId");
 
                     b.ToTable("ClientPayments");
-                });
-
-            modelBuilder.Entity("Core.Models.Clients.Patient", b =>
-                {
-                    b.Property<int>("PatientId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PatientId"));
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text");
-
-                    b.HasKey("PatientId");
-
-                    b.HasIndex("ClientId");
-
-                    b.ToTable("Patients");
                 });
 
             modelBuilder.Entity("Core.Models.Pricing.TablePrice", b =>
@@ -153,7 +170,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkTypeId");
 
-                    b.ToTable("tablePriceItems");
+                    b.ToTable("TablePriceItems");
                 });
 
             modelBuilder.Entity("Core.Models.Production.Scale", b =>
@@ -194,28 +211,6 @@ namespace Infra.Migrations
                     b.ToTable("Shades");
                 });
 
-            modelBuilder.Entity("Core.Models.ServiceOrders.OrderPayment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("AmountPaid")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OrderPayments");
-                });
-
             modelBuilder.Entity("Core.Models.ServiceOrders.ProductionStage", b =>
                 {
                     b.Property<int>("Id")
@@ -227,20 +222,39 @@ namespace Infra.Migrations
                     b.Property<DateTime>("DateIn")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("DateOut")
+                    b.Property<DateTime?>("DateOut")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("ServiceOrderId")
+                    b.Property<int>("SectorId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Step")
+                    b.Property<int>("ServiceOrderId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SectorId");
+
                     b.HasIndex("ServiceOrderId");
 
                     b.ToTable("ProductionStages");
+                });
+
+            modelBuilder.Entity("Core.Models.ServiceOrders.Sector", b =>
+                {
+                    b.Property<int>("SectorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SectorId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("SectorId");
+
+                    b.ToTable("Sectors");
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ServiceOrder", b =>
@@ -251,6 +265,9 @@ namespace Infra.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ServiceOrderId"));
 
+                    b.Property<int?>("BillingInvoiceId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ClientId")
                         .HasColumnType("integer");
 
@@ -260,16 +277,25 @@ namespace Infra.Migrations
                     b.Property<DateTime>("DateOut")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("DateOutFinal")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("OrderNumber")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("OrderTotal")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("PatientName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.HasKey("ServiceOrderId");
+
+                    b.HasIndex("BillingInvoiceId");
 
                     b.HasIndex("ClientId");
 
@@ -287,13 +313,22 @@ namespace Infra.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
                     b.Property<decimal>("PriceUnit")
                         .HasColumnType("numeric");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ScaleId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ServiceOrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ShadeId")
                         .HasColumnType("integer");
 
                     b.Property<int>("WorkTypeId")
@@ -301,7 +336,11 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ScaleId");
+
                     b.HasIndex("ServiceOrderId");
+
+                    b.HasIndex("ShadeId");
 
                     b.HasIndex("WorkTypeId");
 
@@ -353,19 +392,15 @@ namespace Infra.Migrations
                     b.ToTable("WorkTypes");
                 });
 
-            modelBuilder.Entity("OrderPaymentServiceOrder", b =>
+            modelBuilder.Entity("Core.Models.Billing.BillingInvoice", b =>
                 {
-                    b.Property<int>("PaymentsId")
-                        .HasColumnType("integer");
+                    b.HasOne("Core.Models.Clients.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("ServiceOrdersServiceOrderId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("PaymentsId", "ServiceOrdersServiceOrderId");
-
-                    b.HasIndex("ServiceOrdersServiceOrderId");
-
-                    b.ToTable("OrderPaymentServiceOrder");
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("Core.Models.Clients.Client", b =>
@@ -380,6 +415,9 @@ namespace Infra.Migrations
                         {
                             b1.Property<int>("ClientId")
                                 .HasColumnType("integer");
+
+                            b1.Property<string>("Cep")
+                                .HasColumnType("text");
 
                             b1.Property<string>("City")
                                 .HasColumnType("text");
@@ -404,27 +442,68 @@ namespace Infra.Migrations
                                 .HasForeignKey("ClientId");
                         });
 
+                    b.OwnsOne("Core.Models.Clients.ClientBalance", "Balance", b1 =>
+                        {
+                            b1.Property<int>("ClientId")
+                                .HasColumnType("integer");
+
+                            b1.Property<decimal>("Credit")
+                                .HasColumnType("numeric")
+                                .HasColumnName("Credit");
+
+                            b1.Property<decimal>("Debt")
+                                .HasColumnType("numeric")
+                                .HasColumnName("Debt");
+
+                            b1.HasKey("ClientId");
+
+                            b1.ToTable("Clients");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ClientId");
+                        });
+
+                    b.OwnsMany("Core.Models.Clients.Patient", "Patients", b1 =>
+                        {
+                            b1.Property<int>("ClientId")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("PatientInternalId")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("PatientInternalId"));
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Notes")
+                                .HasColumnType("text");
+
+                            b1.HasKey("ClientId", "PatientInternalId");
+
+                            b1.ToTable("Patients", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ClientId");
+                        });
+
                     b.Navigation("Address")
                         .IsRequired();
+
+                    b.Navigation("Balance")
+                        .IsRequired();
+
+                    b.Navigation("Patients");
 
                     b.Navigation("TablePrice");
                 });
 
-            modelBuilder.Entity("Core.Models.Clients.ClientPayment", b =>
+            modelBuilder.Entity("Core.Models.Clients.PerClientPayment", b =>
                 {
                     b.HasOne("Core.Models.Clients.Client", "Client")
                         .WithMany("Payments")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-                });
-
-            modelBuilder.Entity("Core.Models.Clients.Patient", b =>
-                {
-                    b.HasOne("Core.Models.Clients.Client", "Client")
-                        .WithMany("Patients")
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -464,29 +543,56 @@ namespace Infra.Migrations
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ProductionStage", b =>
                 {
-                    b.HasOne("Core.Models.ServiceOrders.ServiceOrder", null)
+                    b.HasOne("Core.Models.ServiceOrders.Sector", "Sector")
+                        .WithMany()
+                        .HasForeignKey("SectorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Models.ServiceOrders.ServiceOrder", "ServiceOrder")
                         .WithMany("Stages")
-                        .HasForeignKey("ServiceOrderId");
+                        .HasForeignKey("ServiceOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sector");
+
+                    b.Navigation("ServiceOrder");
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ServiceOrder", b =>
                 {
+                    b.HasOne("Core.Models.Billing.BillingInvoice", "BillingInvoice")
+                        .WithMany("ServiceOrders")
+                        .HasForeignKey("BillingInvoiceId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Core.Models.Clients.Client", "Client")
                         .WithMany("ServiceOrders")
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("BillingInvoice");
+
                     b.Navigation("Client");
                 });
 
             modelBuilder.Entity("Core.Models.Works.Work", b =>
                 {
+                    b.HasOne("Core.Models.Production.Scale", "Scale")
+                        .WithMany()
+                        .HasForeignKey("ScaleId");
+
                     b.HasOne("Core.Models.ServiceOrders.ServiceOrder", "ServiceOrder")
                         .WithMany("Works")
                         .HasForeignKey("ServiceOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Core.Models.Production.Shade", "Shade")
+                        .WithMany()
+                        .HasForeignKey("ShadeId");
 
                     b.HasOne("Core.Models.Works.WorkType", "WorkType")
                         .WithMany()
@@ -494,7 +600,11 @@ namespace Infra.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Scale");
+
                     b.Navigation("ServiceOrder");
+
+                    b.Navigation("Shade");
 
                     b.Navigation("WorkType");
                 });
@@ -510,25 +620,13 @@ namespace Infra.Migrations
                     b.Navigation("WorkSection");
                 });
 
-            modelBuilder.Entity("OrderPaymentServiceOrder", b =>
+            modelBuilder.Entity("Core.Models.Billing.BillingInvoice", b =>
                 {
-                    b.HasOne("Core.Models.ServiceOrders.OrderPayment", null)
-                        .WithMany()
-                        .HasForeignKey("PaymentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Models.ServiceOrders.ServiceOrder", null)
-                        .WithMany()
-                        .HasForeignKey("ServiceOrdersServiceOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ServiceOrders");
                 });
 
             modelBuilder.Entity("Core.Models.Clients.Client", b =>
                 {
-                    b.Navigation("Patients");
-
                     b.Navigation("Payments");
 
                     b.Navigation("ServiceOrders");

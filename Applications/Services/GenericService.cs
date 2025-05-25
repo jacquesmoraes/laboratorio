@@ -1,4 +1,4 @@
-﻿using Applications.Interfaces;
+﻿using Applications.Contracts;
 using Core.Interfaces;
 using Core.Specifications;
 

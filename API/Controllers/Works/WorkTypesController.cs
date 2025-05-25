@@ -1,5 +1,5 @@
-﻿using Applications.Dtos.Work;
-using Applications.Interfaces;
+﻿using Applications.Contracts;
+using Applications.Dtos.Work;
 using AutoMapper;
 using Core.Models.Works;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +13,7 @@ namespace API.Controllers.Works
         private readonly IMapper _mapper = mapper;
         private readonly IWorkTypeService _workTypeService = workTypeService;
 
-        [HttpGet]
+        [HttpGet] 
         public async Task<IActionResult> GetAll ( )
         {
             var types = await _workTypeService.GetAllWithSectionsAsync();

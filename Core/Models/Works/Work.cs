@@ -1,4 +1,5 @@
-﻿using Core.Models.ServiceOrders;
+﻿using Core.Models.Production;
+using Core.Models.ServiceOrders;
 
 namespace Core.Models.Works
 {
@@ -9,8 +10,12 @@ namespace Core.Models.Works
         public decimal PriceUnit { get; set; }
         public decimal PriceTotal => Quantity * PriceUnit;
         public bool IsActive { get; set; }
+        public string? Notes { get; set; }
+        public int? ShadeId { get; set; }
+        public Shade? Shade { get; set; }
 
-
+        public int? ScaleId { get; set; }
+        public Scale? Scale { get; set; }
 
         public int WorkTypeId { get; set; }
         public WorkType WorkType { get; set; } = null!;

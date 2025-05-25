@@ -1,5 +1,5 @@
-﻿using Applications.Dtos.Pricing;
-using Applications.Interfaces;
+﻿using Applications.Contracts;
+using Applications.Dtos.Pricing;
 using AutoMapper;
 using Core.FactorySpecifications;
 using Core.Models.Pricing;
@@ -26,14 +26,14 @@ namespace API.Controllers.Pricing
             return Ok ( response );
         }
 
-        [HttpGet ( "GetByTableId/{tableId}" )]
-        public async Task<IActionResult> GetByTableId ( int tableId )
-        {
-            var spec = TablePriceItemSpecs.ByTablePriceId(tableId);
-            var items = await _tableService.GetAllWithSpecAsync(spec);
-            var response = _mapper.Map<TablePriceItemsResponseDto> ( items );
-            return Ok ( response );
-        }
+        //[HttpGet ( "GetByTableId/{tableId}" )]
+        //public async Task<IActionResult> GetByTableId ( int tableId )
+        //{
+        //    var spec = TablePriceItemSpecs.ByTablePriceId(tableId);
+        //    var items = await _tableService.GetAllWithSpecAsync(spec);
+        //    var response = _mapper.Map<TablePriceItemsResponseDto> ( items );
+        //    return Ok ( response );
+        //}
 
         [HttpGet ( "{id}" )]
         public async Task<IActionResult> GetById ( int id )

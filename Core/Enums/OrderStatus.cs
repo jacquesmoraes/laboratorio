@@ -6,7 +6,6 @@
         Production = 1,
         TryIn = 2,
         Finished = 3,
-      
-
-    }
+       Paid = 4
+     }
 }

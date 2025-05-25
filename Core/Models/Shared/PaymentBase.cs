@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Core.Models.Shared
+﻿namespace Core.Models.Shared
 {
-    public class PaymentBase
+    public  class PaymentBase
     {
         public int Id { get; set; }
         public DateTime PaymentDate { get; set; }

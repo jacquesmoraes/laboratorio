@@ -1,49 +1,80 @@
-﻿using Applications.Interfaces;
+﻿using Applications.Contracts;
+using Applications.Dtos.Pricing;
+using AutoMapper;
 using Core.FactorySpecifications;
 using Core.Models.Pricing;
-using Core.Specifications;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Pricing
 {
     [Route ( "api/[controller]" )]
     [ApiController]
-    public class TablePriceController ( IGenericService<TablePrice> tablePriceService ) : BaseApiController
+    public class TablePriceController ( IMapper mapper, ITablePriceService tablePriceService )
+        : BaseApiController
     {
-        private readonly IGenericService<TablePrice> _tablePriceService = tablePriceService;
+        private readonly IMapper _mapper = mapper;
+        private readonly ITablePriceService _tablePriceService = tablePriceService;
 
+
+        /// <summary>
+        /// Retorna todas as tabelas de preço com seus itens e clientes vinculados.
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll ( )
         {
-            var spec = new BaseSpecification<TablePrice>();
+            var spec = TablePriceSpecs.AllWithRelations();
             var result = await _tablePriceService.GetAllWithSpecAsync(spec);
-            return Ok ( result );
+
+            var response = _mapper.Map<List<TablePriceResponseDto>>(result);
+            return Ok ( response );
         }
 
+        /// <summary>
+        /// Retorna uma tabela de preço específica com seus itens e clientes vinculados.
+        /// </summary>
         [HttpGet ( "{id}" )]
         public async Task<IActionResult> GetById ( int id )
         {
             var spec = TablePriceSpecs.ByIdWithRelations(id);
             var result = await _tablePriceService.GetEntityWithSpecAsync(spec);
             if ( result == null ) return NotFound ( );
-            return Ok ( result );
+
+            var response = _mapper.Map<TablePriceResponseDto>(result);
+            return Ok ( response );
         }
 
+        /// <summary>
+        /// Cria uma nova tabela de preço.
+        /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Create ( [FromBody] TablePrice tablePrice )
+        public async Task<IActionResult> Create ( [FromBody] CreateTablePriceDto dto )
         {
-            var created = await _tablePriceService.CreateAsync(tablePrice);
+            var entity = _mapper.Map<TablePrice>(dto);
+            foreach ( var item in entity.Items )
+                item.TablePrice = entity;
+            var created = await _tablePriceService.CreateAsync(entity);
             return CreatedAtAction ( nameof ( GetById ), new { id = created.Id }, created );
         }
 
+        /// <summary>
+        /// Atualiza uma tabela de preço existente.
+        /// </summary>
         [HttpPut ( "{id}" )]
-        public async Task<IActionResult> Update ( int id, [FromBody] TablePrice updated )
+        public async Task<IActionResult> Update ( int id, [FromBody] UpdateTablePriceDto dto )
         {
-            var result = await _tablePriceService.UpdateAsync(id, updated);
-            if ( result == null ) return NotFound ( );
-            return Ok ( result );
+            if ( id != dto.Id )
+                return BadRequest ( "ID inconsistente" );
+
+            var updated = await _tablePriceService.UpdateFromDtoAsync(dto);
+            if ( updated == null ) return NotFound ( );
+
+            var response = _mapper.Map<TablePriceResponseDto>(updated);
+            return Ok ( response );
         }
 
+        /// <summary>
+        /// Remove uma tabela de preço.
+        /// </summary>
         [HttpDelete ( "{id}" )]
         public async Task<IActionResult> Delete ( int id )
         {
@@ -52,5 +83,4 @@ namespace API.Controllers.Pricing
             return NoContent ( );
         }
     }
-
 }

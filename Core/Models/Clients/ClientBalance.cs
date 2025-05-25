@@ -1,40 +1,26 @@
-﻿namespace Core.Models.Clients
+﻿using Core.Helpers;
+using Core.Models.ServiceOrders;
+
+namespace Core.Models.Clients
 {
     public class ClientBalance
     {
-        public decimal Credit { get; private set; } = 0;
-        public decimal Debt { get; private set; } = 0;
+        public decimal Credit { get; private set; }
+        public decimal Debt { get; private set; }
 
-
+        public decimal CurrentBalance => Credit - Debt;
         public void AddCredit ( decimal amount )
         {
-            if ( amount <= 0 )
-                throw new ArgumentException ( "Invalid Credit." );
+            Guard.AgainstNegativeOrZero ( amount );
             Credit += amount;
         }
-
         public void AddDebt ( decimal amount )
         {
-            if ( amount <= 0 )
-                throw new ArgumentException ( "Invalid Debt." );
+            Guard.AgainstNegativeOrZero ( amount );
             Debt += amount;
         }
 
-        public void PayDebt ( decimal amount )
-        {
-            if ( amount <= 0 )
-                throw new ArgumentException ( "Invalid payment." );
-
-            if ( amount > Debt )
-            {
-                var leftover = amount - Debt;
-                Debt = 0;
-                Credit += leftover;
-            }
-            else
-            {
-                Debt -= amount;
-            }
-        }
+        public void AddDebtFromOrder ( ServiceOrder so ) =>
+            AddDebt ( so.OrderTotal );
     }
 }

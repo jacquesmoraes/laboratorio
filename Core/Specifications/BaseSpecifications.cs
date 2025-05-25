@@ -2,10 +2,11 @@
 
 namespace Core.Specifications
 {
-    public  class BaseSpecification<T> : ISpecification<T> 
+    public class BaseSpecification<T> : ISpecification<T>
     {
         public Expression<Func<T, bool>>? Criteria { get; private set; }
         public List<Expression<Func<T, object>>> Includes { get; } = [];
+        public List<string> IncludeStrings { get; } = [];
         public Expression<Func<T, object>>? OrderBy { get; private set; }
         public Expression<Func<T, object>>? OrderByDescending { get; private set; }
         public int Take { get; private set; }
@@ -23,7 +24,10 @@ namespace Core.Specifications
         {
             Includes.Add ( includeExpression );
         }
-
+         protected void AddInclude ( string includeString )
+        {
+            IncludeStrings.Add ( includeString );
+        }
         protected void AddOrderBy ( Expression<Func<T, object>> orderByExpression )
         {
             OrderBy = orderByExpression;
@@ -40,5 +44,7 @@ namespace Core.Specifications
             Take = take;
             IsPagingEnabled = true;
         }
+
+       
     }
 }

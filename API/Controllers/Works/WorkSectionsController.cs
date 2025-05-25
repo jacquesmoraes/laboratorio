@@ -1,15 +1,15 @@
-﻿using Applications.Interfaces;
+﻿using Applications.Contracts;
 using Core.FactorySpecifications;
 using Core.Models.Works;
 using Core.Specifications;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Works
 {
     [Route ( "api/[controller]" )]
     [ApiController]
-    public class WorkSectionsController ( IGenericService<WorkSection> sectionService ) : BaseApiController
+    public class WorkSectionsController ( IGenericService<WorkSection> sectionService ) :
+        BaseApiController
     {
         private readonly IGenericService<WorkSection> _sectionService = sectionService;
 

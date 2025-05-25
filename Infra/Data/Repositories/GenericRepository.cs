@@ -2,7 +2,6 @@
 using Core.Interfaces;
 using Core.Specifications;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Infra.Data.Repositories
 {
@@ -74,6 +73,7 @@ namespace Infra.Data.Repositories
             }
 
             query = spec.Includes.Aggregate ( query, ( current, include ) => current.Include ( include ) );
+            query = spec.IncludeStrings.Aggregate ( query, ( current, include ) => current.Include ( include ) );
 
             if ( spec.OrderBy != null )
             {
@@ -89,6 +89,7 @@ namespace Infra.Data.Repositories
                 query = query.Skip ( spec.Skip )
                             .Take ( spec.Take );
             }
+
 
             return query;
         }

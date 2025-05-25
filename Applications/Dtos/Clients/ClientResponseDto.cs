@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Applications.Dtos.Payments;
+using Applications.Dtos.ServiceOrder;
 
 namespace Applications.Dtos.Clients
 {
@@ -28,7 +25,7 @@ namespace Applications.Dtos.Clients
         public bool IsInactive { get; set; }
         public List<PatientDto> Patients { get; set; } = [];
         public List<ClientPaymentDto> Payments { get; set; } = [];
-        public List<ServiceOrderDto> ServiceOrders { get; set; } = [];
+        public List<ServiceOrderListDto> ServiceOrders { get; set; } = [];
     }
 }
 
