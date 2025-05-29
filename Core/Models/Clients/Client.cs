@@ -1,4 +1,6 @@
 ﻿using Core.Enums;
+using Core.Models.Billing;
+using Core.Models.Payments;
 using Core.Models.Pricing;
 using Core.Models.ServiceOrders;
 
@@ -14,7 +16,7 @@ namespace Core.Models.Clients
         public string? Cnpj { get; set; }
         public string? ClientCpf { get; set; }
         public string? ClientPhoneNumber { get; set; }
-        public ClientBalance Balance { get; private set; } = new ( );
+
         public BillingMode BillingMode { get; set; }
         public string? Notes { get; set; }
 
@@ -24,33 +26,11 @@ namespace Core.Models.Clients
         public TablePrice? TablePrice { get; set; }
 
         public List<Patient> Patients { get; set; } = [];
-        public List<PerClientPayment> Payments { get; set; } = [];
+        public List<Payment> Payments { get; set; } = [];
         public List<ServiceOrder> ServiceOrders { get; set; } = [];
-
-
+         public List<BillingInvoice> BillingInvoices { get; set; } = [];
         public bool IsInactive =>
-        ServiceOrders.OrderByDescending ( o => o.DateIn )
-            .FirstOrDefault ( )?.DateIn < DateTime.Now.AddDays ( -60 );
-
-        public void RegisterPayment ( decimal amount, DateTime paidAt )
-        {
-            var payment = new PerClientPayment
-            {
-                AmountPaid = amount,
-                PaymentDate = paidAt,
-                ClientId = this.ClientId
-            };
-            Payments.Add ( payment );
-            Balance.AddCredit ( amount );
-        }
-
-        public void CloseMonth ( IEnumerable<ServiceOrder> finishedOrders )
-        {
-            foreach ( var so in finishedOrders )
-            {
-                if ( so.IsBillable )
-                    Balance.AddDebtFromOrder ( so );
-            }
-        }
+            ServiceOrders.OrderByDescending ( o => o.DateIn )
+                         .FirstOrDefault ( )?.DateIn < DateTime.Now.AddDays ( -60 );
     }
 }

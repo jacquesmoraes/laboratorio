@@ -53,7 +53,8 @@ namespace API.Controllers.Pricing
             foreach ( var item in entity.Items )
                 item.TablePrice = entity;
             var created = await _tablePriceService.CreateAsync(entity);
-            return CreatedAtAction ( nameof ( GetById ), new { id = created.Id }, created );
+            var responseDto = _mapper.Map<TablePriceResponseDto>(created);
+            return CreatedAtAction ( nameof ( GetById ), new { id = created.Id }, responseDto );
         }
 
         /// <summary>

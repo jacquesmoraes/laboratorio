@@ -1,4 +1,6 @@
-﻿using Core.Models.Clients;
+﻿using Core.Models.Billing;
+using Core.Models.Clients;
+using Core.Models.Payments;
 using Core.Models.Pricing;
 using Core.Models.Production;
 using Core.Models.ServiceOrders;
@@ -11,7 +13,7 @@ namespace Infra.Data
     {
         public DbSet<Client> Clients { get; set; }
 
-        public DbSet<PerClientPayment> ClientPayments { get; set; }
+        public DbSet<Payment> ClientPayments { get; set; }
         public DbSet<TablePrice> TablePrices { get; set; }
         public DbSet<TablePriceItem> TablePriceItems { get; set; }
         public DbSet<Scale> Scales { get; set; }
@@ -30,18 +32,6 @@ namespace Infra.Data
 
             modelBuilder.Entity<Client> ( ).OwnsOne ( c => c.Address );
 
-            modelBuilder.Entity<ServiceOrder> ( )
-                .HasOne ( o => o.BillingInvoice )
-                .WithMany ( i => i.ServiceOrders )
-                .HasForeignKey ( o => o.BillingInvoiceId )
-                .OnDelete ( DeleteBehavior.SetNull );
-
-            modelBuilder.Entity<Client> ( )
-                .OwnsOne ( c => c.Balance, cb =>
-                {
-                    cb.Property ( c => c.Credit ).HasColumnName ( "Credit" );
-                    cb.Property ( c => c.Debt ).HasColumnName ( "Debt" );
-                } );
 
             modelBuilder.Entity<Client> ( b =>
             {
@@ -56,6 +46,20 @@ namespace Infra.Data
                     pb.ToTable ( "Patients" );
                 } );
             } );
+
+            modelBuilder.Entity<BillingInvoice> ( )
+                .HasMany ( i => i.Payments )
+                .WithOne ( p => p.BillingInvoice )
+                .HasForeignKey ( p => p.BillingInvoiceId )
+                .OnDelete ( DeleteBehavior.Cascade );
+
+
+            modelBuilder.Entity<ServiceOrder> ( )
+               .HasOne ( o => o.BillingInvoice )
+               .WithMany ( i => i.ServiceOrders )
+               .HasForeignKey ( o => o.BillingInvoiceId )
+               .OnDelete ( DeleteBehavior.SetNull );
+
             modelBuilder.Entity<ServiceOrder> ( )
                 .HasMany ( o => o.Stages )
                 .WithOne ( s => s.ServiceOrder )
@@ -65,6 +69,12 @@ namespace Infra.Data
     .HasMany ( o => o.Works )
     .WithOne ( w => w.ServiceOrder )
     .HasForeignKey ( w => w.ServiceOrderId )
+    .OnDelete ( DeleteBehavior.Cascade );
+
+            modelBuilder.Entity<TablePriceItem> ( )
+    .HasOne ( i => i.TablePrice )
+    .WithMany ( p => p.Items )
+    .HasForeignKey ( i => i.TablePriceId )
     .OnDelete ( DeleteBehavior.Cascade );
 
 

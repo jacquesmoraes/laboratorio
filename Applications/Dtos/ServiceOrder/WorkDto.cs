@@ -3,7 +3,7 @@
     public class WorkDto
     {
         public int WorkTypeId { get; set; }
-        public string WorkTypeName { get; set; } = string.Empty; // do WorkType.Name
+        public string WorkTypeName { get; set; } = string.Empty; 
         public int Quantity { get; set; }
         public decimal PriceUnit { get; set; }
         public decimal PriceTotal => Quantity * PriceUnit;

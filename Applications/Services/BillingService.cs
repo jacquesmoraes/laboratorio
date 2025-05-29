@@ -2,94 +2,105 @@
 using Applications.Dtos.Billing;
 using Core.Enums;
 using Core.FactorySpecifications.Billing;
+using Core.FactorySpecifications.ClientsFactorySpecifications;
+using Core.FactorySpecifications.PayementSpecifications;
 using Core.FactorySpecifications.ServiceOrderFactorySpecifications;
 using Core.Interfaces;
 using Core.Models.Billing;
+using Core.Models.Clients;
+using Core.Models.Payments;
 using Core.Models.ServiceOrders;
 
 namespace Applications.Services
 {
     public class BillingService (
-    IGenericRepository<BillingInvoice> invoiceRepo,
-    IGenericRepository<ServiceOrder> orderRepo,
-    IUnitOfWork uow
-) : GenericService<BillingInvoice> ( invoiceRepo ), IBillingService
+     IGenericRepository<BillingInvoice> invoiceRepo,
+     IGenericRepository<Client> clientRepo,
+     IGenericRepository<ServiceOrder> orderRepo,
+     IGenericRepository<Payment> paymentRepo,
+     IUnitOfWork uow
+ ) : GenericService<BillingInvoice> ( invoiceRepo ), IBillingService
     {
-        private readonly IGenericRepository<BillingInvoice> _invoiceRepo = invoiceRepo;
+        private readonly IGenericRepository<Client> _clientRepo = clientRepo;
         private readonly IGenericRepository<ServiceOrder> _orderRepo = orderRepo;
+        private readonly IGenericRepository<Payment> _paymentRepo = paymentRepo;
+        private readonly IGenericRepository<BillingInvoice> _invoiceRepo = invoiceRepo;
         private readonly IUnitOfWork _uow = uow;
 
         public async Task<BillingInvoice> GenerateInvoiceAsync ( CreateBillingInvoiceDto dto )
         {
             using var tx = await _uow.BeginTransactionAsync();
 
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIds(dto.ServiceOrderIds);
-            var orders = await _orderRepo.GetAllAsync(spec);
+            var client = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId))
+        ?? throw new Exception("Cliente não encontrado.");
 
-            if ( orders.Count != dto.ServiceOrderIds.Count )
-                throw new Exception ( "Uma ou mais OS não foram encontradas." );
-
-            if ( orders.Any ( o => o.ClientId != dto.ClientId ) )
-                throw new Exception ( "As OS não pertencem ao cliente informado." );
-
-            if ( orders.Any ( o => o.Status != OrderStatus.Finished ) )
-                throw new Exception ( "Todas as OS devem estar finalizadas." );
+            // Valida ordens
+            var orders = await _orderRepo.GetAllAsync(ServiceOrderSpecification.ServiceOrderSpecs.ByIds(dto.ServiceOrderIds));
 
             if ( orders.Any ( o => o.BillingInvoiceId != null ) )
-                throw new Exception ( "Uma ou mais OS já estão vinculadas a uma fatura." );
+                throw new Exception ( "Uma ou mais ordens já estão associadas a uma fatura." );
 
-            var total = orders.Sum(o => o.OrderTotal);
+            if ( orders.Any ( o => o.Status != OrderStatus.Finished ) )
+                throw new Exception ( "Só é possível faturar ordens já finalizadas." );
 
             var invoice = new BillingInvoice
             {
-                ClientId = dto.ClientId,
-                IssuedAt = dto.IssuedAt ?? DateTime.UtcNow,
-                TotalAmount = total,
+                InvoiceNumber = GenerateInvoiceNumber(client.ClientId),
+                CreatedAt = DateTime.UtcNow,
+                Description = dto.Description,
+                ClientId = client.ClientId,
+                Client = client,
                 Status = InvoiceStatus.Open,
-                ServiceOrders = orders.ToList()
+                ServiceOrders = orders.ToList(),
+                TotalServiceOrdersAmount = orders.Sum(o => o.OrderTotal)
             };
 
-            await _invoiceRepo.CreateAsync ( invoice );
-            await _uow.SaveChangesAsync ( );
-            await tx.CommitAsync ( );
+            // Fecha fatura anterior se existir
+            var faturasAntigas = (await _invoiceRepo.GetAllAsync(
+        BillingInvoiceSpecification.BillingInvoiceSpecs.AllByClient(client.ClientId)))
+        .Where(i => i.Status != InvoiceStatus.Cancelled)
+        .OrderByDescending(i => i.CreatedAt)
+        .ToList();
 
-            return invoice; // ✅ retorna a entidade
-        }
+            var faturaAnterior = faturasAntigas.FirstOrDefault();
 
-        public async Task<BillingInvoice> MarkAsPaidAsync ( int invoiceId )
-        {
-            using var tx = await _uow.BeginTransactionAsync();
-
-            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.ByIdFull(invoiceId);
-            var invoice = await _invoiceRepo.GetEntityWithSpec(spec);
-
-            if ( invoice == null )
-                throw new Exception ( "Fatura não encontrada." );
-
-            if ( invoice.Status == InvoiceStatus.Paid )
-                throw new Exception ( "Fatura já está marcada como paga." );
-
-            invoice.Status = InvoiceStatus.Paid;
-            invoice.PaidAt = DateTime.UtcNow;
-
-            // Marca todas as OS como pagas também
-            foreach ( var os in invoice.ServiceOrders )
+            if ( faturaAnterior != null )
             {
-                os.Status = OrderStatus.Paid;
+                faturaAnterior.Status = InvoiceStatus.Closed;
+
+                // Calcula saldo anterior
+                var pagamentos = await _paymentRepo.GetAllAsync(
+            PaymentSpecification.PaymentSpecs.ByInvoiceId(faturaAnterior.BillingInvoiceId));
+
+                var totalPagoAnterior = pagamentos.Sum(p => p.AmountPaid);
+                var diff = totalPagoAnterior - faturaAnterior.TotalInvoiceAmount;
+
+                if ( diff > 0 )
+                    invoice.PreviousCredit = diff;
+                else if ( diff < 0 )
+                    invoice.PreviousDebit = Math.Abs ( diff );
             }
 
+            // Atualiza relacionamento com OS
+            foreach ( var order in invoice.ServiceOrders )
+                order.BillingInvoice = invoice;
+
+
+
+            await _invoiceRepo.CreateAsync ( invoice );
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
 
             return invoice;
         }
 
-        public async Task<BillingInvoice> CancelInvoiceAsync ( int invoiceId )
-        {
-            using var tx = await _uow.BeginTransactionAsync();
 
-            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.ByIdFull(invoiceId);
-            var invoice = await _invoiceRepo.GetEntityWithSpec(spec);
+        public async Task<BillingInvoice> CancelInvoiceAsync ( int id )
+        {
+            await using var tx = await _uow.BeginTransactionAsync();
+
+            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.ByIdFull(id);
+            var invoice = await GetEntityWithSpecAsync(spec);
 
             if ( invoice == null )
                 throw new Exception ( "Fatura não encontrada." );
@@ -97,14 +108,13 @@ namespace Applications.Services
             if ( invoice.Status == InvoiceStatus.Cancelled )
                 throw new Exception ( "Fatura já está cancelada." );
 
-            invoice.Status = InvoiceStatus.Cancelled;
-            invoice.PaidAt = null;
+            if ( invoice.Status == InvoiceStatus.Paid )
+                throw new Exception ( "Faturas pagas não podem ser canceladas." );
 
-            // Desvincula as OS
-            foreach ( var os in invoice.ServiceOrders )
-            {
-                os.BillingInvoiceId = null;
-            }
+            foreach ( var order in invoice.ServiceOrders )
+                order.BillingInvoiceId = null;
+
+            invoice.Status = InvoiceStatus.Cancelled;
 
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
@@ -112,12 +122,10 @@ namespace Applications.Services
             return invoice;
         }
 
-        public async Task<IReadOnlyList<BillingInvoice>> GetAllByClientAsync ( int clientId )
+        private static string GenerateInvoiceNumber ( int clientId )
         {
-            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.AllByClient(clientId);
-            return await _invoiceRepo.GetAllAsync ( spec );
+            return $"FAT-{DateTime.UtcNow:yyyyMM}-C{clientId:D4}-{Guid.NewGuid ( ).ToString ( "N" ) [..6].ToUpper ( )}";
         }
-
 
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Core.Models.Clients
+﻿namespace Core.Models.Clients
 {
     public class Patient
     {

@@ -32,7 +32,7 @@ namespace API.Controllers.Clients
         {
             var spec = ClientSpecs.ById(id);
             var client = await _clientService.GetEntityWithSpecAsync(spec);
-            var response = _mapper.Map<ClientResponseDto>(client);
+            var response = _mapper.Map<ClientResponseDetailsDto>(client);
             return Ok ( response );
         }
 

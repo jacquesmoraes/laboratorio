@@ -3,6 +3,7 @@ using System;
 using Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infra.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250529001656_CurrentBalanceUpdated")]
+    partial class CurrentBalanceUpdated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -410,7 +413,7 @@ namespace Infra.Migrations
             modelBuilder.Entity("Core.Models.Billing.BillingInvoice", b =>
                 {
                     b.HasOne("Core.Models.Clients.Client", "Client")
-                        .WithMany("BillingInvoices")
+                        .WithMany()
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -494,9 +497,8 @@ namespace Infra.Migrations
             modelBuilder.Entity("Core.Models.Payments.Payment", b =>
                 {
                     b.HasOne("Core.Models.Billing.BillingInvoice", "BillingInvoice")
-                        .WithMany("Payments")
-                        .HasForeignKey("BillingInvoiceId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany()
+                        .HasForeignKey("BillingInvoiceId");
 
                     b.HasOne("Core.Models.Clients.Client", "Client")
                         .WithMany("Payments")
@@ -619,15 +621,11 @@ namespace Infra.Migrations
 
             modelBuilder.Entity("Core.Models.Billing.BillingInvoice", b =>
                 {
-                    b.Navigation("Payments");
-
                     b.Navigation("ServiceOrders");
                 });
 
             modelBuilder.Entity("Core.Models.Clients.Client", b =>
                 {
-                    b.Navigation("BillingInvoices");
-
                     b.Navigation("Payments");
 
                     b.Navigation("ServiceOrders");

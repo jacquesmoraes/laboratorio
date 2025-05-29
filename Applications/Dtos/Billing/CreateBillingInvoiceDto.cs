@@ -4,6 +4,6 @@
     {
         public int ClientId { get; set; }
         public List<int> ServiceOrderIds { get; set; } = [];
-        public DateTime? IssuedAt { get; set; }  
+        public string? Description { get; set; }  
     }
 }

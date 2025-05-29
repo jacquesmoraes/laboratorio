@@ -3,7 +3,9 @@
     public enum InvoiceStatus
     {
         Open = 0,
-        Paid = 1,
-        Cancelled = 2,
+        PartiallyPaid = 1,
+        Paid = 2,
+        Cancelled = 3,
+        Closed = 4
     }
 }

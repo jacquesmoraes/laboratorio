@@ -2,7 +2,7 @@
 using Applications.Mapping;
 using Applications.Services;
 using Core.Interfaces;
-using Core.Models.Clients;
+using Core.Models.Payments;
 using Core.Models.ServiceOrders;
 using Infra.Data;
 using Infra.Data.Repositories;
@@ -30,7 +30,7 @@ namespace API.Extensions
                  o => o.UseQuerySplittingBehavior ( QuerySplittingBehavior.SplitQuery ) ) );
             services.AddScoped ( typeof ( IGenericRepository<> ), typeof ( GenericRepository<> ) );
             services.AddScoped ( typeof ( IGenericService<> ), typeof ( GenericService<> ) );
-            services.AddScoped<IGenericService<PerClientPayment>, GenericService<PerClientPayment>> ( );
+            services.AddScoped<IGenericService<Payment>, GenericService<Payment>> ( );
            
             services.AddScoped<IGenericService<ServiceOrder>, GenericService<ServiceOrder>> ( );
             services.AddScoped<ITablePriceItemService, TablePriceItemService> ( );
@@ -38,8 +38,10 @@ namespace API.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
             services.AddScoped<IClientService, ClientService> ( );
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
+            services.AddScoped<IPaymentService, PaymentService> ( );
             services.AddScoped<ISectorService, SectorService> ( );
             services.AddScoped<IServiceOrderService, ServiceOrderService> ( );
+            services.AddScoped<IBillingService, BillingService> ( );
             services.AddAutoMapper ( typeof ( ProductionMappingProfile ).Assembly );
             return services;
         }

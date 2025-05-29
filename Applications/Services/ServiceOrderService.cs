@@ -41,8 +41,6 @@ namespace Applications.Services
             order.Status = OrderStatus.Production;
             order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
 
-
-
             var firstSector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.FirstSectorId))
         ?? throw new Exception("Setor inicial não encontrado.");
 
@@ -52,13 +50,7 @@ namespace Applications.Services
                 SectorId = firstSector.SectorId,
                 DateIn = DateTime.SpecifyKind ( dto.DateIn, DateTimeKind.Utc ),
                 ServiceOrder = order
-
             } );
-
-            if ( client.BillingMode == BillingMode.perMonth )
-            {
-                client.Balance.AddDebt ( order.OrderTotal );
-            }
 
             await _orderRepo.CreateAsync ( order );
             await _uow.SaveChangesAsync ( );
@@ -66,6 +58,8 @@ namespace Applications.Services
 
             return order;
         }
+
+
 
         public async Task<ServiceOrder?> MoveToStageAsync ( MoveToStageDto dto )
         {
@@ -107,46 +101,44 @@ namespace Applications.Services
         }
 
 
-        public async Task<List<ServiceOrder>> FinishOrdersAsync(FinishOrderDto dto)
-{
-    using var tx = await _uow.BeginTransactionAsync();
+        public async Task<List<ServiceOrder>> FinishOrdersAsync ( FinishOrderDto dto )
+        {
+            using var tx = await _uow.BeginTransactionAsync();
 
-    var serviceOrders = new List<ServiceOrder>();
+            var serviceOrders = new List<ServiceOrder>();
 
-    foreach (var id in dto.ServiceOrderIds)
-    {
-        var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
-        var order = await _orderRepo.GetEntityWithSpec(spec);
+            foreach ( var id in dto.ServiceOrderIds )
+            {
+                var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
+                var order = await _orderRepo.GetEntityWithSpec(spec);
 
-        if (order == null || order.Status == OrderStatus.Finished)
-            continue;
+                if ( order == null || order.Status == OrderStatus.Finished )
+                    continue;
 
-        serviceOrders.Add(order);
-    }
+                serviceOrders.Add ( order );
+            }
 
-    if (!serviceOrders.Any())
-        throw new InvalidOperationException("Nenhuma ordem válida encontrada.");
+            if ( !serviceOrders.Any ( ) )
+                throw new InvalidOperationException ( "Nenhuma ordem válida encontrada." );
 
-    // Validação de cliente único
-    var clientId = serviceOrders.First().ClientId;
-    if (serviceOrders.Any(o => o.ClientId != clientId))
-        throw new InvalidOperationException("Todas as ordens devem ser do mesmo cliente.");
+            // Validação de cliente único
+            var clientId = serviceOrders.First().ClientId;
+            if ( serviceOrders.Any ( o => o.ClientId != clientId ) )
+                throw new InvalidOperationException ( "Todas as ordens devem ser do mesmo cliente." );
 
-    var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
+            var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
 
-    foreach (var order in serviceOrders)
-    {
-        order.Finish(dateOutUtc);
+            foreach ( var order in serviceOrders )
+            {
+                order.Finish ( dateOutUtc );
+            }
 
-        if (order.Client.BillingMode == BillingMode.perMonth)
-            order.Client.Balance.AddDebtFromOrder(order);
-    }
+            await _uow.SaveChangesAsync ( );
+            await tx.CommitAsync ( );
 
-    await _uow.SaveChangesAsync();
-    await tx.CommitAsync();
+            return serviceOrders;
+        }
 
-    return serviceOrders;
-}
 
 
 

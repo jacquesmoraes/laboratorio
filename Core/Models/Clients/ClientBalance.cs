@@ -1,26 +1,40 @@
-﻿using Core.Helpers;
+﻿using Core.Enums;
+using Core.Helpers;
+using Core.Models.Billing;
 using Core.Models.ServiceOrders;
 
 namespace Core.Models.Clients
 {
     public class ClientBalance
     {
-        public decimal Credit { get; private set; }
-        public decimal Debt { get; private set; }
+        public decimal TotalPaid { get; set; }
+        public decimal TotalInvoiced { get; set; }
+        public decimal Credit => TotalPaid > TotalInvoiced ? TotalPaid - TotalInvoiced : 0;
+        public decimal Debit => TotalInvoiced > TotalPaid ? TotalInvoiced - TotalPaid : 0;
+        public decimal Balance => TotalPaid - TotalInvoiced;
 
-        public decimal CurrentBalance => Credit - Debt;
-        public void AddCredit ( decimal amount )
-        {
-            Guard.AgainstNegativeOrZero ( amount );
-            Credit += amount;
-        }
-        public void AddDebt ( decimal amount )
-        {
-            Guard.AgainstNegativeOrZero ( amount );
-            Debt += amount;
-        }
+        public List<BillingInvoice> OpenInvoices { get; set; } = [];
+        public List<BillingInvoice> ClosedInvoices { get; set; } = [];
 
-        public void AddDebtFromOrder ( ServiceOrder so ) =>
-            AddDebt ( so.OrderTotal );
+        public BillingInvoice? CurrentOpenInvoice => OpenInvoices.OrderByDescending ( i => i.CreatedAt ).FirstOrDefault ( );
+
+        public static ClientBalance Calculate ( Client client )
+        {
+            var allInvoices = client.ServiceOrders
+            .Where(o => o.BillingInvoice != null)
+            .Select(o => o.BillingInvoice!)
+            .Distinct()
+            .ToList();
+
+            var payments = client.Payments;
+
+            return new ClientBalance
+            {
+                TotalPaid = payments.Sum ( p => p.AmountPaid ),
+                TotalInvoiced = allInvoices.Sum ( i => i.TotalServiceOrdersAmount ),
+                OpenInvoices = allInvoices.Where ( i => i.Status == InvoiceStatus.Open || i.Status == InvoiceStatus.PartiallyPaid ).ToList ( ),
+                ClosedInvoices = allInvoices.Where ( i => i.Status == InvoiceStatus.Closed ).ToList ( )
+            };
+        }
     }
 }

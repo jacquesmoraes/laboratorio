@@ -17,36 +17,19 @@ namespace API.Controllers.Billing
         private readonly IBillingService _billingService = billingService;
         private readonly IMapper _mapper = mapper;
 
-        [HttpPost]
-        public async Task<IActionResult> Create ( [FromBody] CreateBillingInvoiceDto dto )
+        [HttpPost ( "invoice" )]
+        public async Task<IActionResult> CreateInvoice ( [FromBody] CreateBillingInvoiceDto dto )
         {
-            try
-            {
-                var invoice = await _billingService.GenerateInvoiceAsync(dto);
-                var response = _mapper.Map<BillingInvoiceResponseDto>(invoice);
-                return CreatedAtAction ( nameof ( GetById ), new { id = response.BillingInvoiceId }, response );
-            }
-            catch ( Exception ex )
-            {
-                return BadRequest ( ex.Message );
-            }
+            if ( dto.ServiceOrderIds == null || dto.ServiceOrderIds.Count == 0 )
+                return BadRequest ( "É necessário informar ao menos uma ordem de serviço." );
+
+            var invoice = await _billingService.GenerateInvoiceAsync(dto);
+            var response = _mapper.Map<BillingInvoiceResponseDto>(invoice);
+            return Ok ( response );
         }
 
 
-        [HttpPost ( "{id}/pay" )]
-        public async Task<IActionResult> MarkAsPaid ( int id )
-        {
-            try
-            {
-                var invoice = await _billingService.MarkAsPaidAsync(id);
-                var response = _mapper.Map<BillingInvoiceResponseDto>(invoice);
-                return Ok ( response );
-            }
-            catch ( Exception ex )
-            {
-                return BadRequest ( ex.Message );
-            }
-        }
+
 
         [HttpPost ( "{id}/cancel" )]
         public async Task<IActionResult> Cancel ( int id )
@@ -63,13 +46,7 @@ namespace API.Controllers.Billing
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetByClient ( [FromQuery] int clientId )
-        {
-            var invoices = await _billingService.GetAllByClientAsync(clientId);
-            var response = _mapper.Map<List<BillingInvoiceResponseDto>>(invoices);
-            return Ok ( response );
-        }
+
 
 
         [HttpGet ( "{id}" )]

@@ -14,7 +14,7 @@ namespace Applications.Dtos.ServiceOrder
         public DateTime? DateOutFinal { get; set; }
         public decimal OrderTotal { get; set; }
         public string? CurrentSectorName { get; set; }
-        public ClientResponseForOrderServiceDto Client { get; set; } = new ( );
+        public ClientInvoiceDto Client { get; set; } = new ( );
         public List<WorkDto> Works { get; set; } = [];
         public List<StageDto> Stages { get; set; } = [];
     }

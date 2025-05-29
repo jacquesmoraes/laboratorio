@@ -1,24 +1,23 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Payments;
 using AutoMapper;
+using Core.FactorySpecifications.PayementSpecifications;
 using Core.Interfaces;
-using Core.Models.Clients;
 using Microsoft.AspNetCore.Mvc;
-using static Core.FactorySpecifications.PayementSpecifications.PerClientPaymentSpecification;
 
 
-namespace API.Controllers.Clients
+namespace API.Controllers.Payments
 {
     [Route ( "api/[controller]" )]
     [ApiController]
-    public class ClientPaymentsController (
-        IGenericService<PerClientPayment> clientPaymentService,
+    public class PaymentsController (
+        IPaymentService clientPaymentService,
         IClientService clientService,
         IUnitOfWork unitOfWork,
         IMapper mapper ) : BaseApiController
     {
 
-        private readonly IGenericService<PerClientPayment> _clientPaymentService = clientPaymentService;
+        private readonly IPaymentService _clientPaymentService = clientPaymentService;
         private readonly IClientService _clientService = clientService;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IMapper _mapper = mapper;
@@ -30,36 +29,19 @@ namespace API.Controllers.Clients
         /// <param name="dto">Dados do pagamento a ser criado</param>
         /// <returns>Pagamento criado</returns>
         [HttpPost ( "client" )]
-        public async Task<IActionResult> CreateClientPayment ( [FromBody] CreatePerClientPaymentDto dto )
+        public async Task<IActionResult> CreateClientPayment ( [FromBody] CreatePaymentDto dto )
         {
-            if ( dto == null )
-                return BadRequest ( "Dados do pagamento não fornecidos." );
-
-            if ( dto.AmountPaid <= 0 )
-                return BadRequest ( "O valor do pagamento deve ser maior que zero." );
-
-            var client = await _clientService.GetClientIfEligibleForPerClientPayment(dto.ClientId);
-            if ( client == null )
-                return BadRequest ( "Este cliente não pode realizar pagamentos parciais." );
-
-            using var tx = await _unitOfWork.BeginTransactionAsync();
-
-            // 1. Cria o pagamento
-            var entity = _mapper.Map<PerClientPayment>(dto);
-            var created = await _clientPaymentService.CreateAsync(entity);
-
-            // 2. Lança o crédito no saldo
-            client.Balance.AddCredit ( dto.AmountPaid );
-            await _clientService.UpdateAsync ( client.ClientId, client );
-
-            // 3. Salva tudo de uma vez
-            await _unitOfWork.SaveChangesAsync ( );
-            await tx.CommitAsync ( );
-
-            var response = _mapper.Map<PerClientPaymentDto>(created);
-            return CreatedAtAction ( nameof ( GetClientPaymentById ), new { id = response.Id }, response );
+            try
+            {
+                var payment = await _clientPaymentService.RegisterClientPaymentAsync(dto);
+                var response = _mapper.Map<ClientPaymentDto>(payment);
+                return CreatedAtAction ( nameof ( GetClientPaymentById ), new { id = response.Id }, response );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest ( new { error = ex.Message } );
+            }
         }
-
 
 
         // GET: api/payments/client/{id}
@@ -74,17 +56,17 @@ namespace API.Controllers.Clients
             if ( id <= 0 )
                 return BadRequest ( "ID do pagamento inválido" );
 
-            var spec = PerClientPaymentSpecs.ById(id);
+            var spec = PaymentSpecification.PaymentSpecs.ById(id);
             var payment = await _clientPaymentService.GetEntityWithSpecAsync(spec);
 
             if ( payment == null )
                 return NotFound ( $"Pagamento com ID {id} não encontrado" );
 
-            var dto = _mapper.Map<PerClientPaymentDto>(payment);
+            var dto = _mapper.Map<ClientPaymentDto>(payment);
             return Ok ( dto );
         }
 
-       
+
         /// <summary>
         /// Lista os pagamentos de um cliente, com suporte opcional a filtros por mês e ano.
         /// </summary>
@@ -103,11 +85,11 @@ namespace API.Controllers.Clients
 
             var (start, end) = GetDateRange ( month, year );
             var spec = start.HasValue && end.HasValue
-                ? PerClientPaymentSpecs.ByClientAndDateRange(clientId, start.Value, end.Value)
-                : PerClientPaymentSpecs.ByClientId(clientId);
+                ? PaymentSpecification.PaymentSpecs.ByClientAndDateRange(clientId, start.Value, end.Value)
+                : PaymentSpecification.PaymentSpecs.ByClientId(clientId);
 
             var payments = await _clientPaymentService.GetAllWithSpecAsync(spec);
-            var dto = _mapper.Map<List<PerClientPaymentDto>>(payments);
+            var dto = _mapper.Map<List<ClientPaymentDto>>(payments);
             return Ok ( dto );
         }
 

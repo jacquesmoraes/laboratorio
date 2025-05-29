@@ -6,10 +6,8 @@ namespace Applications.Contracts
     public interface IBillingService : IGenericService<BillingInvoice>
     {
         Task<BillingInvoice> GenerateInvoiceAsync(CreateBillingInvoiceDto dto);
-        Task<BillingInvoice> MarkAsPaidAsync(int invoiceId);
-        Task<BillingInvoice> CancelInvoiceAsync(int invoiceId);
-        Task<IReadOnlyList<BillingInvoice>> GetAllByClientAsync(int clientId);
-
+        
+        Task<BillingInvoice> CancelInvoiceAsync ( int id );
 
 
     }

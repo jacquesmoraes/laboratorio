@@ -38,8 +38,19 @@ namespace Core.FactorySpecifications.ClientsFactorySpecifications
                 spec.AddInclude ( x => x.Patients );
                 spec.AddInclude ( x => x.Payments );
                 spec.AddInclude ( x => x.ServiceOrders );
+
+
                 return spec;
             }
+
+
+            public static ClientSpecification ByIdWithInvoices ( int id )
+            {
+                var spec = new ClientSpecification(id);
+                spec.AddInclude ( c => c.BillingInvoices );
+                return spec;
+            }
+
 
             public static ClientSpecification ByName ( string name )
             {
