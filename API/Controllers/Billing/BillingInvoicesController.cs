@@ -21,7 +21,7 @@ namespace API.Controllers.Billing
         public async Task<IActionResult> CreateInvoice ( [FromBody] CreateBillingInvoiceDto dto )
         {
             if ( dto.ServiceOrderIds == null || dto.ServiceOrderIds.Count == 0 )
-                return BadRequest ( "É necessário informar ao menos uma ordem de serviço." );
+                return BadRequest ( "At least one service order is required." );
 
             var invoice = await _billingService.GenerateInvoiceAsync(dto);
             var response = _mapper.Map<BillingInvoiceResponseDto>(invoice);

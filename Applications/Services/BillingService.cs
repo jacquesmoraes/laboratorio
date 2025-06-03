@@ -1,5 +1,6 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Billing;
+using Core.Exceptions;
 using Core.Enums;
 using Core.FactorySpecifications.Billing;
 using Core.FactorySpecifications.ClientsFactorySpecifications;
@@ -10,6 +11,7 @@ using Core.Models.Billing;
 using Core.Models.Clients;
 using Core.Models.Payments;
 using Core.Models.ServiceOrders;
+using System.ComponentModel.DataAnnotations;
 
 namespace Applications.Services
 {
@@ -32,16 +34,16 @@ namespace Applications.Services
             using var tx = await _uow.BeginTransactionAsync();
 
             var client = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId))
-        ?? throw new Exception("Cliente não encontrado.");
+        ?? throw new NotFoundException ("Cliente não encontrado.");
 
             // Valida ordens
             var orders = await _orderRepo.GetAllAsync(ServiceOrderSpecification.ServiceOrderSpecs.ByIds(dto.ServiceOrderIds));
 
             if ( orders.Any ( o => o.BillingInvoiceId != null ) )
-                throw new Exception ( "Uma ou mais ordens já estão associadas a uma fatura." );
+                throw new ConflictException ( "Uma ou mais ordens já estão associadas a uma fatura." );
 
             if ( orders.Any ( o => o.Status != OrderStatus.Finished ) )
-                throw new Exception ( "Só é possível faturar ordens já finalizadas." );
+                throw new UnprocessableEntityException ( "Só é possível faturar ordens já finalizadas." );
 
             var invoice = new BillingInvoice
             {
@@ -51,7 +53,7 @@ namespace Applications.Services
                 ClientId = client.ClientId,
                 Client = client,
                 Status = InvoiceStatus.Open,
-                ServiceOrders = orders.ToList(),
+                ServiceOrders = [.. orders],
                 TotalServiceOrdersAmount = orders.Sum(o => o.OrderTotal)
             };
 
@@ -103,13 +105,13 @@ namespace Applications.Services
             var invoice = await GetEntityWithSpecAsync(spec);
 
             if ( invoice == null )
-                throw new Exception ( "Fatura não encontrada." );
+                throw new NotFoundException ( "Fatura não encontrada." );
 
             if ( invoice.Status == InvoiceStatus.Cancelled )
-                throw new Exception ( "Fatura já está cancelada." );
+                throw new ConflictException ( "Fatura já está cancelada." );
 
             if ( invoice.Status == InvoiceStatus.Paid )
-                throw new Exception ( "Faturas pagas não podem ser canceladas." );
+                throw new UnprocessableEntityException ( "Faturas pagas não podem ser canceladas." );
 
             foreach ( var order in invoice.ServiceOrders )
                 order.BillingInvoiceId = null;

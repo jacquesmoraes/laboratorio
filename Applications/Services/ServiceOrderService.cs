@@ -1,5 +1,7 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.ServiceOrder;
+using Core.Exceptions;
+using Applications.Services.Validators;
 using AutoMapper;
 using Core.Enums;
 using Core.FactorySpecifications.ClientsFactorySpecifications;
@@ -32,7 +34,7 @@ namespace Applications.Services
             using var tx = await _uow.BeginTransactionAsync();
 
             var client = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId))
-        ?? throw new Exception("Cliente não encontrado.");
+        ?? throw new NotFoundException("Cliente não encontrado.");
 
             var order = _mapper.Map<ServiceOrder>(dto);
             order.ClientId = client.ClientId;
@@ -42,7 +44,7 @@ namespace Applications.Services
             order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
 
             var firstSector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.FirstSectorId))
-        ?? throw new Exception("Setor inicial não encontrado.");
+        ?? throw new NotFoundException("Setor inicial não encontrado.");
 
             order.Stages.Add ( new ProductionStage
             {
@@ -65,10 +67,14 @@ namespace Applications.Services
         {
             using var tx = await _uow.BeginTransactionAsync();
 
-            var order  = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId));
-            var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId));
-            if ( order == null || sector == null ) return null;
+            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
+        ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
+
+            var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId))
+        ?? throw new NotFoundException($"Setor {dto.SectorId} não encontrado.");
+
             var dateInUtc = DateTime.SpecifyKind(dto.DateIn, DateTimeKind.Utc);
+            ServiceOrderDateValidator.ValidateNewStageDate ( order.Stages, dateInUtc );
             order.MoveTo ( sector, dateInUtc );
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
@@ -89,15 +95,19 @@ namespace Applications.Services
 
         public async Task<ServiceOrder?> SendToTryInAsync ( SendToTryInDto dto )
         {
-            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId));
-            if ( order == null ) return null;
+            using var tx = await _uow.BeginTransactionAsync();
+
+            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
+        ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
 
             var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
+            ServiceOrderDateValidator.ValidateTryInDate ( order.Stages, dateOutUtc );
             order.SendToTryIn ( dateOutUtc );
-            await _uow.SaveChangesAsync ( );
 
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(order.ServiceOrderId);
-            return await _orderRepo.GetEntityWithSpec ( spec );
+            await _uow.SaveChangesAsync ( );
+            await tx.CommitAsync ( );
+
+            return order;
         }
 
 
@@ -119,20 +129,23 @@ namespace Applications.Services
             }
 
             if ( !serviceOrders.Any ( ) )
-                throw new InvalidOperationException ( "Nenhuma ordem válida encontrada." );
+                throw new BusinessRuleException ( "Nenhuma ordem válida encontrada." );
 
             // Validação de cliente único
             var clientId = serviceOrders.First().ClientId;
             if ( serviceOrders.Any ( o => o.ClientId != clientId ) )
-                throw new InvalidOperationException ( "Todas as ordens devem ser do mesmo cliente." );
+                throw new BusinessRuleException ( "Todas as ordens devem ser do mesmo cliente." );
 
             var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
 
             foreach ( var order in serviceOrders )
             {
+                ServiceOrderDateValidator.ValidateFinishDate ( serviceOrders.First ( ), dateOutUtc );
+            }
+            foreach ( var order in serviceOrders )
+            {
                 order.Finish ( dateOutUtc );
             }
-
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
 
@@ -151,14 +164,15 @@ namespace Applications.Services
 
         public async Task<ServiceOrder?> UpdateOrderAsync ( int id, CreateServiceOrderDto dto )
         {
+                if (id <= 0)
+        throw new CustomValidationException ("ID da ordem de serviço inválido.");
             var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
-            var order = await _orderRepo.GetEntityWithSpec(spec);
+             var order = await _orderRepo.GetEntityWithSpec(spec)
+        ?? throw new NotFoundException($"Ordem de serviço {id} não encontrada.");
 
-            if ( order == null )
-                return null;
 
-            if ( order.Status == OrderStatus.Finished )
-                throw new InvalidOperationException ( "Não é permitido editar uma OS finalizada." );
+             if (order.Status == OrderStatus.Finished)
+        throw new BusinessRuleException("Não é permitido editar uma OS finalizada.");
 
             // Troca de cliente
             if ( order.ClientId != dto.ClientId )

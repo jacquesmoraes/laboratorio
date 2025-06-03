@@ -62,13 +62,20 @@ namespace API.Controllers.ServiceOrders
         [HttpPost ( "tryin" )]
         public async Task<IActionResult> SendToTryIn ( [FromBody] SendToTryInDto dto )
         {
-            var updated = await _service.SendToTryInAsync(dto);
+            try
+            {
+                var updated = await _service.SendToTryInAsync(dto);
 
-            if ( updated == null )
-                return NotFound ( "Ordem de serviço não encontrada ou já finalizada." );
+                if ( updated == null )
+                    return NotFound ( "Ordem de serviço não encontrada ou já finalizada." );
 
-            var response = _mapper.Map<ServiceOrderResponseDto>(updated);
-            return Ok ( response );
+                var response = _mapper.Map<ServiceOrderResponseDto>(updated);
+                return Ok ( response );
+            }
+            catch ( InvalidOperationException ex )
+            {
+                return BadRequest ( new { error = ex.Message } );
+            }
         }
 
 

@@ -1,4 +1,5 @@
 using API.Extensions;
+using API.Middleware;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,25 +12,25 @@ builder.Services.AddControllers ( );
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if ( app.Environment.IsDevelopment ( ) )
+
+if (app.Environment.IsDevelopment())
 {
-  
-   
-     
-}
- app.UseSwagger ( );
-    app.UseSwaggerUI ( c =>
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint ( "/swagger/v1/swagger.json", "Minha API v1" );
-      
-    } );
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Minha API v1");
+    });
+}
 
 
-app.UseHttpsRedirection ( );
+app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseAuthorization ( );
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
-app.MapControllers ( );
+app.UseHttpsRedirection();
+app.UseAuthorization();
 
-app.Run ( );
+app.MapControllers();
+
+app.Run();
+

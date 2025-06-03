@@ -29,54 +29,7 @@ namespace Infra.Data
         protected override void OnModelCreating ( ModelBuilder modelBuilder )
         {
             base.OnModelCreating ( modelBuilder );
-
-            modelBuilder.Entity<Client> ( ).OwnsOne ( c => c.Address );
-
-
-            modelBuilder.Entity<Client> ( b =>
-            {
-                b.OwnsMany ( c => c.Patients, pb =>
-                {
-                    pb.WithOwner ( ).HasForeignKey ( "ClientId" );
-                    // Cria uma coluna de ID interno auto incrementável por cliente
-                    pb.Property<int> ( "PatientInternalId" );
-                    pb.HasKey ( "ClientId", "PatientInternalId" );
-                    pb.Property ( p => p.Name ).IsRequired ( );
-                    pb.Property ( p => p.Notes );
-                    pb.ToTable ( "Patients" );
-                } );
-            } );
-
-            modelBuilder.Entity<BillingInvoice> ( )
-                .HasMany ( i => i.Payments )
-                .WithOne ( p => p.BillingInvoice )
-                .HasForeignKey ( p => p.BillingInvoiceId )
-                .OnDelete ( DeleteBehavior.Cascade );
-
-
-            modelBuilder.Entity<ServiceOrder> ( )
-               .HasOne ( o => o.BillingInvoice )
-               .WithMany ( i => i.ServiceOrders )
-               .HasForeignKey ( o => o.BillingInvoiceId )
-               .OnDelete ( DeleteBehavior.SetNull );
-
-            modelBuilder.Entity<ServiceOrder> ( )
-                .HasMany ( o => o.Stages )
-                .WithOne ( s => s.ServiceOrder )
-                .HasForeignKey ( s => s.ServiceOrderId )
-                .OnDelete ( DeleteBehavior.Cascade );
-            modelBuilder.Entity<ServiceOrder> ( )
-    .HasMany ( o => o.Works )
-    .WithOne ( w => w.ServiceOrder )
-    .HasForeignKey ( w => w.ServiceOrderId )
-    .OnDelete ( DeleteBehavior.Cascade );
-
-            modelBuilder.Entity<TablePriceItem> ( )
-    .HasOne ( i => i.TablePrice )
-    .WithMany ( p => p.Items )
-    .HasForeignKey ( i => i.TablePriceId )
-    .OnDelete ( DeleteBehavior.Cascade );
-
+            modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( ApplicationContext ).Assembly );
 
 
         }

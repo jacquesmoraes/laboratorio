@@ -12,14 +12,10 @@ namespace API.Controllers.Payments
     [ApiController]
     public class PaymentsController (
         IPaymentService clientPaymentService,
-        IClientService clientService,
-        IUnitOfWork unitOfWork,
         IMapper mapper ) : BaseApiController
     {
 
         private readonly IPaymentService _clientPaymentService = clientPaymentService;
-        private readonly IClientService _clientService = clientService;
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IMapper _mapper = mapper;
 
         // POST: api/payments/client

@@ -1,5 +1,6 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Payments;
+using Core.Exceptions;
 using AutoMapper;
 using Core.Enums;
 using Core.FactorySpecifications.Billing;
@@ -32,7 +33,7 @@ namespace Applications.Services
 
             var client = await _clientRepo.GetEntityWithSpec(
                 ClientSpecification.ClientSpecs.ByIdWithInvoices(dto.ClientId)
-                ) ?? throw new Exception("Cliente não encontrado.");
+                ) ?? throw new NotFoundException("Cliente não encontrado.");
 
             // Localiza a fatura aberta mais recente
             var invoice = (await _invoiceRepo.GetAllAsync( BillingInvoiceSpecification.BillingInvoiceSpecs.
@@ -42,7 +43,7 @@ namespace Applications.Services
 
 
             if ( invoice == null )
-                throw new Exception ( "Nenhuma fatura aberta encontrada para este cliente." );
+                throw new UnprocessableEntityException ( "Nenhuma fatura aberta encontrada para este cliente." );
 
             // Cria o pagamento e associa à fatura aberta
             var payment = new Payment

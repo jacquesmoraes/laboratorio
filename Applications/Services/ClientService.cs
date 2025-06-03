@@ -1,25 +1,53 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Clients;
+using Core.Exceptions;
 using Core.Enums;
 using Core.Interfaces;
 using Core.Models.Clients;
 using static Core.FactorySpecifications.ClientsFactorySpecifications.ClientSpecification;
+using Core.Models.Pricing;
+using Core.Specifications;
+using Core.FactorySpecifications;
 
 namespace Applications.Services
 {
-    public class ClientService ( IGenericRepository<Client> repository ) : 
+    public class ClientService ( IGenericRepository<Client> repository, IGenericRepository<TablePrice> tablePriceRepository ) :
         GenericService<Client> ( repository ), IClientService
     {
         private readonly IGenericRepository<Client> _repository = repository;
+        private readonly IGenericRepository<TablePrice> _tablePriceRepository = tablePriceRepository;
+        public async Task<Client> CreateClientAsync ( Client entity )
+        {
+            // Input validation
+            if ( string.IsNullOrWhiteSpace ( entity.ClientName ) )
+                throw new CustomValidationException ( "O nome do cliente é obrigatório." );
 
+            if ( entity.TablePriceId <= 0 )
+                throw new CustomValidationException  ( "É necessário informar uma Tabela de Preço válida." );
+
+            // Validate table price if provided
+            if ( entity.TablePriceId > 0 )
+            {
+                var tablePrice = await _tablePriceRepository.GetEntityWithSpec(TablePriceSpecs.ById(entity.TablePriceId))
+                    ?? throw new NotFoundException($"Tabela de preço com ID {entity.TablePriceId} não encontrada.");
+                if ( !tablePrice.Status )
+                    throw new BusinessRuleException ( "Não é possível associar o cliente a uma tabela de preço inativa." );
+            }
+
+            return await base.CreateAsync ( entity );
+        }
 
         public async Task<Client?> GetClientIfEligibleForPerClientPayment ( int clientId )
         {
-            var spec = ClientSpecs.ById(clientId);
-            var client = await _repository.GetEntityWithSpec(spec);
+            if ( clientId <= 0 )
+                throw new CustomValidationException  ( "ID do cliente inválido." );
 
-            if ( client == null || client.BillingMode != BillingMode.perMonth )
-                return null;
+            var spec = ClientSpecs.ById(clientId);
+            var client = await _repository.GetEntityWithSpec(spec)
+                ?? throw new NotFoundException($"Cliente com ID {clientId} não encontrado.");
+
+            if ( client.BillingMode != BillingMode.perMonth )
+                throw new BusinessRuleException ( "Apenas clientes com cobrança mensal são elegíveis para pagamento por cliente." );
 
             return client;
         }
@@ -29,10 +57,21 @@ namespace Applications.Services
 
         public async Task<Client?> UpdateFromDtoAsync ( UpdateClientDto dto )
         {
+            if ( dto.ClientId <= 0 )
+                throw new CustomValidationException  ( "ID do cliente inválido." );
+
+            if ( string.IsNullOrWhiteSpace ( dto.ClientName ) )
+                throw new CustomValidationException  ( "O nome do cliente é obrigatório." );
+
             var spec = ClientSpecs.ById(dto.ClientId);
-            var existing = await _repository.GetEntityWithSpec(spec);
-            if ( existing == null )
-                return null;
+            var existing = await _repository.GetEntityWithSpec(spec)
+                ?? throw new NotFoundException($"Cliente com ID {dto.ClientId} não encontrado.");
+            if ( dto.BillingMode != existing.BillingMode )
+            {
+                // Verifica se existem ordens de serviço em aberto
+                if ( existing.ServiceOrders.Any ( o => o.Status != OrderStatus.Finished ) )
+                    throw new BusinessRuleException ( "Não é possível alterar o modo de cobrança enquanto houver ordens de serviço em aberto." );
+            }
 
             // Atualiza os campos diretos
             existing.ClientName = dto.ClientName;
@@ -49,7 +88,10 @@ namespace Applications.Services
             existing.Address.Neighborhood = dto.Address.Neighborhood;
             existing.Address.City = dto.Address.City;
 
-            return await _repository.UpdateAsync ( dto.ClientId, existing );
+            var updated = await _repository.UpdateAsync(dto.ClientId, existing)
+                ?? throw new BusinessRuleException("Falha ao atualizar o cliente.");
+
+            return updated;
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Clients;
 using AutoMapper;
+using Core.Exceptions;
 using Core.Models.Clients;
 using Microsoft.AspNetCore.Mvc;
 using static Core.FactorySpecifications.ClientsFactorySpecifications.ClientSpecification;
@@ -14,6 +15,10 @@ namespace API.Controllers.Clients
     {
         private readonly IClientService _clientService = clientService;
         private readonly IMapper _mapper = mapper;
+
+        
+
+
         [HttpGet]
         public async Task<IActionResult> GetAll ( )
         {
@@ -40,7 +45,7 @@ namespace API.Controllers.Clients
         public async Task<IActionResult> Create ( [FromBody] CreateClientDto dto )
         {
             var entity = _mapper.Map<Client>(dto);
-            await _clientService.CreateAsync ( entity );
+            await _clientService.CreateClientAsync ( entity );
             return CreatedAtAction ( nameof ( GetById ), new { id = entity.ClientId }, _mapper.Map<ClientResponseDto> ( entity ) );
         }
 
