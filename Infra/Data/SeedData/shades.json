@@ -1,0 +1,108 @@
+[
+  {
+    "Id": 1,
+    "Name": "A1",
+    "ScaleId": 1
+  },
+  {
+    "Id": 2,
+    "Name": "A2",
+    "ScaleId": 1
+  },
+  {
+    "Id": 3,
+    "Name": "A3",
+    "ScaleId": 1
+  },
+{
+    "Id": 4,
+    "Name": "B1",
+    "ScaleId": 1
+  },
+  {
+    "Id": 5,
+    "Name": "B2",
+    "ScaleId": 1
+  },
+  {
+    "Id": 6,
+    "Name": "C1",
+    "ScaleId": 1
+  },
+
+{
+    "Id": 7,
+    "Name": "C2",
+    "ScaleId": 1
+  },
+  {
+    "Id": 8,
+    "Name": "C3",
+    "ScaleId": 1
+  },
+  {
+    "Id": 9,
+    "Name": "D1",
+    "ScaleId": 1
+  },
+{
+    "Id": 10,
+    "Name": "D2",
+    "ScaleId": 1
+  },
+  {
+    "Id": 11,
+    "Name": "A2",
+    "ScaleId": 1
+  },
+  {
+    "Id": 12,
+    "Name": "1M1",
+    "ScaleId": 2
+  },
+{
+    "Id": 13,
+    "Name": "1M2",
+    "ScaleId": 2
+  },
+  {
+    "Id": 14,
+    "Name": "3R1,5",
+    "ScaleId": 2
+  },
+  {
+    "Id": 15,
+    "Name": "2L2,5",
+    "ScaleId": 2
+  },
+{
+    "Id": 16,
+    "Name": "31",
+    "ScaleId": 3
+  },
+  {
+    "Id": 17,
+    "Name": "62",
+    "ScaleId": 3
+  },
+  {
+    "Id": 18,
+    "Name": "66",
+    "ScaleId": 3
+  },
+{
+    "Id": 19,
+    "Name": "69",
+    "ScaleId": 3
+  },
+  {
+    "Id": 20,
+    "Name": "2A",
+    "ScaleId": 4
+  },
+  {
+    "Id": 21,
+    "Name": "4B",
+    "ScaleId": 4
+  }
+]

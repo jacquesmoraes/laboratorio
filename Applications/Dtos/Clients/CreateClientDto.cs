@@ -1,5 +1,7 @@
 ﻿using Applications.Dtos.Payments;
+using Applications.Records.Clients;
 using Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Applications.Dtos.Clients
 {
@@ -12,9 +14,12 @@ namespace Applications.Dtos.Clients
     public string? Cnpj { get; set; }
     public string? Cpf { get; set; }
     public string? PhoneNumber { get; set; }
+
+    [EnumDataType(typeof(BillingMode), ErrorMessage = "billing mode invalid.")]
     public BillingMode BillingMode { get; set; }
-    public AddressDto Address { get; set; } = new();
-    public int TablePriceId { get; set; }
+    public AddressRecord Address { get; set; } = new();
+
+    public int? TablePriceId { get; set; }
 }
 
 

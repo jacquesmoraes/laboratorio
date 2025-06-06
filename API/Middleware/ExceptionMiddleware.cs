@@ -1,6 +1,7 @@
 ﻿
 using API.Models;
 using Core.Exceptions;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace API.Middleware
@@ -61,7 +62,7 @@ namespace API.Middleware
             return new ApiException ( 403, ex.Message );
         }
 
-        
+
         private ApiResponse HandleInvalidException ( Exception ex )
         {
             return new ApiException ( 400, "Operação inválida: " + ex.Message );
@@ -69,26 +70,27 @@ namespace API.Middleware
 
         private ApiResponse HandleValidationException ( Exception ex )
         {
-            if ( ex is CustomValidationException  vex )
+            if ( ex is CustomValidationException vex )
             {
-                return new ApiValidationErrorResponse
+                return new ApiValidationErrorResponse ( vex.Errors.FirstOrDefault ( ) )
                 {
                     Errors = vex.Errors
                 };
             }
 
-            return new ApiValidationErrorResponse
+            return new ApiValidationErrorResponse ( ex.Message )
             {
                 Errors = [ex.Message]
             };
         }
+
 
         private ApiResponse HandleConflictException ( Exception ex )
         {
             return new ApiException ( 409, ex.Message );
         }
 
-         private ApiResponse HandleUnprocessableEntityExceptionException ( Exception ex )
+        private ApiResponse HandleUnprocessableEntityExceptionException ( Exception ex )
         {
             return new ApiException ( 422, ex.Message );
         }
@@ -98,6 +100,7 @@ namespace API.Middleware
                 ? new ApiException ( 500, ex.Message, ex.StackTrace )
                 : new ApiException ( 500, "An unexpected error occurred." );
         }
+       
 
         private async Task WriteResponse ( HttpContext context, ApiResponse response )
         {

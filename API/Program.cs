@@ -1,5 +1,7 @@
 using API.Extensions;
 using API.Middleware;
+using Infra.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,24 +15,38 @@ builder.Services.AddControllers ( );
 var app = builder.Build();
 
 
-if (app.Environment.IsDevelopment())
+if ( app.Environment.IsDevelopment ( ) )
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    app.UseSwagger ( );
+    app.UseSwaggerUI ( c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Minha API v1");
-    });
+        c.SwaggerEndpoint ( "/swagger/v1/swagger.json", "Minha API v1" );
+    } );
 }
 
 
-app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<ExceptionMiddleware> ( );
 
-app.UseStatusCodePagesWithReExecute("/errors/{0}");
+app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
+app.UseHttpsRedirection ( );
+app.UseAuthorization ( );
 
-app.MapControllers();
+app.MapControllers ( );
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var context = services.GetRequiredService<ApplicationContext>();
+var logger = services.GetRequiredService<ILogger<Program>>();
 
-app.Run();
+try
+{
+    await context.Database.MigrateAsync ( );
+    await ApplicationContextSeed.SeedAsync ( context, logger );
+}
+catch ( Exception ex )
+{
+    logger.LogError ( ex, "An error occurred while migrating or seeding the database" );
+    throw;
+}
+app.Run ( );
 

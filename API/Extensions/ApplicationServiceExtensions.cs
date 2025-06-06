@@ -10,6 +10,7 @@ using Infra.Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 namespace API.Extensions
 {
@@ -32,8 +33,8 @@ namespace API.Extensions
                 options.InvalidModelStateResponseFactory = context =>
                 {
                     var errors = context.ModelState
-                    .Where(e => e.Value.Errors.Count > 0)
-                    .SelectMany(x => x.Value.Errors)
+                    .Where(e => e.Value is not null && e.Value.Errors.Count > 0)
+                    .SelectMany(x => x.Value!.Errors)
                     .Select(x => x.ErrorMessage)
                     .ToList();
                     var response = new ApiValidationErrorResponse
@@ -44,6 +45,12 @@ namespace API.Extensions
                 };
             } );
 
+            services
+                .AddControllers ( )
+                .AddJsonOptions ( opt =>
+                {
+                    opt.JsonSerializerOptions.Converters.Add ( new JsonStringEnumConverter ( ) );
+                } );
 
             services.AddDbContext<ApplicationContext> ( options =>
                 options.UseNpgsql ( config.GetConnectionString ( "DefaultConnection" ),

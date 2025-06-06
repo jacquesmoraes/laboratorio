@@ -39,7 +39,7 @@ namespace Applications.Services
             var order = _mapper.Map<ServiceOrder>(dto);
             order.ClientId = client.ClientId;
             order.Client = client;
-            order.OrderNumber = GenerateOrderNumber ( );
+            order.OrderNumber = await GenerateOrderNumberAsync (client.ClientId );
             order.Status = OrderStatus.Production;
             order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
 
@@ -164,15 +164,15 @@ namespace Applications.Services
 
         public async Task<ServiceOrder?> UpdateOrderAsync ( int id, CreateServiceOrderDto dto )
         {
-                if (id <= 0)
-        throw new CustomValidationException ("ID da ordem de serviço inválido.");
+            if ( id <= 0 )
+                throw new CustomValidationException ( "ID da ordem de serviço inválido." );
             var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
-             var order = await _orderRepo.GetEntityWithSpec(spec)
+            var order = await _orderRepo.GetEntityWithSpec(spec)
         ?? throw new NotFoundException($"Ordem de serviço {id} não encontrada.");
 
 
-             if (order.Status == OrderStatus.Finished)
-        throw new BusinessRuleException("Não é permitido editar uma OS finalizada.");
+            if ( order.Status == OrderStatus.Finished )
+                throw new BusinessRuleException ( "Não é permitido editar uma OS finalizada." );
 
             // Troca de cliente
             if ( order.ClientId != dto.ClientId )
@@ -239,7 +239,24 @@ namespace Applications.Services
         }
 
 
-        private static int GenerateOrderNumber ( ) => new Random ( ).Next ( 100000, 999999 );
+        private async Task<string> GenerateOrderNumberAsync ( int clientId )
+        {
+            var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(clientId);
+            var lastOrder = (await _orderRepo.GetAllAsync(spec)).FirstOrDefault();
+
+            int nextSequence = 1;
+            if ( lastOrder != null && lastOrder.OrderNumber is not null )
+            {
+                var parts = lastOrder.OrderNumber.Split('-');
+                if ( parts.Length == 2 && int.TryParse ( parts [0], out var lastSeq ) )
+                {
+                    nextSequence = lastSeq + 1;
+                }
+            }
+
+            return $"{nextSequence}-{clientId}";
+        }
+
 
 
     }

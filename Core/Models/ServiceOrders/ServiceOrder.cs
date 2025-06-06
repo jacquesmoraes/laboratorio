@@ -10,7 +10,7 @@ namespace Core.Models.ServiceOrders
     public class ServiceOrder
     {
         public int ServiceOrderId { get; set; }
-        public required int OrderNumber { get; set; }
+        public string OrderNumber { get; set; } = string.Empty;
         public required DateTime DateIn { get; set; }
         public DateTime DateOut { get; set; }
         public DateTime? DateOutFinal { get; set; }

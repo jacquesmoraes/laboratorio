@@ -296,8 +296,9 @@ namespace Infra.Migrations
                     b.Property<DateTime?>("DateOutFinal")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("OrderNumber")
-                        .HasColumnType("integer");
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<decimal>("OrderTotal")
                         .HasColumnType("numeric");

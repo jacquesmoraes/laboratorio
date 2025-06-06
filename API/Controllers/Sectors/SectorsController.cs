@@ -1,5 +1,6 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Sector;
+using Applications.Records.Sector;
 using AutoMapper;
 using Core.FactorySpecifications.SectorSpecifications;
 using Core.Models.ServiceOrders;
@@ -21,7 +22,7 @@ namespace API.Controllers.Sectors
             var sectors = await _service.GetAllWithSpecAsync(spec);
             if (sectors == null || !sectors.Any()) return NotFound();
 
-            var response = _mapper.Map<List<SectorDto>>(sectors);
+            var response = _mapper.Map<List<SectorRecord>>(sectors);
             return Ok(response);
         }
 
@@ -31,7 +32,8 @@ namespace API.Controllers.Sectors
             var spec = SectorSpecification.SectorSpecs.ById(id);
             var sector = await _service.GetEntityWithSpecAsync(spec);
             if (sector == null) return NotFound();
-            var response = _mapper.Map<SectorDto>(sector);
+
+            var response = _mapper.Map<SectorRecord>(sector);
             return Ok(response);
         }
 
@@ -40,7 +42,7 @@ namespace API.Controllers.Sectors
         {
             var entity = _mapper.Map<Sector>(dto);
             var created = await _service.CreateAsync(entity);
-            var response = _mapper.Map<SectorDto>(created);
+            var response = _mapper.Map<SectorRecord>(created);
             return CreatedAtAction(nameof(GetById), new { id = response.SectorId }, response);
         }
 
@@ -54,7 +56,7 @@ namespace API.Controllers.Sectors
             if (updated == null)
                 return NotFound($"Sector with id {id} not found.");
 
-            var response = _mapper.Map<SectorDto>(updated);
+            var response = _mapper.Map<SectorRecord>(updated);
             return Ok(response);
         }
 
@@ -62,9 +64,7 @@ namespace API.Controllers.Sectors
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _service.DeleteAsync(id);
-            if (deleted == null)
-                return NotFound();
-            return NoContent();
+            return deleted == null ? NotFound() : NoContent();
         }
     }
 }

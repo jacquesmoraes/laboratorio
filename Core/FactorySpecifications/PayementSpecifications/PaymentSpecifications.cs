@@ -23,6 +23,11 @@ namespace Core.FactorySpecifications.PayementSpecifications
 
             public static PaymentSpecification ByInvoiceId ( int invoiceId, bool includeClient = false )
                 => new ( p => p.BillingInvoiceId == invoiceId, includeClient );
+            public static PaymentSpecification ByClientIdWithInvoice ( int clientId )
+                => new ( p => p.ClientId == clientId )
+                {
+                    Includes = { p => p.Client!, p => p.BillingInvoice! }
+                };
 
             public static PaymentSpecification ByClientAndDateRange ( int clientId, DateTime start, DateTime end, bool includeClient = false )
                 => new ( p =>

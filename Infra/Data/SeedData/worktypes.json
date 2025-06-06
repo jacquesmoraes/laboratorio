@@ -1,0 +1,47 @@
+[
+  {
+    "Id": 1,
+    "Name": "Psi",
+    "WorkSectionId": 3
+  },
+  {
+    "Id": 2,
+    "Name": "Mc convencional",
+    "WorkSectionId": 3
+  },
+  {
+    "Id": 3,
+    "Name": "emax",
+    "WorkSectionId": 5
+  },
+ {
+    "Id": 4,
+    "Name": "PT-R",
+    "WorkSectionId": 2
+  },
+  {
+    "Id": 5,
+    "Name": "Protese protocolo",
+    "WorkSectionId": 2
+  },
+  {
+    "Id": 6,
+    "Name": "elemento Provisorio",
+    "WorkSectionId": 2
+  },
+{
+    "Id": 7,
+    "Name": "barra protocolo",
+    "WorkSectionId": 4
+  },
+  {
+    "Id": 8,
+    "Name": "Pino fundido",
+    "WorkSectionId": 4
+  },
+  {
+    "Id": 9,
+    "Name": "modelo impresso",
+    "WorkSectionId": 1
+  }
+]

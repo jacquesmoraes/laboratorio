@@ -1,5 +1,7 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Clients;
+using Applications.Projections.Clients;
+using Applications.Records.Clients;
 using AutoMapper;
 using Core.Exceptions;
 using Core.Models.Clients;
@@ -27,7 +29,7 @@ namespace API.Controllers.Clients
             if ( clients == null || !clients.Any ( ) ) return NotFound ( );
 
 
-            var response = _mapper.Map<List<ClientResponseDto>>(clients);
+            var response = _mapper.Map<List<ClientResponseRecord>>(clients);
             return Ok ( response );
 
         }
@@ -37,7 +39,7 @@ namespace API.Controllers.Clients
         {
             var spec = ClientSpecs.ById(id);
             var client = await _clientService.GetEntityWithSpecAsync(spec);
-            var response = _mapper.Map<ClientResponseDetailsDto>(client);
+            var response = _mapper.Map<ClientResponseDetailsProjection>(client);
             return Ok ( response );
         }
 
@@ -46,7 +48,7 @@ namespace API.Controllers.Clients
         {
             var entity = _mapper.Map<Client>(dto);
             await _clientService.CreateClientAsync ( entity );
-            return CreatedAtAction ( nameof ( GetById ), new { id = entity.ClientId }, _mapper.Map<ClientResponseDto> ( entity ) );
+            return CreatedAtAction ( nameof ( GetById ), new { id = entity.ClientId }, _mapper.Map<ClientResponseRecord> ( entity ) );
         }
 
 
@@ -58,7 +60,7 @@ namespace API.Controllers.Clients
             var updatedClient = await _clientService.UpdateFromDtoAsync ( client );
             if ( updatedClient == null )
                 return NotFound ( $"Client with id {id} not found." );
-            var response = _mapper.Map<ClientResponseDto>(updatedClient);
+            var response = _mapper.Map<ClientResponseRecord>(updatedClient);
             return Ok ( response );
         }
 

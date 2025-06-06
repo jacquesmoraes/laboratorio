@@ -1,10 +1,9 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Payments;
+using Applications.Records.Payments;
 using AutoMapper;
 using Core.FactorySpecifications.PayementSpecifications;
-using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace API.Controllers.Payments
 {
@@ -14,23 +13,19 @@ namespace API.Controllers.Payments
         IPaymentService clientPaymentService,
         IMapper mapper ) : BaseApiController
     {
-
         private readonly IPaymentService _clientPaymentService = clientPaymentService;
         private readonly IMapper _mapper = mapper;
 
-        // POST: api/payments/client
         /// <summary>
         /// Cria um novo pagamento para um cliente.
         /// </summary>
-        /// <param name="dto">Dados do pagamento a ser criado</param>
-        /// <returns>Pagamento criado</returns>
         [HttpPost ( "client" )]
         public async Task<IActionResult> CreateClientPayment ( [FromBody] CreatePaymentDto dto )
         {
             try
             {
                 var payment = await _clientPaymentService.RegisterClientPaymentAsync(dto);
-                var response = _mapper.Map<ClientPaymentDto>(payment);
+                var response = _mapper.Map<ClientPaymentRecord>(payment);
                 return CreatedAtAction ( nameof ( GetClientPaymentById ), new { id = response.Id }, response );
             }
             catch ( Exception ex )
@@ -39,13 +34,9 @@ namespace API.Controllers.Payments
             }
         }
 
-
-        // GET: api/payments/client/{id}
         /// <summary>
         /// Obtém um pagamento de cliente pelo seu ID.
         /// </summary>
-        /// <param name="id">ID do pagamento</param>
-        /// <returns>Pagamento encontrado</returns>
         [HttpGet ( "client/{id}" )]
         public async Task<IActionResult> GetClientPaymentById ( int id )
         {
@@ -58,18 +49,13 @@ namespace API.Controllers.Payments
             if ( payment == null )
                 return NotFound ( $"Pagamento com ID {id} não encontrado" );
 
-            var dto = _mapper.Map<ClientPaymentDto>(payment);
+            var dto = _mapper.Map<ClientPaymentRecord>(payment);
             return Ok ( dto );
         }
 
-
         /// <summary>
-        /// Lista os pagamentos de um cliente, com suporte opcional a filtros por mês e ano.
+        /// Lista os pagamentos de um cliente, com filtros por mês e ano.
         /// </summary>
-        /// <param name="clientId">ID do cliente</param>
-        /// <param name="month">Mês opcional para filtrar (1-12)</param>
-        /// <param name="year">Ano opcional para filtrar</param>
-        /// <returns>Lista de pagamentos do cliente</returns>
         [HttpGet ( "client/byclient/{clientId}" )]
         public async Task<IActionResult> GetClientPaymentsWithOptionalPeriod ( int clientId, [FromQuery] int? month, [FromQuery] int? year )
         {
@@ -82,10 +68,10 @@ namespace API.Controllers.Payments
             var (start, end) = GetDateRange ( month, year );
             var spec = start.HasValue && end.HasValue
                 ? PaymentSpecification.PaymentSpecs.ByClientAndDateRange(clientId, start.Value, end.Value)
-                : PaymentSpecification.PaymentSpecs.ByClientId(clientId);
+                : PaymentSpecification.PaymentSpecs.ByClientIdWithInvoice(clientId);
 
             var payments = await _clientPaymentService.GetAllWithSpecAsync(spec);
-            var dto = _mapper.Map<List<ClientPaymentDto>>(payments);
+            var dto = _mapper.Map<List<ClientPaymentRecord>>(payments);
             return Ok ( dto );
         }
 
@@ -102,6 +88,5 @@ namespace API.Controllers.Payments
             var yearStart = new DateTime(year.Value, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return (yearStart, yearStart.AddYears ( 1 ));
         }
-
     }
 }
