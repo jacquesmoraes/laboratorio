@@ -31,7 +31,7 @@ namespace Applications.Services
 
         public async Task<ServiceOrder> CreateOrderAsync ( CreateServiceOrderDto dto )
         {
-            using var tx = await _uow.BeginTransactionAsync();
+            await using var tx = await _uow.BeginTransactionAsync();
 
             var client = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId))
         ?? throw new NotFoundException("Cliente não encontrado.");
@@ -65,7 +65,7 @@ namespace Applications.Services
 
         public async Task<ServiceOrder?> MoveToStageAsync ( MoveToStageDto dto )
         {
-            using var tx = await _uow.BeginTransactionAsync();
+           await using var tx = await _uow.BeginTransactionAsync();
 
             var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
         ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
@@ -95,7 +95,7 @@ namespace Applications.Services
 
         public async Task<ServiceOrder?> SendToTryInAsync ( SendToTryInDto dto )
         {
-            using var tx = await _uow.BeginTransactionAsync();
+           await using var tx = await _uow.BeginTransactionAsync();
 
             var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
         ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
@@ -113,7 +113,7 @@ namespace Applications.Services
 
         public async Task<List<ServiceOrder>> FinishOrdersAsync ( FinishOrderDto dto )
         {
-            using var tx = await _uow.BeginTransactionAsync();
+            await using var tx = await _uow.BeginTransactionAsync();
 
             var serviceOrders = new List<ServiceOrder>();
 

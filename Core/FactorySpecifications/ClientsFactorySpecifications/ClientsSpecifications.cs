@@ -1,4 +1,7 @@
-﻿using Core.Models.Clients;
+﻿using Core.Enums;
+using Core.Models.Billing;
+using Core.Models.Clients;
+using Core.Models.Payments;
 using Core.Specifications;
 using System.Linq.Expressions;
 
@@ -27,6 +30,7 @@ namespace Core.FactorySpecifications.ClientsFactorySpecifications
                 spec.AddInclude ( x => x.Patients );
                 spec.AddInclude ( x => x.Payments );
                 spec.AddInclude ( x => x.ServiceOrders );
+                
                 return spec;
             }
             public static ClientSpecification ByIdFullForBalance ( int id )
@@ -36,6 +40,8 @@ namespace Core.FactorySpecifications.ClientsFactorySpecifications
                 spec.AddInclude ( x => x.BillingInvoices );
                 spec.AddInclude ( x => x.ServiceOrders );
                 spec.AddInclude ( "ServiceOrders.BillingInvoice" );
+                
+
                 return spec;
             }
 
@@ -47,6 +53,7 @@ namespace Core.FactorySpecifications.ClientsFactorySpecifications
                 spec.AddInclude ( x => x.Patients );
                 spec.AddInclude ( x => x.Payments );
                 spec.AddInclude ( x => x.ServiceOrders );
+                spec.AddInclude("Payments.BillingInvoice");
 
 
                 return spec;
@@ -67,7 +74,9 @@ namespace Core.FactorySpecifications.ClientsFactorySpecifications
                 spec.AddInclude ( x => x.TablePrice! );
                 return spec;
             }
+
         }
+        
 
 
     }

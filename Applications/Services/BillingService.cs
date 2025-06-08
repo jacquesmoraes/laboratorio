@@ -11,7 +11,7 @@ using Core.Models.Billing;
 using Core.Models.Clients;
 using Core.Models.Payments;
 using Core.Models.ServiceOrders;
-using System.ComponentModel.DataAnnotations;
+
 
 namespace Applications.Services
 {
@@ -31,7 +31,7 @@ namespace Applications.Services
 
         public async Task<BillingInvoice> GenerateInvoiceAsync ( CreateBillingInvoiceDto dto )
         {
-            using var tx = await _uow.BeginTransactionAsync();
+           await using var tx = await _uow.BeginTransactionAsync();
 
             var client = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId))
         ?? throw new NotFoundException ("Cliente não encontrado.");

@@ -1,10 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-
-namespace Core.Interfaces
+﻿namespace Core.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        Task<IDbContextTransaction> BeginTransactionAsync ( );
+        Task<ITransaction> BeginTransactionAsync ( );
         Task<int> SaveChangesAsync ( );
     }
 }

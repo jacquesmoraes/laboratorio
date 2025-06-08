@@ -59,7 +59,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("BillingInvoice");
+                    b.ToTable("BillingInvoice", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Clients.Client", b =>
@@ -105,7 +105,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("TablePriceId");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Payments.Payment", b =>
@@ -137,7 +137,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("ClientPayments");
+                    b.ToTable("ClientPayments", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Pricing.TablePrice", b =>
@@ -159,7 +159,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TablePrices");
+                    b.ToTable("TablePrices", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Pricing.TablePriceItem", b =>
@@ -185,7 +185,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkTypeId");
 
-                    b.ToTable("TablePriceItems");
+                    b.ToTable("TablePriceItems", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Production.Scale", b =>
@@ -202,7 +202,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Scales");
+                    b.ToTable("Scales", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Production.Shade", b =>
@@ -224,7 +224,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ScaleId");
 
-                    b.ToTable("Shades");
+                    b.ToTable("Shades", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ProductionStage", b =>
@@ -253,7 +253,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ServiceOrderId");
 
-                    b.ToTable("ProductionStages");
+                    b.ToTable("ProductionStages", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.Sector", b =>
@@ -270,7 +270,7 @@ namespace Infra.Migrations
 
                     b.HasKey("SectorId");
 
-                    b.ToTable("Sectors");
+                    b.ToTable("Sectors", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ServiceOrder", b =>
@@ -316,7 +316,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("ServiceOrders");
+                    b.ToTable("ServiceOrders", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Works.Work", b =>
@@ -361,7 +361,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkTypeId");
 
-                    b.ToTable("Works");
+                    b.ToTable("Works", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Works.WorkSection", b =>
@@ -378,7 +378,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WorkSections");
+                    b.ToTable("WorkSections", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Works.WorkType", b =>
@@ -406,7 +406,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkSectionId");
 
-                    b.ToTable("WorkTypes");
+                    b.ToTable("WorkTypes", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.Billing.BillingInvoice", b =>
@@ -451,7 +451,7 @@ namespace Infra.Migrations
 
                             b1.HasKey("ClientId");
 
-                            b1.ToTable("Clients");
+                            b1.ToTable("Clients", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ClientId");

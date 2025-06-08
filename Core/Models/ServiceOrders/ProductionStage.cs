@@ -11,15 +11,15 @@
         public required ServiceOrder ServiceOrder { get; set; }
 
 
-          public static ProductionStage Create ( ServiceOrder order, Sector sector, DateTime dateIn )
-        {
-            return new ProductionStage
-            {
-                Sector = sector,
-                SectorId = sector.SectorId,
-                ServiceOrder = order,
-                DateIn = dateIn
-            };
-        }
+        //  public static ProductionStage Create ( ServiceOrder order, Sector sector, DateTime dateIn )
+        //{
+        //    return new ProductionStage
+        //    {
+        //        Sector = sector,
+        //        SectorId = sector.SectorId,
+        //        ServiceOrder = order,
+        //        DateIn = dateIn
+        //    };
+        //}
     }
 }
