@@ -39,7 +39,7 @@ namespace API.Controllers.Production
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateShadeDto dto)
         {
-            var created = await _service.CreateWithValidationAsync(dto);
+            var created = await _service.CreateShade(dto);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, _mapper.Map<ShadeRecord>(created));
         }
 

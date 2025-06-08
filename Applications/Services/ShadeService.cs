@@ -20,16 +20,14 @@ namespace Applications.Services
         private readonly IMapper _mapper = mapper;
         private readonly IUnitOfWork _uow = uow;
 
-        public async Task<Shade> CreateWithValidationAsync(CreateShadeDto dto)
+        public async Task<Shade> CreateShade(CreateShadeDto dto)
         {
             var scale = await _scaleRepo.GetByIdAsync(dto.ScaleId, new BaseSpecification<Scale>());
             if (scale == null)
                 throw new NotFoundException($"Escala de cor {dto.ScaleId} não encontrada.");
 
             var entity = _mapper.Map<Shade>(dto);
-            await _shadeRepo.CreateAsync(entity);
-            await _uow.SaveChangesAsync();
-            return entity;
+            return await base.CreateAsync ( entity );
         }
 
         public async Task<Shade?> UpdateWithValidationAsync(int id, CreateShadeDto dto)

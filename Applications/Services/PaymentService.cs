@@ -61,7 +61,7 @@ namespace Applications.Services
             var payments = await _paymentRepo.GetAllAsync(
         PaymentSpecification.PaymentSpecs.ByInvoiceId(invoice.BillingInvoiceId));
 
-            var totalPaid = payments.Sum(p => p.AmountPaid) + dto.AmountPaid;
+            var totalPaid = payments.Sum(p => p.AmountPaid);
 
             invoice.Status = totalPaid switch
             {

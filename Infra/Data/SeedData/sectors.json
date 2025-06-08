@@ -1,34 +1,34 @@
 [
   {
-    "SectorId": 1,
+    
     "Name": "Pia"
   },
   {
-    "SectorId": 2,
+    
     "Name": "montagem"
   },
   {
-    "SectorId": 3,
+    
     "Name": "fluxo digital"
   },
  {
-    "SectorId": 4,
+    
     "Name": "enceramento"
   },
   {
-    "SectorId": 5,
+    
     "Name": "fundição"
   },
   {
-    "SectorId": 6,
+    
     "Name": "aplicação ceramica"
   },
  {
-    "SectorId": 7,
+   
     "Name": "acrilização"
   },
   {
-    "SectorId": 8,
+    
     "Name": "acabamento"
   }
   

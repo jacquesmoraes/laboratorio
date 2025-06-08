@@ -1,92 +1,97 @@
 [
      {
-          "name": "Clínica Sorriso Ideal",
-          "birthDate": "1985-03-12T00:00:00",
-          "email": "contato@sorrisoideal.com.br",
-          "cro": "RS12345",
-          "cnpj": "12.345.678/0001-90",
-          "cpf": "123.456.789-00",
-          "phoneNumber": "(53)99999-1001",
-          "billingMode": "perMonth",
-          "address": {
-               "street": "Rua das Palmeiras",
-               "number": 321,
-               "complement": "Sala 5",
-               "neighborhood": "Centro",
-               "city": "Pelotas"
+          "ClientName": "Clínica Sorriso Ideal",
+          "BirthDate": "1985-03-12T00:00:00",
+          "ClientEmail": "contato@sorrisoideal.com.br",
+          "Cro": "RS12345",
+          "Cnpj": "12.345.678/0001-90",
+          "ClientCpf": "123.456.789-00",
+          "ClientPhoneNumber": "(53)99999-1001",
+          "BillingMode": 0,
+          "Address": {
+               "Street": "Rua das Palmeiras",
+               "Cep": "856984587",
+               "Number": 321,
+               "Complement": "Sala 5",
+               "Neighborhood": "Centro",
+               "City": "Pelotas"
           },
-          "tablePriceId": 1
+          "TablePriceId": 1
      },
      {
-          "name": "Odonto Prime",
-          "birthDate": "1979-09-05T00:00:00",
-          "email": "dra.marta@odontoprime.com",
-          "cro": "RS54321",
-          "cnpj": "98.765.432/0001-01",
-          "cpf": "987.654.321-00",
-          "phoneNumber": "(53)99999-1002",
-          "billingMode": "perServiceOrder",
-          "address": {
-               "street": "Avenida Dom Joaquim",
-               "number": 887,
-               "complement": "Térreo",
-               "neighborhood": "Três Vendas",
-               "city": "Pelotas"
+          "ClientName": "Odonto Prime",
+          "BirthDate": "1979-09-05T00:00:00",
+          "ClientEmail": "dra.marta@odontoprime.com",
+          "Cro": "RS54321",
+          "Cnpj": "98.765.432/0001-01",
+          "ClientCpf": "987.654.321-00",
+          "ClientPhoneNumber": "(53)99999-1002",
+          "BillingMode": 1,
+          "Address": {
+               "Street": "Avenida Dom Joaquim",
+               "Cep": "856984587",
+               "Number": 887,
+               "Complement": "Térreo",
+               "Neighborhood": "Três Vendas",
+               "City": "Pelotas"
           },
-          "tablePriceId": 2
+          "TablePriceId": 2
      },
      {
-          "name": "Sorrir Bem",
-          "birthDate": "1990-06-20T00:00:00",
-          "email": "sorrirbem@gmail.com",
-          "cro": "RS67890",
-          "cnpj": "11.222.333/0001-44",
-          "cpf": "222.333.444-55",
-          "phoneNumber": "(53)99999-1003",
-          "billingMode": "perMonth",
-          "address": {
-               "street": "Rua General Neto",
-               "number": 150,
-               "complement": null,
-               "neighborhood": "Areal",
-               "city": "Pelotas"
+          "ClientName": "Sorrir Bem",
+          "BirthDate": "1990-06-20T00:00:00",
+          "ClientEmail": "sorrirbem@gmail.com",
+          "Cro": "RS67890",
+          "Cnpj": "11.222.333/0001-44",
+          "ClientCpf": "222.333.444-55",
+          "ClientPhoneNumber": "(53)99999-1003",
+          "BillingMode": 0,
+          "Address": {
+               "Street": "Rua General Neto",
+               "Cep": "856984587",
+               "Number": 150,
+               "Complement": null,
+               "Neighborhood": "Areal",
+               "City": "Pelotas"
           },
-          "tablePriceId": 1
+          "TablePriceId": 1
      },
      {
-          "name": "Oral Mais",
-          "birthDate": "1982-12-08T00:00:00",
-          "email": "oralmais@consultas.com",
-          "cro": "RS23456",
-          "cnpj": "22.333.444/0001-66",
-          "cpf": "333.444.555-66",
-          "phoneNumber": "(53)99999-1004",
-          "billingMode": "perServiceOrder",
-          "address": {
-               "street": "Rua Santos Dumont",
-               "number": 421,
-               "complement": "Sala 7",
-               "neighborhood": "Porto",
-               "city": "Pelotas"
+          "ClientName": "Oral Mais",
+          "BirthDate": "1982-12-08T00:00:00",
+          "ClientEmail": "oralmais@consultas.com",
+          "Cro": "RS23456",
+          "Cnpj": "22.333.444/0001-66",
+          "ClientCpf": "333.444.555-66",
+          "ClientPhoneNumber": "(53)99999-1004",
+          "BillingMode": 1,
+          "Address": {
+               "Street": "Rua Santos Dumont",
+               "Cep": "856984587",
+               "Number": 421,
+               "Complement": "Sala 7",
+               "Neighborhood": "Porto",
+               "City": "Pelotas"
           },
-          "tablePriceId": 3
+          "TablePriceId": 3
      },
      {
-          "name": "Clínica do Sorriso",
-          "birthDate": "1975-01-25T00:00:00",
-          "email": "dr.julio@sorriso.com",
-          "cro": "RS09876",
-          "cnpj": "33.444.555/0001-77",
-          "cpf": "444.555.666-77",
-          "phoneNumber": "(53)99999-1005",
-          "billingMode": "perMonth",
-          "address": {
-               "street": "Rua Andrade Neves",
-               "number": 778,
-               "complement": "Conj. 4",
-               "neighborhood": "Centro",
-               "city": "Pelotas"
+          "ClientName": "Clínica do Sorriso",
+          "BirthDate": "1975-01-25T00:00:00",
+          "ClientEmail": "dr.julio@sorriso.com",
+          "Cro": "RS09876",
+          "Cnpj": "33.444.555/0001-77",
+          "ClientCpf": "444.555.666-77",
+          "ClientPhoneNumber": "(53)99999-1005",
+          "BillingMode": 0,
+          "Address": {
+               "Street": "Rua Andrade Neves",
+               "Cep": "856984587",
+               "Number": 778,
+               "Complement": "Conj. 4",
+               "Neighborhood": "Centro",
+               "City": "Pelotas"
           },
-          "tablePriceId": 2
+          "TablePriceId": 2
      }
 ]

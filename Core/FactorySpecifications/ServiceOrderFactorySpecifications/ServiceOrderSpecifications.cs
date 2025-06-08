@@ -1,5 +1,4 @@
 ﻿using Core.Enums;
-using Core.Models.Clients;
 using Core.Models.Production;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
@@ -10,38 +9,38 @@ namespace Core.FactorySpecifications.ServiceOrderFactorySpecifications
 {
     public class ServiceOrderSpecification : BaseSpecification<ServiceOrder>
     {
-        public ServiceOrderSpecification() { }
+        public ServiceOrderSpecification ( ) { }
 
-        public ServiceOrderSpecification(Expression<Func<ServiceOrder, bool>> criteria)
-            : base(criteria) { }
+        public ServiceOrderSpecification ( Expression<Func<ServiceOrder, bool>> criteria )
+            : base ( criteria ) { }
 
-        public ServiceOrderSpecification(int id)
-            : base(o => o.ServiceOrderId == id) { }
+        public ServiceOrderSpecification ( int id )
+            : base ( o => o.ServiceOrderId == id ) { }
 
         public static class ServiceOrderSpecs
         {
-            public static ServiceOrderSpecification ByIdFull(int id)
+            public static ServiceOrderSpecification ByIdFull ( int id )
             {
                 var spec = new ServiceOrderSpecification(id);
-                AddFullIncludes(spec);
+                AddFullIncludes ( spec );
                 return spec;
             }
 
-            public static ServiceOrderSpecification ByIds(List<int> ids)
+            public static ServiceOrderSpecification ByIds ( List<int> ids )
             {
                 var spec = new ServiceOrderSpecification(o => ids.Contains(o.ServiceOrderId));
-                AddWorksIncludes(spec);
+                AddWorksIncludes ( spec );
                 return spec;
             }
 
-            public static ServiceOrderSpecification FinishedInMonthByClient(int clientId, DateTime start, DateTime end)
-                => new(x =>
+            public static ServiceOrderSpecification FinishedInMonthByClient ( int clientId, DateTime start, DateTime end )
+                => new ( x =>
                     x.ClientId == clientId &&
                     x.Status == OrderStatus.Finished &&
                     x.DateIn >= start &&
-                    x.DateIn < end);
+                    x.DateIn < end );
 
-            public static ServiceOrderSpecification OutForTryInMoreThanXDays(int days)
+            public static ServiceOrderSpecification OutForTryInMoreThanXDays ( int days )
             {
                 var limite = DateTime.UtcNow.AddDays(-days);
 
@@ -50,13 +49,13 @@ namespace Core.FactorySpecifications.ServiceOrderFactorySpecifications
                     o.Stages.Any(s => s.DateOut != null && s.DateOut < limite);
 
                 var spec = new ServiceOrderSpecification(criteria);
-                spec.AddInclude(o => o.Client);
-                AddStagesIncludes(spec);
+                spec.AddInclude ( o => o.Client );
+                AddStagesIncludes ( spec );
 
                 return spec;
             }
 
-            public static ServiceOrderSpecification Filtered(string? status, int? clientId, DateTime? start, DateTime? end)
+            public static ServiceOrderSpecification Filtered ( string? status, int? clientId, DateTime? start, DateTime? end )
             {
                 Expression<Func<ServiceOrder, bool>> criteria = x =>
                     (string.IsNullOrEmpty(status) || x.Status.ToString() == status) &&
@@ -65,31 +64,31 @@ namespace Core.FactorySpecifications.ServiceOrderFactorySpecifications
                     (!end.HasValue || x.DateIn <= end.Value);
 
                 var spec = new ServiceOrderSpecification(criteria);
-                AddFullIncludes(spec);
+                AddFullIncludes ( spec );
 
                 return spec;
             }
 
             //  Métodos auxiliares para evitar repetição
-            private static void AddFullIncludes(ServiceOrderSpecification spec)
+            private static void AddFullIncludes ( ServiceOrderSpecification spec )
             {
-                spec.AddInclude(o => o.Client);
-                AddWorksIncludes(spec);
-                AddStagesIncludes(spec);
+                spec.AddInclude ( o => o.Client );
+                AddWorksIncludes ( spec );
+                AddStagesIncludes ( spec );
             }
 
-            private static void AddWorksIncludes(ServiceOrderSpecification spec)
+            private static void AddWorksIncludes ( ServiceOrderSpecification spec )
             {
-                spec.AddInclude(o => o.Works);
-                spec.AddInclude($"{nameof(ServiceOrder.Works)}.{nameof(Work.WorkType)}");
-                spec.AddInclude($"{nameof(ServiceOrder.Works)}.{nameof(Work.Shade)}");
-                spec.AddInclude($"{nameof(ServiceOrder.Works)}.{nameof(Work.Shade)}.{nameof(Shade.Scale)}");
+                spec.AddInclude ( o => o.Works );
+                spec.AddInclude ( $"{nameof ( ServiceOrder.Works )}.{nameof ( Work.WorkType )}" );
+                spec.AddInclude ( $"{nameof ( ServiceOrder.Works )}.{nameof ( Work.Shade )}" );
+                spec.AddInclude ( $"{nameof ( ServiceOrder.Works )}.{nameof ( Work.Shade )}.{nameof ( Shade.Scale )}" );
             }
 
-            private static void AddStagesIncludes(ServiceOrderSpecification spec)
+            private static void AddStagesIncludes ( ServiceOrderSpecification spec )
             {
-                spec.AddInclude(o => o.Stages);
-                spec.AddInclude($"{nameof(ServiceOrder.Stages)}.{nameof(ProductionStage.Sector)}");
+                spec.AddInclude ( o => o.Stages );
+                spec.AddInclude ( $"{nameof ( ServiceOrder.Stages )}.{nameof ( ProductionStage.Sector )}" );
             }
         }
     }

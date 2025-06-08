@@ -1,8 +1,8 @@
 [
      {
-          "name": "Tabela Padrão",
-          "description": "Tabela padrão utilizada na maioria dos clientes",
-          "status": true,
+          "Name": "Tabela Padrão",
+          "Description": "Tabela padrão utilizada na maioria dos clientes",
+          "Status": true,
           "items": [
                {
                     "workTypeId": 1,
@@ -19,9 +19,9 @@
           ]
      },
      {
-          "name": "Tabela Especial Clínica Sorriso Ideal",
-          "description": "Condições diferenciadas para Clínica Sorriso Ideal",
-          "status": true,
+          "Name": "Tabela Especial Clínica Sorriso Ideal",
+          "Description": "Condições diferenciadas para Clínica Sorriso Ideal",
+          "Status": true,
           "items": [
                {
                     "workTypeId": 1,
@@ -38,9 +38,9 @@
           ]
      },
      {
-          "name": "Tabela Premium",
-          "description": "Tabela com margem maior para serviços premium",
-          "status": true,
+          "Name": "Tabela Premium",
+          "Description": "Tabela com margem maior para serviços premium",
+          "Status": true,
           "items": [
                {
                     "workTypeId": 1,
@@ -61,9 +61,9 @@
           ]
      },
      {
-          "name": "Tabela Promoção Junho",
-          "description": "Tabela promocional válida durante o mês de junho",
-          "status": false,
+          "Name": "Tabela Promoção Junho",
+          "Description": "Tabela promocional válida durante o mês de junho",
+          "Status": false,
           "items": [
                {
                     "workTypeId": 1,
@@ -76,9 +76,9 @@
           ]
      },
      {
-          "name": "Tabela Exclusiva Dra. Fernanda",
-          "description": "Condições personalizadas para a Dra. Fernanda",
-          "status": true,
+          "Name": "Tabela Exclusiva Dra. Fernanda",
+          "Description": "Condições personalizadas para a Dra. Fernanda",
+          "Status": true,
           "items": [
                {
                     "workTypeId": 1,

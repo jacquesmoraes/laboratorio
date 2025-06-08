@@ -64,6 +64,7 @@ namespace API.Extensions
             services.AddScoped<ITablePriceService, TablePriceService> ( );
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
             services.AddScoped<IClientService, ClientService> ( );
+            services.AddScoped<IClientBalanceService, ClientBalanceService>();
             services.AddScoped<IShadeService, ShadeService> ( );
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
             services.AddScoped<IPaymentService, PaymentService> ( );

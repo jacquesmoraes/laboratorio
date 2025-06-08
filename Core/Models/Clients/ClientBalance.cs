@@ -1,7 +1,5 @@
 ﻿using Core.Enums;
-using Core.Helpers;
 using Core.Models.Billing;
-using Core.Models.ServiceOrders;
 
 namespace Core.Models.Clients
 {

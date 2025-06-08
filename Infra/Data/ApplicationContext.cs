@@ -6,6 +6,7 @@ using Core.Models.Production;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infra.Data
 {
@@ -30,6 +31,24 @@ namespace Infra.Data
         {
             base.OnModelCreating ( modelBuilder );
             modelBuilder.ApplyConfigurationsFromAssembly ( typeof ( ApplicationContext ).Assembly );
+            foreach ( var entityType in modelBuilder.Model.GetEntityTypes ( ) )
+            {
+                foreach ( var property in entityType.GetProperties ( ) )
+                {
+                    if ( property.ClrType == typeof ( DateTime ) )
+                    {
+                        property.SetValueConverter ( new ValueConverter<DateTime, DateTime> (
+                            v => v.ToUniversalTime ( ),
+                            v => DateTime.SpecifyKind ( v, DateTimeKind.Utc ) ) );
+                    }
+                    if ( property.ClrType == typeof ( DateTime? ) )
+                    {
+                        property.SetValueConverter ( new ValueConverter<DateTime?, DateTime?> (
+                            v => v.HasValue ? v.Value.ToUniversalTime ( ) : v,
+                            v => v.HasValue ? DateTime.SpecifyKind ( v.Value, DateTimeKind.Utc ) : v ) );
+                    }
+                }
+            }
 
 
         }

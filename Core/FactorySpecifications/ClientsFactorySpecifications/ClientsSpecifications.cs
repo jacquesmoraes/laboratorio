@@ -29,6 +29,15 @@ namespace Core.FactorySpecifications.ClientsFactorySpecifications
                 spec.AddInclude ( x => x.ServiceOrders );
                 return spec;
             }
+            public static ClientSpecification ByIdFullForBalance ( int id )
+            {
+                var spec = new ClientSpecification(id);
+                spec.AddInclude ( x => x.Payments );
+                spec.AddInclude ( x => x.BillingInvoices );
+                spec.AddInclude ( x => x.ServiceOrders );
+                spec.AddInclude ( "ServiceOrders.BillingInvoice" );
+                return spec;
+            }
 
             public static ClientSpecification ById ( int id )
             {

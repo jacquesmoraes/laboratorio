@@ -15,11 +15,16 @@ namespace Applications.Mapping
         {
             // Resposta curta (GET /clients)
             CreateMap<Client, ClientResponseRecord>()
-                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City));
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City))
+                .ForMember(dest => dest.TablePriceName, opt => opt.MapFrom(src => src.TablePrice!.Name));
 
             // Resposta detalhada (GET /clients/{id})
             CreateMap<Client, ClientResponseDetailsProjection>()
-                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City));
+    .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City))
+    .ForMember(dest => dest.BillingMode, opt => opt.MapFrom(src => (int)src.BillingMode)) 
+    .ForMember(dest => dest.TablePriceName, opt => opt.MapFrom(src => src.TablePrice != null ? src.TablePrice.Name : null)); 
+
+            CreateMap<ClientBalance, ClientBalanceRecord>();
 
             // Projeção para tabela de preços
             CreateMap<Client, ClientResponseForTablePriceRecord>()

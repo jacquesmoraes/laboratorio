@@ -1,13 +1,12 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Clients;
-using Core.Exceptions;
 using Core.Enums;
+using Core.Exceptions;
+using Core.FactorySpecifications;
 using Core.Interfaces;
 using Core.Models.Clients;
-using static Core.FactorySpecifications.ClientsFactorySpecifications.ClientSpecification;
 using Core.Models.Pricing;
-using Core.Specifications;
-using Core.FactorySpecifications;
+using static Core.FactorySpecifications.ClientsFactorySpecifications.ClientSpecification;
 
 namespace Applications.Services
 {
@@ -23,16 +22,18 @@ namespace Applications.Services
                 throw new CustomValidationException ( "O nome do cliente é obrigatório." );
 
             if ( entity.TablePriceId <= 0 )
-                throw new CustomValidationException  ( "É necessário informar uma Tabela de Preço válida." );
+                throw new CustomValidationException ( "É necessário informar uma Tabela de Preço válida." );
 
             // Validate table price if provided
-            if ( entity.TablePriceId > 0 )
+             if ( entity.TablePriceId.HasValue && entity.TablePriceId.Value > 0 )
             {
-                var tablePrice = await _tablePriceRepository.GetEntityWithSpec(TablePriceSpecs.ById(entity.TablePriceId))
-                    ?? throw new NotFoundException($"Tabela de preço com ID {entity.TablePriceId} não encontrada.");
+                var tablePrice = await _tablePriceRepository.GetEntityWithSpec(
+                    TablePriceSpecs.ById(entity.TablePriceId.Value)
+                    ) ?? throw new NotFoundException($"Tabela de preço com ID {entity.TablePriceId} não encontrada.");
                 if ( !tablePrice.Status )
                     throw new BusinessRuleException ( "Não é possível associar o cliente a uma tabela de preço inativa." );
             }
+
 
             return await base.CreateAsync ( entity );
         }
@@ -40,7 +41,7 @@ namespace Applications.Services
         public async Task<Client?> GetClientIfEligibleForPerClientPayment ( int clientId )
         {
             if ( clientId <= 0 )
-                throw new CustomValidationException  ( "ID do cliente inválido." );
+                throw new CustomValidationException ( "ID do cliente inválido." );
 
             var spec = ClientSpecs.ById(clientId);
             var client = await _repository.GetEntityWithSpec(spec)
@@ -58,10 +59,10 @@ namespace Applications.Services
         public async Task<Client?> UpdateFromDtoAsync ( UpdateClientDto dto )
         {
             if ( dto.ClientId <= 0 )
-                throw new CustomValidationException  ( "ID do cliente inválido." );
+                throw new CustomValidationException ( "ID do cliente inválido." );
 
             if ( string.IsNullOrWhiteSpace ( dto.ClientName ) )
-                throw new CustomValidationException  ( "O nome do cliente é obrigatório." );
+                throw new CustomValidationException ( "O nome do cliente é obrigatório." );
 
             var spec = ClientSpecs.ById(dto.ClientId);
             var existing = await _repository.GetEntityWithSpec(spec)

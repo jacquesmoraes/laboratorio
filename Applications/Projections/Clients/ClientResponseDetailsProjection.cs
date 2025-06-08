@@ -10,6 +10,8 @@ namespace Applications.Projections.Clients
         public string? ClientPhoneNumber { get; init; }
         public string? City { get; init; }
         public bool IsInactive { get; init; }
+         public int BillingMode { get; init; }
+        public string? TablePriceName { get; init; }
         public List<ServiceOrderShortRecord> ServiceOrders { get; init; } = [];
         public List<ClientPaymentRecord> Payments { get; init; } = [];
     }

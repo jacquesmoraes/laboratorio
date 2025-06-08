@@ -3,7 +3,7 @@
     public record ServiceOrderAlertRecord
     {
         public int ServiceOrderId { get; init; }
-        public int OrderNumber { get; init; }
+        public string OrderNumber { get; init; } = string.Empty;
         public string PatientName { get; init; } = string.Empty;
         public string ClientName { get; init; } = string.Empty;
         public string CurrentSectorName { get; set; } = string.Empty;

@@ -22,7 +22,7 @@ namespace Core.Models.Clients
 
         public Address Address { get; set; } = new ( );
 
-        public int TablePriceId { get; set; }
+        public int? TablePriceId { get; set; } 
         public TablePrice? TablePrice { get; set; }
 
         public List<Patient> Patients { get; set; } = [];

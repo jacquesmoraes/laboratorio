@@ -7,7 +7,7 @@ namespace Applications.Projections.ServiceOrder
    public record ServiceOrderDetailsProjection
 {
     public int ServiceOrderId { get; init; }
-    public int OrderNumber { get; init; }
+    public string OrderNumber { get; init; } = string.Empty;
     public string PatientName { get; init; } = string.Empty;
     public string Status { get; init; } = string.Empty;
     public DateTime DateIn { get; init; }

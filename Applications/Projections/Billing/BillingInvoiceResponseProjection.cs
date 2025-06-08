@@ -14,8 +14,7 @@ public record BillingInvoiceResponseProjection
     public ClientInvoiceRecord Client { get; init; } = new();
 
     public List<InvoiceServiceOrderRecord> ServiceOrders { get; init; } = [];
-    public List<InvoiceWorkItemRecord> WorkItems { get; init; } = [];
-
+   
     public InvoiceStatus Status { get; init; }
 
     public decimal TotalServiceOrdersAmount { get; init; }
