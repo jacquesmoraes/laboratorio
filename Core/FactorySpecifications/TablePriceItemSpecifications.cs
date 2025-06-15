@@ -9,12 +9,11 @@ namespace Core.FactorySpecifications
         public TablePriceItemSpecification ( ) { }
 
         public TablePriceItemSpecification ( int id, bool includeRelations = false )
-            : base ( x => x.Id == id )
+            : base ( x => x.TablePriceItemId == id )
         {
             if ( includeRelations )
             {
-                AddInclude ( x => x.WorkType );
-                AddInclude ( x => x.TablePrice );
+                AddInclude ( x => x.TablePrice! );
             }
         }
 
@@ -23,17 +22,23 @@ namespace Core.FactorySpecifications
         {
             if ( includeRelations )
             {
-                AddInclude ( x => x.WorkType );
-                AddInclude ( x => x.TablePrice );
+               
+                AddInclude ( x => x.TablePrice! );
             }
         }
     }
 
     public static class TablePriceItemSpecs
     {
+
         public static TablePriceItemSpecification All ( ) => new ( x => true, includeRelations: true );
-        public static TablePriceItemSpecification ByIdWithRelations ( int id ) => new ( id, includeRelations: true );
-        public static TablePriceItemSpecification ByTablePriceId ( int tablePriceId ) => new ( x => x.TablePriceId == tablePriceId, includeRelations: true );
+        public static TablePriceItemSpecification ByIds(IEnumerable<int> ids, bool includeRelations = false)
+            => new TablePriceItemSpecification(x => ids.Contains(x.TablePriceItemId), includeRelations);
+
+        public static TablePriceItemSpecification ByIdWithRelations ( int id )
+            => new ( id, includeRelations: true );
+        public static TablePriceItemSpecification ByTablePriceId ( int tablePriceId ) 
+            => new ( x => x.TablePriceId == tablePriceId, includeRelations: true );
     }
 
 }

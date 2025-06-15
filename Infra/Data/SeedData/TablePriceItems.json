@@ -1,12 +1,77 @@
 [
-  { "WorkTypeId": 1, "Price": 480 },
-  { "WorkTypeId": 2, "Price": 900 },
-  { "WorkTypeId": 3, "Price": 1500 },
-  { "WorkTypeId": 4, "Price": 300 },
-  { "WorkTypeId": 1, "Price": 450 },
-  { "WorkTypeId": 2, "Price": 850 },
-  { "WorkTypeId": 3, "Price": 1400 },
-  { "WorkTypeId": 4, "Price": 320 },
-  { "WorkTypeId": 1, "Price": 520 },
-  { "WorkTypeId": 3, "Price": 1600 }
+     {
+         
+          "ItemName": "Psi",
+          "Price": 350
+     },
+     {
+          
+          "ItemName": "Prótese total removivel",
+          "Price": 450
+     },
+     {
+          
+          "ItemName": "Metalo ceramica convencional",
+          "Price": 320
+     },
+     {
+         
+          "ItemName": "inlay, onlay,overlay",
+          "Price": 320
+     },
+     {
+          
+          "ItemName": "Placa bruxismo",
+          "Price": 120
+     },
+     {
+          
+          "ItemName": "emax",
+          "Price": 430
+     },
+     {
+          
+          "ItemName": "provisorio acrilico",
+          "Price": 60
+     },
+     {
+          
+          "ItemName": "palato incolor",
+          "Price": 50
+     },
+     {
+          
+          "ItemName": "protese protocolo",
+          "Price": 1200
+     },
+     {
+          
+          "ItemName": "barra protocolo",
+          "Price": 400
+     },
+     {
+          
+          "ItemName": "pino nucleo fundido",
+          "Price": 60
+     },
+     {
+          
+          "ItemName": "troquel",
+          "Price": 50
+     },
+     {
+         
+          "ItemName": "componentes",
+          "Price": 80
+     },
+     {
+         
+          "ItemName": "dentes delara (kulzer)",
+          "Price": 120
+     },
+     {
+         
+          "ItemName": "dentes trilux",
+          "Price": 60
+     }
 ]

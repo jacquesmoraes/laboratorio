@@ -1,10 +1,11 @@
-﻿using Core.Models.Billing;
-using Core.Models.Clients;
+﻿using Core.Models.Clients;
+using Core.Models.LabSettings;
 using Core.Models.Payments;
 using Core.Models.Pricing;
 using Core.Models.Production;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -19,7 +20,7 @@ namespace Infra.Data
         public DbSet<TablePriceItem> TablePriceItems { get; set; }
         public DbSet<Scale> Scales { get; set; }
         public DbSet<Shade> Shades { get; set; }
-
+        public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<ProductionStage> ProductionStages { get; set; }
         public DbSet<Sector> Sectors { get; set; }
         public DbSet<ServiceOrder> ServiceOrders { get; set; }

@@ -33,7 +33,7 @@ namespace API.Controllers.Clients
             return Ok ( response );
 
         }
-        //TODO: verificar pq nao vem os pagamentos e nao aparece client balance
+        
         [HttpGet ( "{id}" )]
         public async Task<IActionResult> GetById ( int id )
         {

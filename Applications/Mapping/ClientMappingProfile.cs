@@ -20,6 +20,7 @@ namespace Applications.Mapping
 
             // Resposta detalhada (GET /clients/{id})
             CreateMap<Client, ClientResponseDetailsProjection>()
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
     .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City))
     .ForMember(dest => dest.BillingMode, opt => opt.MapFrom(src => (int)src.BillingMode)) 
     .ForMember(dest => dest.TablePriceName, opt => opt.MapFrom(src => src.TablePrice != null ? src.TablePrice.Name : null)); 
@@ -31,7 +32,12 @@ namespace Applications.Mapping
                 .ForMember(dest => dest.TablePriceName, opt => opt.MapFrom(src => src.TablePrice != null ? src.TablePrice.Name : null));
 
             // Projeção de endereço
-            CreateMap<AddressRecord, Address>();
+            CreateMap<Address, ClientAddressRecord>();
+            CreateMap<Client, ClientInvoiceRecord>()
+    .ForMember(dest => dest.ClientName, opt => opt.MapFrom(src => src.ClientName))
+    .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+    .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.ClientPhoneNumber));
+
 
             // Projeção de pagamento
             CreateMap<Payment, ClientPaymentRecord>()

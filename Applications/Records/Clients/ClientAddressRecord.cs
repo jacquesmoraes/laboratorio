@@ -1,6 +1,6 @@
 ﻿namespace Applications.Records.Clients
 {
-    public record AddressRecord
+    public record ClientAddressRecord
     {
         public string Street { get; init; } = string.Empty;
         public int Number { get; init; }

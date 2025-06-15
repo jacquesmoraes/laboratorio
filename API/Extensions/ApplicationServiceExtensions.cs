@@ -1,5 +1,6 @@
 ﻿using API.Models;
 using Applications.Contracts;
+using Applications.Contracts.Pdf;
 using Applications.Mapping;
 using Applications.Services;
 using Core.Interfaces;
@@ -64,12 +65,14 @@ namespace API.Extensions
             services.AddScoped<ITablePriceService, TablePriceService> ( );
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
             services.AddScoped<IClientService, ClientService> ( );
-            services.AddScoped<IClientBalanceService, ClientBalanceService>();
+            services.AddScoped<IClientBalanceService, ClientBalanceService> ( );
             services.AddScoped<IShadeService, ShadeService> ( );
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
             services.AddScoped<IPaymentService, PaymentService> ( );
             services.AddScoped<ISectorService, SectorService> ( );
+            
             services.AddScoped<IServiceOrderService, ServiceOrderService> ( );
+            services.AddScoped<ISystemSettingsService, SystemSettingsService> ( );
             services.AddScoped<IBillingService, BillingService> ( );
             services.AddAutoMapper ( typeof ( ProductionMappingProfile ).Assembly );
             return services;

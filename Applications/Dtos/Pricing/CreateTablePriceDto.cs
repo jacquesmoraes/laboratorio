@@ -5,7 +5,7 @@
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
      
-        public List<CreateTablePriceItemDto> Items { get; set; } = [];
+        public List<TablePriceItemDtoForTablePrice> Items { get; set; } = [];
     }
 
 }

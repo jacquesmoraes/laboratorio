@@ -14,7 +14,7 @@ namespace Core.Models.ServiceOrders
         public required DateTime DateIn { get; set; }
         public DateTime DateOut { get; set; }
         public DateTime? DateOutFinal { get; set; }
- 
+
         public decimal OrderTotal { get; set; }
         public string PatientName { get; set; } = string.Empty;
 
@@ -79,7 +79,9 @@ namespace Core.Models.ServiceOrders
 
         public void SendToTryIn ( DateTime dateOut )
         {
-            // Busca o estágio aberto (DateOut == null)
+            if ( Stages == null || !Stages.Any ( ) )
+                throw new InvalidOperationException ( "A ordem de serviço não possui estágios." );
+
             var openStage = Stages.FirstOrDefault(s => s.DateOut == null);
             if ( openStage == null )
                 throw new InvalidOperationException ( "Não há estágio aberto para enviar para prova." );
@@ -88,6 +90,7 @@ namespace Core.Models.ServiceOrders
             Status = OrderStatus.TryIn;
             DateOut = dateOut;
         }
+
 
         public void Finish ( DateTime dateOut )
         {

@@ -11,32 +11,29 @@ namespace Applications.Services
     {
         private readonly IGenericRepository<TablePriceItem> _repository = repository;
 
-        public async Task<TablePriceItem?> UpdateFromDtoAsync ( int id, UpdateTablePriceItemDto dto )
-        {
-            if (id <= 0)
-                throw new CustomValidationException ("ID do item da tabela de preço inválido.");
+        public async Task<TablePriceItem?> UpdateFromDtoAsync(int id, UpdateTablePriceItemDto dto)
+    {
+        if (id <= 0)
+            throw new CustomValidationException("ID do item da tabela de preço inválido.");
 
-            if (dto.WorkTypeId <= 0)
-                throw new CustomValidationException ("ID do tipo de trabalho inválido.");
+        if (string.IsNullOrWhiteSpace(dto.ItemName))
+            throw new CustomValidationException("O nome do item é obrigatório.");
 
-            if (dto.Price < 0)
-                throw new CustomValidationException ("O preço não pode ser negativo.");
+        if (dto.Price < 0)
+            throw new CustomValidationException("O preço não pode ser negativo.");
 
-            var spec = TablePriceItemSpecs.ByIdWithRelations(id);
-            var existing = await _repository.GetEntityWithSpec(spec)
-                ?? throw new NotFoundException($"Item da tabela de preço com ID {id} não encontrado.");
+        var existing = await _repository.GetEntityWithSpec(TablePriceItemSpecs.ByIdWithRelations(id))
+            ?? throw new NotFoundException($"Item da tabela de preço com ID {id} não encontrado.");
 
+        
+            existing.ItemName = dto.ItemName;
+        existing.Price = dto.Price;
 
-            // Atualiza os campos
-            existing.WorkTypeId = dto.WorkTypeId;
-            existing.Price = dto.Price;
+        var updated = await _repository.UpdateAsync(id, existing)
+            ?? throw new BusinessRuleException("Falha ao atualizar o item da tabela de preço.");
 
-            // Passa o id e a entidade para o método Update
-            var updated = await _repository.UpdateAsync(id, existing)
-                ?? throw new BusinessRuleException("Falha ao atualizar o item da tabela de preço.");
-
-            return updated;
-        }
+        return updated;
+    }
 
 
     }

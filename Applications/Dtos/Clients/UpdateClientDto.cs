@@ -14,7 +14,7 @@ namespace Applications.Dtos.Clients
         [EnumDataType(typeof(BillingMode), ErrorMessage = "Modo de faturamento inválido.")]
         public BillingMode BillingMode { get; set; }
         public int TablePriceId { get; set; }
-        public AddressRecord Address { get; set; } = new();
+        public ClientAddressRecord Address { get; set; } = new();
 
     }
 }

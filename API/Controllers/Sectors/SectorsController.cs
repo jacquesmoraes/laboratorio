@@ -10,16 +10,16 @@ namespace API.Controllers.Sectors
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SectorsController(IMapper mapper, ISectorService service) : BaseApiController
+    public class SectorsController(IMapper mapper, ISectorService sectorService) : BaseApiController
     {
-        private readonly ISectorService _service = service;
+        private readonly ISectorService _sectorService = sectorService;
         private readonly IMapper _mapper = mapper;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var spec = SectorSpecification.SectorSpecs.All();
-            var sectors = await _service.GetAllWithSpecAsync(spec);
+            var sectors = await _sectorService.GetAllWithSpecAsync(spec);
             if (sectors == null || !sectors.Any()) return NotFound();
 
             var response = _mapper.Map<List<SectorRecord>>(sectors);
@@ -30,7 +30,7 @@ namespace API.Controllers.Sectors
         public async Task<IActionResult> GetById(int id)
         {
             var spec = SectorSpecification.SectorSpecs.ById(id);
-            var sector = await _service.GetEntityWithSpecAsync(spec);
+            var sector = await _sectorService.GetEntityWithSpecAsync(spec);
             if (sector == null) return NotFound();
 
             var response = _mapper.Map<SectorRecord>(sector);
@@ -41,7 +41,7 @@ namespace API.Controllers.Sectors
         public async Task<IActionResult> Create([FromBody] CreateSectorDto dto)
         {
             var entity = _mapper.Map<Sector>(dto);
-            var created = await _service.CreateAsync(entity);
+            var created = await _sectorService.CreateAsync(entity);
             var response = _mapper.Map<SectorRecord>(created);
             return CreatedAtAction(nameof(GetById), new { id = response.SectorId }, response);
         }
@@ -52,7 +52,7 @@ namespace API.Controllers.Sectors
             if (id != dto.SectorId)
                 return BadRequest($"Mismatch between route ID {id} and body ID {dto.SectorId}.");
 
-            var updated = await _service.UpdateFromDtoAsync(dto);
+            var updated = await _sectorService.UpdateFromDtoAsync(dto);
             if (updated == null)
                 return NotFound($"Sector with id {id} not found.");
 
@@ -63,7 +63,7 @@ namespace API.Controllers.Sectors
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
+            var deleted = await _sectorService.DeleteAsync(id);
             return deleted == null ? NotFound() : NoContent();
         }
     }

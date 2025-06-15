@@ -11,15 +11,15 @@ namespace API.Controllers.ServiceOrders
 {
     [ApiController]
     [Route ( "api/[controller]" )]
-    public class ServiceOrdersController ( IMapper mapper, IServiceOrderService service ) : BaseApiController
+    public class ServiceOrdersController ( IMapper mapper, IServiceOrderService serviceOrderService ) : BaseApiController
     {
-        private readonly IServiceOrderService _service = service;
+        private readonly IServiceOrderService _serviceOrderService = serviceOrderService;
         private readonly IMapper _mapper = mapper;
 
         [HttpPost]
         public async Task<IActionResult> Create ( [FromBody] CreateServiceOrderDto dto )
         {
-            var created = await _service.CreateOrderAsync(dto);
+            var created = await _serviceOrderService.CreateOrderAsync(dto);
             var response = _mapper.Map<ServiceOrderDetailsProjection>(created);
             return CreatedAtAction ( nameof ( GetById ), new { id = response.ServiceOrderId }, response );
         }
@@ -27,7 +27,7 @@ namespace API.Controllers.ServiceOrders
         [HttpGet]
         public async Task<IActionResult> GetAll ( [FromQuery] ServiceOrderFilterDto filter )
         {
-            var result = await _service.GetAllFilteredAsync(filter);
+            var result = await _serviceOrderService.GetAllFilteredAsync(filter);
             var response = _mapper.Map<List<ServiceOrderDetailsProjection>>(result);
             return Ok ( response );
         }
@@ -36,7 +36,7 @@ namespace API.Controllers.ServiceOrders
         public async Task<IActionResult> GetById ( int id )
         {
             var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
-            var entity = await _service.GetEntityWithSpecAsync(spec);
+            var entity = await _serviceOrderService.GetEntityWithSpecAsync(spec);
             if ( entity == null ) return NotFound ( );
             var response = _mapper.Map<ServiceOrderDetailsProjection>(entity);
             return Ok ( response );
@@ -45,7 +45,7 @@ namespace API.Controllers.ServiceOrders
         [HttpPost ( "moveto" )]
         public async Task<IActionResult> MoveToStage ( [FromBody] MoveToStageDto dto )
         {
-            var updated = await _service.MoveToStageAsync(dto);
+            var updated = await _serviceOrderService.MoveToStageAsync(dto);
             if ( updated == null ) return NotFound ( );
             var response = _mapper.Map<ServiceOrderDetailsProjection>(updated);
             return Ok ( response );
@@ -56,7 +56,7 @@ namespace API.Controllers.ServiceOrders
         {
             try
             {
-                var updated = await _service.SendToTryInAsync(dto);
+                var updated = await _serviceOrderService.SendToTryInAsync(dto);
                 if ( updated == null )
                     return NotFound ( "Ordem de serviço não encontrada ou já finalizada." );
                 var response = _mapper.Map<ServiceOrderDetailsProjection>(updated);
@@ -73,7 +73,7 @@ namespace API.Controllers.ServiceOrders
         {
             try
             {
-                var result = await _service.FinishOrdersAsync(dto);
+                var result = await _serviceOrderService.FinishOrdersAsync(dto);
                 var response = _mapper.Map<List<ServiceOrderDetailsProjection>>(result);
                 return Ok ( response );
             }
@@ -86,7 +86,7 @@ namespace API.Controllers.ServiceOrders
         [HttpGet ( "alert/tryin" )]
         public async Task<IActionResult> GetWorksOutForTryin ( [FromQuery] int dias = 5 )
         {
-            var ordens = await _service.GetOutForTryInAsync(dias);
+            var ordens = await _serviceOrderService.GetOutForTryInAsync(dias);
             var response = _mapper.Map<List<ServiceOrderAlertRecord>>(ordens);
             return Ok ( response );
         }
@@ -96,7 +96,7 @@ namespace API.Controllers.ServiceOrders
         {
             try
             {
-                var updated = await _service.UpdateOrderAsync(id, dto);
+                var updated = await _serviceOrderService.UpdateOrderAsync(id, dto);
                 return updated == null
                     ? NotFound ( )
                     : Ok ( _mapper.Map<ServiceOrderDetailsProjection> ( updated ) );
@@ -112,7 +112,7 @@ namespace API.Controllers.ServiceOrders
         {
             try
             {
-                var deleted = await _service.DeleteOrderAsync(id);
+                var deleted = await _serviceOrderService.DeleteOrderAsync(id);
                 return deleted == null ? NotFound ( ) : NoContent ( );
             }
             catch ( InvalidOperationException ex )
@@ -124,7 +124,7 @@ namespace API.Controllers.ServiceOrders
         [HttpPost ( "{id}/reopen" )]
         public async Task<IActionResult> Reopen ( int id )
         {
-            var reopened = await _service.ReopenOrderAsync(id);
+            var reopened = await _serviceOrderService.ReopenOrderAsync(id);
             return reopened == null
                 ? BadRequest ( new { error = "A ordem não pode ser reaberta (não encontrada ou já está em produção)." } )
                 : Ok ( _mapper.Map<ServiceOrderDetailsProjection> ( reopened ) );

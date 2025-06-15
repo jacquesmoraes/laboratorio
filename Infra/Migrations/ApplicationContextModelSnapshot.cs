@@ -59,7 +59,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("BillingInvoice", (string)null);
+                    b.ToTable("BillingInvoice");
                 });
 
             modelBuilder.Entity("Core.Models.Clients.Client", b =>
@@ -105,7 +105,46 @@ namespace Infra.Migrations
 
                     b.HasIndex("TablePriceId");
 
-                    b.ToTable("Clients", (string)null);
+                    b.ToTable("Clients");
+                });
+
+            modelBuilder.Entity("Core.Models.LabSettings.SystemSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CNPJ")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FooterMessage")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LabName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LogoFileName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemSettings");
                 });
 
             modelBuilder.Entity("Core.Models.Payments.Payment", b =>
@@ -137,7 +176,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("ClientPayments", (string)null);
+                    b.ToTable("ClientPayments");
                 });
 
             modelBuilder.Entity("Core.Models.Pricing.TablePrice", b =>
@@ -159,16 +198,20 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TablePrices", (string)null);
+                    b.ToTable("TablePrices");
                 });
 
             modelBuilder.Entity("Core.Models.Pricing.TablePriceItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("TablePriceItemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TablePriceItemId"));
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -176,16 +219,11 @@ namespace Infra.Migrations
                     b.Property<int?>("TablePriceId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("WorkTypeId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
+                    b.HasKey("TablePriceItemId");
 
                     b.HasIndex("TablePriceId");
 
-                    b.HasIndex("WorkTypeId");
-
-                    b.ToTable("TablePriceItems", (string)null);
+                    b.ToTable("TablePriceItems");
                 });
 
             modelBuilder.Entity("Core.Models.Production.Scale", b =>
@@ -202,7 +240,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Scales", (string)null);
+                    b.ToTable("Scales");
                 });
 
             modelBuilder.Entity("Core.Models.Production.Shade", b =>
@@ -224,7 +262,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ScaleId");
 
-                    b.ToTable("Shades", (string)null);
+                    b.ToTable("Shades");
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ProductionStage", b =>
@@ -253,7 +291,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ServiceOrderId");
 
-                    b.ToTable("ProductionStages", (string)null);
+                    b.ToTable("ProductionStages");
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.Sector", b =>
@@ -270,7 +308,7 @@ namespace Infra.Migrations
 
                     b.HasKey("SectorId");
 
-                    b.ToTable("Sectors", (string)null);
+                    b.ToTable("Sectors");
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ServiceOrder", b =>
@@ -316,7 +354,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("ServiceOrders", (string)null);
+                    b.ToTable("ServiceOrders");
                 });
 
             modelBuilder.Entity("Core.Models.Works.Work", b =>
@@ -361,7 +399,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkTypeId");
 
-                    b.ToTable("Works", (string)null);
+                    b.ToTable("Works");
                 });
 
             modelBuilder.Entity("Core.Models.Works.WorkSection", b =>
@@ -378,7 +416,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WorkSections", (string)null);
+                    b.ToTable("WorkSections");
                 });
 
             modelBuilder.Entity("Core.Models.Works.WorkType", b =>
@@ -406,7 +444,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkSectionId");
 
-                    b.ToTable("WorkTypes", (string)null);
+                    b.ToTable("WorkTypes");
                 });
 
             modelBuilder.Entity("Core.Models.Billing.BillingInvoice", b =>
@@ -451,7 +489,7 @@ namespace Infra.Migrations
 
                             b1.HasKey("ClientId");
 
-                            b1.ToTable("Clients", (string)null);
+                            b1.ToTable("Clients");
 
                             b1.WithOwner()
                                 .HasForeignKey("ClientId");
@@ -491,6 +529,49 @@ namespace Infra.Migrations
                     b.Navigation("TablePrice");
                 });
 
+            modelBuilder.Entity("Core.Models.LabSettings.SystemSettings", b =>
+                {
+                    b.OwnsOne("Core.Models.LabSettings.LabAddress", "Address", b1 =>
+                        {
+                            b1.Property<int>("SystemSettingsId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Cep")
+                                .HasColumnType("text")
+                                .HasColumnName("Address_Cep");
+
+                            b1.Property<string>("City")
+                                .HasColumnType("text")
+                                .HasColumnName("Address_City");
+
+                            b1.Property<string>("Complement")
+                                .HasColumnType("text")
+                                .HasColumnName("Address_Complement");
+
+                            b1.Property<string>("Neighborhood")
+                                .HasColumnType("text")
+                                .HasColumnName("Address_Neighborhood");
+
+                            b1.Property<int?>("Number")
+                                .HasColumnType("integer")
+                                .HasColumnName("Address_Number");
+
+                            b1.Property<string>("Street")
+                                .HasColumnType("text")
+                                .HasColumnName("Address_Street");
+
+                            b1.HasKey("SystemSettingsId");
+
+                            b1.ToTable("SystemSettings");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SystemSettingsId");
+                        });
+
+                    b.Navigation("Address")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Core.Models.Payments.Payment", b =>
                 {
                     b.HasOne("Core.Models.Billing.BillingInvoice", "BillingInvoice")
@@ -516,15 +597,7 @@ namespace Infra.Migrations
                         .HasForeignKey("TablePriceId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Core.Models.Works.WorkType", "WorkType")
-                        .WithMany()
-                        .HasForeignKey("WorkTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("TablePrice");
-
-                    b.Navigation("WorkType");
                 });
 
             modelBuilder.Entity("Core.Models.Production.Shade", b =>

@@ -10,16 +10,16 @@ namespace API.Controllers.Pricing
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TablePriceItemController(IMapper mapper, ITablePriceItemService tableService) : BaseApiController
+    public class TablePriceItemController(IMapper mapper, ITablePriceItemService tablePriceItemService) : BaseApiController
     {
         private readonly IMapper _mapper = mapper;
-        private readonly ITablePriceItemService _tableService = tableService;
+        private readonly ITablePriceItemService _tablePriceItemService = tablePriceItemService;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var spec = TablePriceItemSpecs.All();
-            var items = await _tableService.GetAllWithSpecAsync(spec);
+            var items = await _tablePriceItemService.GetAllWithSpecAsync(spec);
             var response = _mapper.Map<IEnumerable<TablePriceItemsResponseRecord>>(items);
             return Ok(response);
         }
@@ -28,7 +28,7 @@ namespace API.Controllers.Pricing
         public async Task<IActionResult> GetById(int id)
         {
             var spec = TablePriceItemSpecs.ByIdWithRelations(id);
-            var item = await _tableService.GetEntityWithSpecAsync(spec);
+            var item = await _tablePriceItemService.GetEntityWithSpecAsync(spec);
             if (item == null)
                 return NotFound();
 
@@ -40,8 +40,8 @@ namespace API.Controllers.Pricing
         public async Task<IActionResult> Create([FromBody] CreateTablePriceItemDto dto)
         {
             var entity = _mapper.Map<TablePriceItem>(dto);
-            var created = await _tableService.CreateAsync(entity);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            var created = await _tablePriceItemService.CreateAsync(entity);
+            return CreatedAtAction(nameof(GetById), new { id = created.TablePriceItemId }, created);
         }
 
         [HttpPut("{id}")]
@@ -50,7 +50,7 @@ namespace API.Controllers.Pricing
             if (dto.Id != id)
                 return BadRequest("ID in URL does not match ID in body.");
 
-            var updated = await _tableService.UpdateFromDtoAsync(id, dto);
+            var updated = await _tablePriceItemService.UpdateFromDtoAsync(id, dto);
             if (updated == null) return NotFound();
 
             var response = _mapper.Map<TablePriceItemsResponseRecord>(updated);
@@ -60,7 +60,7 @@ namespace API.Controllers.Pricing
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _tableService.DeleteAsync(id);
+            var deleted = await _tablePriceItemService.DeleteAsync(id);
             return deleted == null ? NotFound() : NoContent();
         }
     }

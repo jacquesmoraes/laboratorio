@@ -12,7 +12,7 @@ namespace Core.FactorySpecifications
         {
             AddInclude(x => x.Items);
             AddInclude(x => x.Clients);
-                AddInclude("Items.WorkType");
+                
         }
         }
 
@@ -21,8 +21,7 @@ namespace Core.FactorySpecifications
         {
             if ( includeRelations )
                 AddInclude ( x => x.Items );
-            AddInclude("Items.WorkType");
-            AddInclude ( x => x.Clients );
+                 AddInclude ( x => x.Clients );
         }
 
         public TablePriceSpecification ( Expression<Func<TablePrice, bool>> criteria, bool includeRelations = false )
@@ -31,7 +30,7 @@ namespace Core.FactorySpecifications
             if ( includeRelations )
                 AddInclude ( x => x.Items );
             AddInclude ( x => x.Clients );
-            AddInclude("Items.WorkType");
+            
         }
     }
 

@@ -11,6 +11,8 @@ using Core.Models.Billing;
 using Core.Models.Clients;
 using Core.Models.Payments;
 using Core.Models.ServiceOrders;
+using AutoMapper;
+using Applications.Records.Billing;
 
 
 namespace Applications.Services
@@ -20,7 +22,8 @@ namespace Applications.Services
      IGenericRepository<Client> clientRepo,
      IGenericRepository<ServiceOrder> orderRepo,
      IGenericRepository<Payment> paymentRepo,
-     IUnitOfWork uow
+     IUnitOfWork uow,
+        IMapper mapper
  ) : GenericService<BillingInvoice> ( invoiceRepo ), IBillingService
     {
         private readonly IGenericRepository<Client> _clientRepo = clientRepo;
@@ -28,10 +31,12 @@ namespace Applications.Services
         private readonly IGenericRepository<Payment> _paymentRepo = paymentRepo;
         private readonly IGenericRepository<BillingInvoice> _invoiceRepo = invoiceRepo;
         private readonly IUnitOfWork _uow = uow;
+        private readonly IMapper _mapper = mapper;
+
 
         public async Task<BillingInvoice> GenerateInvoiceAsync ( CreateBillingInvoiceDto dto )
         {
-           await using var tx = await _uow.BeginTransactionAsync();
+            await using var tx = await _uow.BeginTransactionAsync();
 
             var client = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId))
         ?? throw new NotFoundException ("Cliente não encontrado.");
@@ -123,6 +128,17 @@ namespace Applications.Services
 
             return invoice;
         }
+
+        public async Task<BillingInvoiceRecord?> GetInvoiceRecordByIdAsync ( int id )
+        {
+            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.ByIdFull(id);
+            var invoice = await _invoiceRepo.GetEntityWithSpec(spec);
+
+            return invoice == null
+                ? null
+                : _mapper.Map<BillingInvoiceRecord> ( invoice );
+        }
+
 
         private static string GenerateInvoiceNumber ( int clientId )
         {

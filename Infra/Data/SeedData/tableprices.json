@@ -3,95 +3,50 @@
           "Name": "Tabela Padrão",
           "Description": "Tabela padrão utilizada na maioria dos clientes",
           "Status": true,
-          "items": [
-               {
-                    "workTypeId": 1,
-                    "price": 480
-               },
-               {
-                    "workTypeId": 2,
-                    "price": 900
-               },
-               {
-                    "workTypeId": 3,
-                    "price": 1500
-               }
+          "Items": [
+               { "tablePriceItemId": 1 },
+               { "tablePriceItemId": 2 },
+               { "tablePriceItemId": 3 }
           ]
      },
      {
           "Name": "Tabela Especial Clínica Sorriso Ideal",
           "Description": "Condições diferenciadas para Clínica Sorriso Ideal",
           "Status": true,
-          "items": [
-               {
-                    "workTypeId": 1,
-                    "price": 450
-               },
-               {
-                    "workTypeId": 2,
-                    "price": 850
-               },
-               {
-                    "workTypeId": 3,
-                    "price": 1400
-               }
+          "Items": [
+               { "tablePriceItemId": 4 },
+               { "tablePriceItemId": 5 },
+               { "tablePriceItemId": 6 }
           ]
      },
      {
           "Name": "Tabela Premium",
           "Description": "Tabela com margem maior para serviços premium",
           "Status": true,
-          "items": [
-               {
-                    "workTypeId": 1,
-                    "price": 520
-               },
-               {
-                    "workTypeId": 2,
-                    "price": 950
-               },
-               {
-                    "workTypeId": 3,
-                    "price": 1600
-               },
-               {
-                    "workTypeId": 4,
-                    "price": 300
-               }
+          "Items": [
+               { "tablePriceItemId": 7 },
+               { "tablePriceItemId": 8 },
+               { "tablePriceItemId": 9 },
+               { "tablePriceItemId": 10 }
           ]
      },
      {
           "Name": "Tabela Promoção Junho",
           "Description": "Tabela promocional válida durante o mês de junho",
           "Status": false,
-          "items": [
-               {
-                    "workTypeId": 1,
-                    "price": 400
-               },
-               {
-                    "workTypeId": 2,
-                    "price": 800
-               }
+          "Items": [
+               { "tablePriceItemId": 11 },
+               { "tablePriceItemId": 12 }
           ]
      },
      {
           "Name": "Tabela Exclusiva Dra. Fernanda",
           "Description": "Condições personalizadas para a Dra. Fernanda",
           "Status": true,
-          "items": [
-               {
-                    "workTypeId": 1,
-                    "price": 470
-               },
-               {
-                    "workTypeId": 3,
-                    "price": 1450
-               },
-               {
-                    "workTypeId": 4,
-                    "price": 350
-               }
+          "Items": [
+               { "tablePriceItemId": 13 },
+               { "tablePriceItemId": 14 },
+               { "tablePriceItemId": 15 }
           ]
      }
 ]

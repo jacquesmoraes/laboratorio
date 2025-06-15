@@ -39,7 +39,7 @@ namespace Applications.Services
             var order = _mapper.Map<ServiceOrder>(dto);
             order.ClientId = client.ClientId;
             order.Client = client;
-            order.OrderNumber = await GenerateOrderNumberAsync (client.ClientId );
+            order.OrderNumber = await GenerateOrderNumberAsync ( client.ClientId );
             order.Status = OrderStatus.Production;
             order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
 
@@ -58,14 +58,20 @@ namespace Applications.Services
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
 
-            return order;
+
+
+            var fullOrder = await _orderRepo.GetEntityWithSpec(
+                ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(order.ServiceOrderId)
+                );
+            return fullOrder!;
+
         }
 
 
 
         public async Task<ServiceOrder?> MoveToStageAsync ( MoveToStageDto dto )
         {
-           await using var tx = await _uow.BeginTransactionAsync();
+            await using var tx = await _uow.BeginTransactionAsync();
 
             var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
         ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
@@ -95,7 +101,7 @@ namespace Applications.Services
 
         public async Task<ServiceOrder?> SendToTryInAsync ( SendToTryInDto dto )
         {
-           await using var tx = await _uow.BeginTransactionAsync();
+            await using var tx = await _uow.BeginTransactionAsync();
 
             var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
         ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
@@ -241,21 +247,23 @@ namespace Applications.Services
 
         private async Task<string> GenerateOrderNumberAsync ( int clientId )
         {
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(clientId);
-            var lastOrder = (await _orderRepo.GetAllAsync(spec)).FirstOrDefault();
+            var spec = ServiceOrderSpecification.ServiceOrderSpecs.AllByClient(clientId);
 
-            int nextSequence = 1;
-            if ( lastOrder != null && lastOrder.OrderNumber is not null )
-            {
-                var parts = lastOrder.OrderNumber.Split('-');
-                if ( parts.Length == 2 && int.TryParse ( parts [0], out var lastSeq ) )
-                {
-                    nextSequence = lastSeq + 1;
-                }
-            }
+            var allOrders = await _orderRepo.GetAllAsync(spec);
+            var maxSequence = allOrders
+        .Select(o =>
+        {
+            var parts = o.OrderNumber?.Split('-');
+            return parts != null && int.TryParse(parts[0], out var n) ? n : 0;
+        })
+        .DefaultIfEmpty(0)
+        .Max();
+
+            var nextSequence = maxSequence + 1;
 
             return $"{nextSequence}-{clientId}";
         }
+
 
 
 

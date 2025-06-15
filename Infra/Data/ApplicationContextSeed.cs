@@ -1,4 +1,5 @@
 ﻿using Core.Models.Clients;
+using Core.Models.LabSettings;
 using Core.Models.Pricing;
 using Core.Models.Production;
 using Core.Models.ServiceOrders;
@@ -20,11 +21,13 @@ namespace Infra.Data
                 await SeedSectors ( context, logger );
                 await SeedScales ( context, logger );
                 await SeedShades ( context, logger );
+                await SeedTablePriceItems ( context, logger );
                 await SeedTablePrices ( context, logger );
+                await SeedSystemSettings ( context, logger );
 
                 // Seeds que dependem dos anteriores
                 await SeedClients ( context, logger );
-             
+
 
 
                 logger.LogInformation ( "Database seeded successfully" );
@@ -35,6 +38,7 @@ namespace Infra.Data
                 throw;
             }
         }
+
 
         private static async Task SeedWorkSections ( ApplicationContext context, ILogger logger )
         {
@@ -110,21 +114,74 @@ namespace Infra.Data
                 }
             }
         }
+        private static async Task SeedTablePriceItems ( ApplicationContext context, ILogger logger )
+        {
+            if ( !context.TablePriceItems.Any ( ) )
+            {
+                var data = File.ReadAllText("../Infra/Data/SeedData/tablepriceitems.json");
+
+                var items = JsonSerializer.Deserialize<List<TablePriceItem>>(data, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true // ← evita erro de casing
+                });
+
+                if ( items != null )
+                {
+                    await context.TablePriceItems.AddRangeAsync ( items );
+                    await context.SaveChangesAsync ( );
+                    logger.LogInformation ( "TablePriceItems seeded successfully" );
+                }
+            }
+        }
+
 
         private static async Task SeedTablePrices ( ApplicationContext context, ILogger logger )
         {
             if ( !context.TablePrices.Any ( ) )
             {
                 var data = File.ReadAllText("../Infra/Data/SeedData/tableprices.json");
-                var prices = JsonSerializer.Deserialize<List<TablePrice>>(data);
-                if ( prices != null )
+
+                var rawTables = JsonSerializer.Deserialize<List<RawTablePriceDto>>(data, new JsonSerializerOptions
                 {
-                    await context.TablePrices.AddRangeAsync ( prices );
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if ( rawTables != null )
+                {
+                    foreach ( var raw in rawTables )
+                    {
+                        var table = new TablePrice
+                        {
+                            Name = raw.Name,
+                            Description = raw.Description,
+                            Status = raw.Status,
+                            Items = context.TablePriceItems
+                        .Where(i => raw.Items.Select(x => x.TablePriceItemId).Contains(i.TablePriceItemId))
+                        .ToList()
+                        };
+
+                        await context.TablePrices.AddAsync ( table );
+                    }
+
                     await context.SaveChangesAsync ( );
-                    logger.LogInformation ( "Table Prices seeded successfully" );
+                    logger.LogInformation ( "TablePrices seeded successfully with associated items." );
                 }
             }
         }
+
+        private record RawTablePriceDto
+        {
+            public string Name { get; set; } = string.Empty;
+            public string Description { get; set; } = string.Empty;
+            public bool Status { get; set; }
+            public List<RawTablePriceItemRef> Items { get; set; } = [];
+        }
+
+        private record RawTablePriceItemRef
+        {
+            public int TablePriceItemId { get; set; }
+        }
+
 
         private static async Task SeedClients ( ApplicationContext context, ILogger logger )
         {
@@ -142,6 +199,36 @@ namespace Infra.Data
         }
 
 
+        private static async Task SeedSystemSettings ( ApplicationContext context, ILogger logger )
+        {
+            if ( !context.SystemSettings.Any ( ) )
+            {
+                var settings = new SystemSettings
+                {
+                    Id = 1,
+                    LabName = "Laboratório Modelo",
+                    Email = "contato@labmodelo.com",
+                    Phone = "(53)99999-0000",
+                    CNPJ = "00.000.000/0001-00",
+                    FooterMessage = "Obrigado por confiar no nosso laboratório.",
+                    LogoFileName = null,
+                    LastUpdated = DateTime.UtcNow,
+                    Address = new LabAddress
+                    {
+                        Street = "Rua Exemplo",
+                        Number = 123,
+                        Complement = "Sala 2",
+                        Neighborhood = "Centro",
+                        City = "Pelotas",
+                        Cep = "96000-000"
+                    }
+                };
+
+                await context.SystemSettings.AddAsync ( settings );
+                await context.SaveChangesAsync ( );
+                logger.LogInformation ( "SystemSettings seeded successfully" );
+            }
+        }
 
 
 

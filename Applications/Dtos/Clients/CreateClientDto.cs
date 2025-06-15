@@ -17,7 +17,7 @@ namespace Applications.Dtos.Clients
 
     [EnumDataType(typeof(BillingMode), ErrorMessage = "billing mode invalid.")]
     public BillingMode BillingMode { get; set; }
-    public AddressRecord Address { get; set; } = new();
+    public ClientAddressRecord Address { get; set; } = new();
 
     public int? TablePriceId { get; set; }
 }

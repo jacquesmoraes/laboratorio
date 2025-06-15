@@ -2,7 +2,7 @@
 {
     public class CreateTablePriceItemDto
     {
-        public int WorkTypeId { get; set; }
-        public decimal Price { get; set; }
+        public required string ItemName { get; set; }
+        public required decimal Price { get; set; }
     }
 }

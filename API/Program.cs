@@ -26,6 +26,7 @@ if ( app.Environment.IsDevelopment ( ) )
 
 
 app.UseMiddleware<ExceptionMiddleware> ( );
+app.UseStaticFiles(); // necessário para servir os arquivos de /wwwroot
 
 app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );
 

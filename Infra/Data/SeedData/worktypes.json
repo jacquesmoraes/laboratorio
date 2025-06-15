@@ -1,47 +1,65 @@
 [
-  {
-  
-    "Name": "Psi",
-    "WorkSectionId": 3
-  },
-  {
-    
-    "Name": "Mc convencional",
-    "WorkSectionId": 3
-  },
-  {
-    
-    "Name": "emax",
-    "WorkSectionId": 5
-  },
- {
-   
-    "Name": "PT-R",
-    "WorkSectionId": 2
-  },
-  {
-   
-    "Name": "Protese protocolo",
-    "WorkSectionId": 2
-  },
-  {
-    
-    "Name": "elemento Provisorio",
-    "WorkSectionId": 2
-  },
-{
-    
-    "Name": "barra protocolo",
-    "WorkSectionId": 4
-  },
-  {
-    
-    "Name": "Pino fundido",
-    "WorkSectionId": 4
-  },
-  {
-    
-    "Name": "modelo impresso",
-    "WorkSectionId": 1
-  }
+     {
+
+          "Name": "Psi",
+          "WorkSectionId": 3,
+          "Description": "protese sobre implante",
+          "IsActive": true
+     },
+     {
+
+          "Name": "Mc convencional",
+          "WorkSectionId": 3,
+          "Description": "metalo ceramica sobre preparo",
+          "IsActive": true
+     },
+     {
+
+          "Name": "emax",
+          "WorkSectionId": 5,
+          "Description": "metal free, coroa total ou faceta",
+          "IsActive": true
+     },
+     {
+
+          "Name": "PT-R",
+          "WorkSectionId": 2,
+          "Description": "protese total",
+          "IsActive": true
+     },
+     {
+
+          "Name": "Protese protocolo",
+          "WorkSectionId": 2,
+          "Description": "protese protoloco acrilico",
+          "IsActive": true
+     },
+     {
+
+          "Name": "elemento Provisorio",
+          "WorkSectionId": 2,
+          "Description": "provisorio acrilico",
+          "IsActive": true
+     },
+     {
+
+          "Name": "barra protocolo",
+          "WorkSectionId": 4,
+          "Description": "barra fundida",
+          "IsActive": true
+     },
+     {
+
+          "Name": "Pino fundido",
+          "WorkSectionId": 4,
+          "Description": "fundição de pino nucleo",
+          "IsActive": true
+     },
+     {
+
+          "Name": "modelo impresso",
+          "WorkSectionId": 1,
+          "Description": "modelo feito em impressora 3d",
+          "IsActive": true
+     }
 ]

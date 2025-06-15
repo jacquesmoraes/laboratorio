@@ -3,7 +3,7 @@
     public record ClientInvoiceRecord
     {
         public string ClientName { get; init; } = string.Empty;
-        public string? Address { get; init; }
+        public ClientAddressRecord Address { get; init; } = new();
         public string? PhoneNumber { get; init; }
     }
 }

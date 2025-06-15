@@ -1,7 +1,6 @@
 ﻿using Applications.Dtos.Pricing;
-using Applications.Records.Pricing;
 using Applications.Projections.Pricing;
-using Applications.Mapping.Resolvers;
+using Applications.Records.Pricing;
 using AutoMapper;
 using Core.Models.Pricing;
 
@@ -9,30 +8,36 @@ namespace Applications.Mapping
 {
     public class PricingMappingProfile : Profile
     {
-        public PricingMappingProfile()
+        public PricingMappingProfile ( )
         {
-            // Criação de itens e tabela de preços (entrada POST)
-            CreateMap<CreateTablePriceDto, TablePrice>();
-            CreateMap<CreateTablePriceItemDto, TablePriceItem>()
-                .ForMember(dest => dest.TablePrice, opt => opt.Ignore())
-                .ForMember(dest => dest.WorkType, opt => opt.Ignore());
+            // Criação (POST)
+            CreateMap<CreateTablePriceDto, TablePrice>()
+                .ForMember(dest => dest.Items, opt => opt.Ignore()); // vai ser resolvido manualmente no serviço
 
-            // Atualização de tabela de preços (entrada PUT)
-            CreateMap<UpdateTablePriceDto, TablePrice>();
-            CreateMap<UpdateTablePriceItemDto, TablePriceItem>();
+            CreateMap<CreateTablePriceItemDto, TablePriceItem> ( )
+                .ForMember ( dest => dest.TablePrice, opt => opt.Ignore ( ) );
 
-            // Resposta resumida de item
-            CreateMap<TablePriceItem, TablePriceItemShortRecord>()
-                .ForMember(dest => dest.WorkTypeName, opt => opt.MapFrom<WorkTypeNameForShortRecordResolver>());
+            // Atualização (PUT)
+            CreateMap<UpdateTablePriceDto, TablePrice> ( );
+            CreateMap<UpdateTablePriceItemDto, TablePriceItem> ( )
+                .ForMember ( dest => dest.TablePrice, opt => opt.Ignore ( ) );
+
+            // Respostas resumidas de item
+            CreateMap<TablePriceItem, TablePriceItemShortRecord> ( )
+                .ForMember ( dest => dest.Id, opt => opt.MapFrom ( src => src.TablePriceItemId ) )
+                .ForMember ( dest => dest.ItemName, opt => opt.MapFrom ( src => src.ItemName ) )
+                .ForMember ( dest => dest.Price, opt => opt.MapFrom ( src => src.Price ) );
 
             // Resposta detalhada de item
-            CreateMap<TablePriceItem, TablePriceItemsResponseRecord>()
-                .ForMember(dest => dest.TablePriceName, opt => opt.MapFrom<TablePriceNameResolver>())
-                .ForMember(dest => dest.WorkTypeName, opt => opt.MapFrom<WorkTypeNameForResponseRecordResolver>());
+            CreateMap<TablePriceItem, TablePriceItemsResponseRecord> ( )
+                .ForMember ( dest => dest.Id, opt => opt.MapFrom ( src => src.TablePriceItemId ) )
+                .ForMember ( dest => dest.ItemName, opt => opt.MapFrom ( src => src.ItemName ) )
+                .ForMember ( dest => dest.Price, opt => opt.MapFrom ( src => src.Price ) )
+                .ForMember ( dest => dest.TablePriceName, opt => opt.MapFrom ( src => src.TablePrice != null ? src.TablePrice.Name : null ) );
 
             // Resposta completa da tabela de preços
-            CreateMap<TablePrice, TablePriceResponseProjection>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+            CreateMap<TablePrice, TablePriceResponseProjection> ( )
+                .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status ) );
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Core.FactorySpecifications.ServiceOrderFactorySpecifications
 
         public static class ServiceOrderSpecs
         {
+            public static BaseSpecification<ServiceOrder> AllByClient(int clientId)
+        => new(spec => spec.ClientId == clientId);
             public static ServiceOrderSpecification ByIdFull ( int id )
             {
                 var spec = new ServiceOrderSpecification(id);
