@@ -1,6 +1,5 @@
 ﻿using API.Models;
 using Applications.Contracts;
-using Applications.Contracts.Pdf;
 using Applications.Mapping;
 using Applications.Services;
 using Core.Interfaces;
@@ -65,7 +64,7 @@ namespace API.Extensions
             services.AddScoped<ITablePriceService, TablePriceService> ( );
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
             services.AddScoped<IClientService, ClientService> ( );
-            services.AddScoped<IClientBalanceService, ClientBalanceService> ( );
+            services.AddScoped<IClientAreaService, ClientAreaService> ( );
             services.AddScoped<IShadeService, ShadeService> ( );
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
             services.AddScoped<IPaymentService, PaymentService> ( );

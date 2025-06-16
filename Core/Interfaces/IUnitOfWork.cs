@@ -4,5 +4,6 @@
     {
         Task<ITransaction> BeginTransactionAsync ( );
         Task<int> SaveChangesAsync ( );
+        IGenericRepository<T> Repository<T>() where T : class;
     }
 }

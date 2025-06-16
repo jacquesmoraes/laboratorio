@@ -50,7 +50,8 @@ namespace API.Controllers.Billing
                 var document = new BillingInvoicePdfDocument(invoice, settings, logoPath);
                 var pdfBytes = document.GeneratePdf();
 
-                Response.Headers.Add ( "Content-Disposition", "inline; filename=fatura.pdf" );
+                // Retornar PDF inline
+                Response.Headers ["Content-Disposition"] = $"inline; filename=fatura-{invoice.InvoiceNumber}.pdf";
                 return File ( pdfBytes, "application/pdf" );
 
             }

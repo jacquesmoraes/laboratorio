@@ -25,7 +25,7 @@ namespace Applications.Mapping
     .ForMember(dest => dest.BillingMode, opt => opt.MapFrom(src => (int)src.BillingMode)) 
     .ForMember(dest => dest.TablePriceName, opt => opt.MapFrom(src => src.TablePrice != null ? src.TablePrice.Name : null)); 
 
-            CreateMap<ClientBalance, ClientBalanceRecord>();
+            
 
             // Projeção para tabela de preços
             CreateMap<Client, ClientResponseForTablePriceRecord>()
@@ -58,6 +58,21 @@ namespace Applications.Mapping
                     src.BirthDate.HasValue
                         ? DateTime.SpecifyKind(src.BirthDate.Value, DateTimeKind.Utc)
                         : (DateTime?)null));
+
+            CreateMap<ClientAreaDataDto, ClientAreaRecord>()
+    .ForMember(dest => dest.ClientName, opt => opt.MapFrom(src => src.Client.ClientName))
+    .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Client.ClientPhoneNumber))
+    .ForMember(dest => dest.Street, opt => opt.MapFrom(src => src.Client.Address.Street))
+    .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.Client.Address.Number))
+    .ForMember(dest => dest.Complement, opt => opt.MapFrom(src => src.Client.Address.Complement))
+    .ForMember(dest => dest.Neighborhood, opt => opt.MapFrom(src => src.Client.Address.Neighborhood))
+    .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Client.Address.City))
+    .ForMember(dest => dest.TotalPaid, opt => opt.MapFrom(src => src.TotalPaid))
+    .ForMember(dest => dest.TotalInvoiced, opt => opt.MapFrom(src => src.TotalInvoiced))
+    .ForMember(dest => dest.Credit, opt => opt.MapFrom(src => src.Credit))
+    .ForMember(dest => dest.Debit, opt => opt.MapFrom(src => src.Debit))
+    .ForMember(dest => dest.Invoices, opt => opt.MapFrom(src => src.Invoices));
+
         }
     }
 }

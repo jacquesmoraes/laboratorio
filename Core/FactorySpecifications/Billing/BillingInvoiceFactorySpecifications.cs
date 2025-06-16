@@ -37,6 +37,20 @@ namespace Core.FactorySpecifications.Billing
                     ( i.Status == InvoiceStatus.Open || i.Status == InvoiceStatus.PartiallyPaid ) );
             }
 
+            public static BillingInvoiceSpecification AllByClientFull ( int clientId )
+            {
+                var spec = new BillingInvoiceSpecification(i => i.ClientId == clientId);
+
+                spec.AddInclude ( i => i.Client );
+                spec.AddInclude ( "Client.Address" );
+                spec.AddInclude ( i => i.ServiceOrders );
+                spec.AddInclude ( "ServiceOrders.Works" );
+                spec.AddInclude ( "ServiceOrders.Works.WorkType" );
+                spec.AddInclude ( i => i.Payments );
+
+                return spec;
+            }
+
             public static BillingInvoiceSpecification AllByClient ( int clientId )
             {
                 var spec = new BillingInvoiceSpecification(i => i.ClientId == clientId);

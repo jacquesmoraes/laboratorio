@@ -27,4 +27,5 @@ public record BillingInvoiceResponseProjection
     public decimal TotalPaid { get; init; }
 
     public decimal OutstandingBalance => TotalInvoiceAmount - TotalPaid;
+    public string? PdfDownloadUrl { get; init; }
 }

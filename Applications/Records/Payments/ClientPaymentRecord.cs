@@ -10,6 +10,7 @@
         public string ClientName { get; init; } = string.Empty;
         public int? BillingInvoiceId { get; init; }
         public string? InvoiceNumber { get; init; }
+
     }
 
 }
