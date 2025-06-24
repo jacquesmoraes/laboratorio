@@ -52,28 +52,6 @@ CreateMap<ServiceOrder, ServiceOrderAlertRecord>()
             CreateMap<ServiceOrder, ServiceOrderShortRecord>();
         }
 
-        //private static string? ResolveCurrentSectorName(ServiceOrder src)
-        //{
-        //    var orderedStages = src.Stages.OrderByDescending(s => s.DateIn).ToList();
-
-        //    if (!orderedStages.Any())
-        //        return null;
-
-        //    if (src.Status == OrderStatus.Production)
-        //        return orderedStages.FirstOrDefault(s => s.DateOut == null)?.Sector?.Name;
-
-        //    if (src.Status == OrderStatus.TryIn)
-        //        return orderedStages
-        //            .Where(s => s.DateOut != null)
-        //            .OrderByDescending(s => s.DateOut)
-        //            .FirstOrDefault()
-        //            ?.Sector?.Name;
-
-        //    return orderedStages
-        //        .Where(s => s.DateOut != null)
-        //        .OrderByDescending(s => s.DateOut)
-        //        .FirstOrDefault()
-        //        ?.Sector?.Name;
-        //}
+      
     }
 }

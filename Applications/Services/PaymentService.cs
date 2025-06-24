@@ -1,14 +1,18 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Payments;
+using Applications.Records.Payments;
+using Applications.Responses;
 using Core.Enums;
 using Core.Exceptions;
-using Core.FactorySpecifications.Billing;
-using Core.FactorySpecifications.ClientsFactorySpecifications;
-using Core.FactorySpecifications.PayementSpecifications;
+using Core.FactorySpecifications.BillingSpecifications;
+using Core.FactorySpecifications.ClientsSpecifications;
+using Core.FactorySpecifications.PaymentSpecifications;
 using Core.Interfaces;
 using Core.Models.Billing;
 using Core.Models.Clients;
 using Core.Models.Payments;
+using Core.Params;
+using System.Linq.Expressions;
 
 namespace Applications.Services
 {
@@ -47,8 +51,8 @@ namespace Applications.Services
 
                 if ( invoice == null )
                     throw new UnprocessableEntityException ( "Nenhuma fatura aberta encontrada para este cliente." );
-                if (invoice.Status == InvoiceStatus.Closed)
-                    throw new UnprocessableEntityException("A fatura está fechada e não pode receber pagamentos.");
+                if ( invoice.Status == InvoiceStatus.Closed )
+                    throw new UnprocessableEntityException ( "A fatura está fechada e não pode receber pagamentos." );
 
                 var payment = new Payment
                 {
@@ -83,6 +87,40 @@ namespace Applications.Services
                 await tx.RollbackAsync ( );
                 throw;
             }
+        }
+
+        public async Task<Pagination<ClientPaymentRecord>> GetPaginatedAsync ( PaymentParams p )
+        {
+            // 1. Spec principal com filtros + paginação + sort
+            var spec = PaymentSpecification.PaymentSpecs.Paged(p);
+
+            // 2. CountSpec somente com critérios (sem paginação)
+            Expression<Func<Payment, bool>> countCriteria = x =>
+        (!p.ClientId.HasValue || x.ClientId == p.ClientId) &&
+        (string.IsNullOrEmpty(p.Search) || x.Description!.ToLower().Contains(p.Search.ToLower())) &&
+        (!p.StartDate.HasValue || x.PaymentDate >= p.StartDate.Value) &&
+        (!p.EndDate.HasValue || x.PaymentDate <= p.EndDate.Value);
+
+            var countSpec = new PaymentSpecification(countCriteria);
+
+            // 3. Consulta
+            var totalItems = await _paymentRepo.CountAsync(countSpec);
+            var payments = await _paymentRepo.GetAllAsync(spec);
+
+            // 4. Mapeamento para record de resposta
+            var records = payments.Select(p => new ClientPaymentRecord
+            {
+                Id = p.Id,
+                PaymentDate = p.PaymentDate,
+                AmountPaid = p.AmountPaid,
+                Description = p.Description,
+                ClientId = p.ClientId,
+                ClientName = p.Client?.ClientName ?? string.Empty,
+                BillingInvoiceId = p.BillingInvoiceId,
+                InvoiceNumber = p.BillingInvoice?.InvoiceNumber
+            }).ToList();
+
+            return new Pagination<ClientPaymentRecord> ( p.PageNumber, p.PageSize, totalItems, records );
         }
 
     }

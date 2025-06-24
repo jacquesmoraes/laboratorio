@@ -4,10 +4,12 @@ using Applications.Records.Sector;
 using AutoMapper;
 using Core.FactorySpecifications.SectorSpecifications;
 using Core.Models.ServiceOrders;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Sectors
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class SectorsController(IMapper mapper, ISectorService sectorService) : BaseApiController
@@ -15,6 +17,7 @@ namespace API.Controllers.Sectors
         private readonly ISectorService _sectorService = sectorService;
         private readonly IMapper _mapper = mapper;
 
+        
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

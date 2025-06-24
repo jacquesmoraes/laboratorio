@@ -7,6 +7,7 @@ using Core.Interfaces;
 using Core.Models.Billing;
 using Core.Models.Clients;
 using Core.Models.Payments;
+using Core.Params;
 using Core.Specifications;
 using FluentAssertions;
 using Moq;
@@ -636,6 +637,133 @@ public class PaymentServiceTests
         await Assert.ThrowsAsync<UnprocessableEntityException> ( ( ) =>
             _service.RegisterClientPaymentAsync ( dto ) );
     }
+
+    [Fact]
+public async Task GetPaginatedAsync_ShouldReturnPaginatedPayments()
+{
+    var payments = Enumerable.Range(1, 20)
+        .Select(i => new Payment
+        {
+            Id = i,
+            PaymentDate = DateTime.UtcNow.AddDays(-i),
+            AmountPaid = 100,
+            Description = $"Pagamento {i}",
+            ClientId = 1,
+            BillingInvoiceId = 1,
+            BillingInvoice = new BillingInvoice
+            {
+                BillingInvoiceId = 1,
+                Description = "Fatura teste",
+                Status = Core.Enums.InvoiceStatus.Open
+            }
+        }).ToList();
+
+    _paymentRepoMock.Setup(r => r.CountAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(payments.Count);
+    _paymentRepoMock.Setup(r => r.GetAllAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(payments.Take(10).ToList());
+
+    var param = new PaymentParams { PageNumber = 1, PageSize = 10 };
+
+    var result = await _service.GetPaginatedAsync(param);
+
+    result.Data.Should().HaveCount(10);
+    result.TotalItems.Should().Be(20);
+}
+
+    [Fact]
+public async Task GetPaginatedAsync_WithClientIdFilter_ShouldReturnOnlyClientPayments()
+{
+    var clientId = 99;
+    var payments = new List<Payment>
+    {
+        new() { Id = 1, ClientId = clientId, AmountPaid = 200, PaymentDate = DateTime.UtcNow },
+        new() { Id = 2, ClientId = clientId, AmountPaid = 300, PaymentDate = DateTime.UtcNow }
+    };
+
+    _paymentRepoMock.Setup(r => r.CountAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(payments.Count);
+    _paymentRepoMock.Setup(r => r.GetAllAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(payments);
+
+    var param = new PaymentParams { ClientId = clientId };
+
+    var result = await _service.GetPaginatedAsync(param);
+
+    result.Data.All(p => p.ClientId == clientId).Should().BeTrue();
+}
+
+    [Fact]
+public async Task GetPaginatedAsync_WithDateRange_ShouldReturnOnlyPaymentsInRange()
+{
+    var payments = new List<Payment>
+    {
+        new() { Id = 1, PaymentDate = new DateTime(2024, 6, 10), AmountPaid = 100 },
+        new() { Id = 2, PaymentDate = new DateTime(2024, 6, 11), AmountPaid = 200 },
+        new() { Id = 3, PaymentDate = new DateTime(2024, 6, 12), AmountPaid = 300 }
+    };
+
+    var start = new DateTime(2024, 6, 11);
+    var end = new DateTime(2024, 6, 12);
+
+    _paymentRepoMock.Setup(r => r.CountAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(2);
+    _paymentRepoMock.Setup(r => r.GetAllAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(payments.Where(p => p.PaymentDate >= start && p.PaymentDate <= end).ToList());
+
+    var param = new PaymentParams { StartDate = start, EndDate = end };
+
+    var result = await _service.GetPaginatedAsync(param);
+
+    result.Data.Should().HaveCount(2);
+    result.Data.All(p => p.PaymentDate >= start && p.PaymentDate <= end).Should().BeTrue();
+}
+
+    [Fact]
+public async Task GetPaginatedAsync_WithSortAscending_ShouldReturnPaymentsInAscOrder()
+{
+    var payments = new List<Payment>
+    {
+        new() { Id = 1, PaymentDate = new DateTime(2024, 6, 10) },
+        new() { Id = 2, PaymentDate = new DateTime(2024, 6, 11) },
+        new() { Id = 3, PaymentDate = new DateTime(2024, 6, 12) }
+    };
+
+    _paymentRepoMock.Setup(r => r.CountAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(3);
+    _paymentRepoMock.Setup(r => r.GetAllAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(payments.OrderBy(p => p.PaymentDate).ToList());
+
+    var param = new PaymentParams { Sort = "PaymentDate" };
+
+    var result = await _service.GetPaginatedAsync(param);
+
+    result.Data.Should().BeInAscendingOrder(p => p.PaymentDate);
+}
+
+    [Fact]
+public async Task GetPaginatedAsync_WithSearch_ShouldReturnMatchingDescriptions()
+{
+    var payments = new List<Payment>
+    {
+        new() { Id = 1, Description = "Pix parcial" },
+        new() { Id = 2, Description = "Cartão crédito" },
+        new() { Id = 3, Description = "Pix completo" }
+    };
+
+    var search = "pix";
+
+    _paymentRepoMock.Setup(r => r.CountAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(2);
+    _paymentRepoMock.Setup(r => r.GetAllAsync(It.IsAny<ISpecification<Payment>>()))
+        .ReturnsAsync(payments.Where(p => p.Description!.ToLower().Contains(search)).ToList());
+
+    var param = new PaymentParams { Search = search };
+
+    var result = await _service.GetPaginatedAsync(param);
+
+    result.Data.Should().OnlyContain(p => p.Description!.ToLower().Contains(search));
+}
 
 
 }

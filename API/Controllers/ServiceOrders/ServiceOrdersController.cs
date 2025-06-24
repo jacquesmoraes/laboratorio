@@ -3,8 +3,10 @@ using Applications.Dtos.ServiceOrder;
 using Applications.Projections.ServiceOrder;
 
 using Applications.Records.ServiceOrders;
+using Applications.Responses;
 using AutoMapper;
-using Core.FactorySpecifications.ServiceOrderFactorySpecifications;
+using Core.FactorySpecifications.ServiceOrderSpecifications;
+using Core.Params;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.ServiceOrders
@@ -25,10 +27,10 @@ namespace API.Controllers.ServiceOrders
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll ( [FromQuery] ServiceOrderFilterDto filter )
+        public async Task<ActionResult<Pagination<ServiceOrderListDto>>> GetAll ( [FromQuery] ServiceOrderParams parameters )
         {
-            var result = await _serviceOrderService.GetAllFilteredAsync(filter);
-            var response = _mapper.Map<List<ServiceOrderDetailsProjection>>(result);
+            
+            var response = await _serviceOrderService.GetPaginatedAsync(parameters);
             return Ok ( response );
         }
 

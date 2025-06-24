@@ -2,6 +2,7 @@
 using Core.Interfaces;
 using Core.Specifications;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Infra.Data.Repositories
 {
@@ -56,6 +57,13 @@ namespace Infra.Data.Repositories
             return await ApplySpecification ( spec ).FirstOrDefaultAsync ( );
         }
 
+        public async Task<decimal> SumAsync ( Expression<Func<T, bool>> predicate, Expression<Func<T, decimal>> selector )
+        {
+            return await _context.Set<T> ( )
+                .Where ( predicate )
+                .Select ( selector )
+                .SumAsync ( );
+        }
 
 
         public async Task<int> CountAsync ( ISpecification<T> spec )

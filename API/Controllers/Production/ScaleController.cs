@@ -4,10 +4,12 @@ using Applications.Records.Production;
 using AutoMapper;
 using Core.FactorySpecifications.ProductionSpecifications;
 using Core.Models.Production;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Production
 {
+    
     [ApiController]
     [Route("api/[controller]")]
     public class ScaleController(IGenericService<Scale> scaleService, IMapper mapper) : BaseApiController

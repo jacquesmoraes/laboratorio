@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core.Specifications
 {
@@ -13,38 +14,91 @@ namespace Core.Specifications
         public int Skip { get; private set; }
         public bool IsPagingEnabled { get; private set; }
 
-        public BaseSpecification ( ) { }
+        // Construtores
+        public BaseSpecification() { }
 
-        public BaseSpecification ( Expression<Func<T, bool>> criteria )
+        public BaseSpecification(Expression<Func<T, bool>> criteria)
         {
             Criteria = criteria;
         }
 
-        protected void AddInclude ( Expression<Func<T, object>> includeExpression )
+        // Includes
+        protected void AddInclude(Expression<Func<T, object>> includeExpression)
         {
-            Includes.Add ( includeExpression );
+            Includes.Add(includeExpression);
         }
-         protected void AddInclude ( string includeString )
+
+        protected void AddInclude(string includeString)
         {
-            IncludeStrings.Add ( includeString );
+            IncludeStrings.Add(includeString);
         }
-        protected void AddOrderBy ( Expression<Func<T, object>> orderByExpression )
+
+        // Ordenação
+        protected void AddOrderBy(Expression<Func<T, object>> orderByExpression)
         {
             OrderBy = orderByExpression;
         }
 
-        protected void AddOrderByDescending ( Expression<Func<T, object>> orderByDescendingExpression )
+        protected void AddOrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
         {
             OrderByDescending = orderByDescendingExpression;
         }
 
-        protected void ApplyPaging ( int skip, int take )
+        // Paginação
+        protected void ApplyPaging(int skip, int take)
         {
             Skip = skip;
             Take = take;
             IsPagingEnabled = true;
         }
 
-       
+      
+        // ... existing code ...
+
+protected void ApplySorting(string? sort)
+{
+    if (string.IsNullOrWhiteSpace(sort))
+    {
+        // Determina a propriedade de data padrão baseada no tipo
+        var defaultDateProperty = typeof(T).Name switch
+        {
+            "Payment" => "PaymentDate",
+            "ServiceOrder" => "DateIn",
+            "ProductionStage" => "DateIn",
+            _ => "CreatedAt" // fallback genérico
+        };
+        
+        AddOrderByDescending(x => EF.Property<object>(x!, defaultDateProperty));
+        return;
+    }
+
+    var descending = sort.EndsWith("Desc", StringComparison.OrdinalIgnoreCase);
+    var propertyName = descending
+        ? sort[..^4] // remove "Desc"
+        : sort;
+
+    var propInfo = typeof(T).GetProperty(propertyName);
+    if (propInfo == null)
+    {
+        // Propriedade não encontrada, aplica fallback baseado no tipo
+        var defaultDateProperty = typeof(T).Name switch
+        {
+            "Payment" => "PaymentDate",
+            "ServiceOrder" => "DateIn",
+            "ProductionStage" => "DateIn",
+            _ => "CreatedAt" // fallback genérico
+        };
+        
+        AddOrderByDescending(x => EF.Property<object>(x!, defaultDateProperty));
+        return;
+    }
+
+    if (descending)
+        AddOrderByDescending(x => EF.Property<object>(x!, propertyName));
+    else
+        AddOrderBy(x => EF.Property<object>(x!, propertyName));
+}
+
+// ... existing code ...
     }
 }

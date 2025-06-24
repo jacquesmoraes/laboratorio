@@ -1,42 +1,91 @@
 ﻿using Applications.Contracts;
 using Applications.PdfDocuments;
-using Applications.Records.Clients;
+using Applications.Projections.Billing;
+using Applications.Projections.ServiceOrder;
+using Applications.Records.Payments;
 using Applications.Records.Settings;
+using Applications.Responses;
 using AutoMapper;
+using Core.Params;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
 namespace API.Controllers.Clients
 {
+    [Authorize ( Roles = "client" )]
     [ApiController]
     [Route ( "api/client-area" )]
     public class ClientAreaController (
         IClientAreaService clientAreaService,
-        IMapper mapper ) : ControllerBase
+        IPaymentService paymentService,
+        IBillingService billingService,
+        IServiceOrderService serviceOrderService
+         ) : ControllerBase
     {
         private readonly IClientAreaService _clientAreaService = clientAreaService;
-        private readonly IMapper _mapper = mapper;
+        private readonly IPaymentService _paymentService = paymentService;
+        private readonly IBillingService _billingService = billingService;
+        
+        private readonly IServiceOrderService _serviceOrderService = serviceOrderService;
 
 
-         static ClientAreaController ( )
+
+        static ClientAreaController ( )
         {
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
+       
+
         /// <summary>
-        /// Retorna o dashboard completo do cliente, incluindo dados cadastrais,
+        /// Retorna o dashboard resumido do cliente, incluindo dados cadastrais,
         /// totais financeiros e faturas com link para download.
         /// </summary>
+        // API/Controllers/Clients/ClientAreaController.cs
         [HttpGet ( "{id}/dashboard" )]
-        public async Task<IActionResult> GetDashboard ( int id,
-            [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate )
+        public async Task<IActionResult> GetDashboard ( int id )
         {
-            var data = await _clientAreaService.GetClientDashboardAsync(id, startDate, endDate);
-
-            var response = _mapper.Map<ClientAreaRecord>(data);
-            return Ok ( response );
+            var dashboard = await _clientAreaService.GetClientBasicDashboardAsync(id);
+            return Ok ( dashboard );
         }
+
+
+
+        [HttpGet ( "payments" )]
+        public async Task<ActionResult<Pagination<ClientPaymentRecord>>> GetPayments (
+    [FromQuery] PaymentParams parameters )
+        {
+            // ⛔ TEMPORÁRIO: aceita clientId da query durante o desenvolvimento
+            if ( !parameters.ClientId.HasValue )
+                return BadRequest ( "É necessário informar o clientId durante os testes." );
+
+            var result = await _paymentService.GetPaginatedAsync(parameters);
+            return Ok ( result );
+        }
+
+        [HttpGet ( "orders" )]
+        public async Task<ActionResult<Pagination<ServiceOrderListProjection>>> GetClientOrders ( [FromQuery] ServiceOrderParams parameters )
+        {
+            // Durante os testes, aceitar ClientId pela query
+            if ( !parameters.ClientId.HasValue )
+                return BadRequest ( "É necessário informar o clientId durante os testes." );
+
+            var result = await _serviceOrderService.GetPaginatedAsync(parameters);
+            return Ok ( result );
+        }
+
+
+        [HttpGet ( "invoices" )]
+        public async Task<ActionResult<Pagination<BillingInvoiceResponseProjection>>> GetInvoices ( [FromQuery] InvoiceParams query )
+        {
+            var result = await _billingService.GetPaginatedInvoicesAsync(query);
+            return Ok ( result );
+        }
+
+
 
         /// <summary>
         /// Faz o download do PDF da fatura para o cliente.

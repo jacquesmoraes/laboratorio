@@ -1,16 +1,20 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.ServiceOrder;
-using Core.Exceptions;
+using Applications.Projections.ServiceOrder;
+using Applications.Responses;
 using Applications.Services.Validators;
 using AutoMapper;
 using Core.Enums;
-using Core.FactorySpecifications.ClientsFactorySpecifications;
-using Core.FactorySpecifications.ServiceOrderFactorySpecifications;
+using Core.Exceptions;
+using Core.FactorySpecifications.ServiceOrderSpecifications;
 using Core.Interfaces;
 using Core.Models.Clients;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
+using Core.Params;
+using static Core.FactorySpecifications.ClientsSpecifications.ClientSpecification;
 using static Core.FactorySpecifications.SectorSpecifications.SectorSpecification;
+using static Core.FactorySpecifications.ServiceOrderSpecifications.ServiceOrderSpecification;
 
 namespace Applications.Services
 {
@@ -33,7 +37,7 @@ namespace Applications.Services
         {
             await using var tx = await _uow.BeginTransactionAsync();
 
-            var client = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId))
+            var client = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(dto.ClientId))
         ?? throw new NotFoundException("Cliente não encontrado.");
 
             var order = _mapper.Map<ServiceOrder>(dto);
@@ -61,7 +65,7 @@ namespace Applications.Services
 
 
             var fullOrder = await _orderRepo.GetEntityWithSpec(
-                ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(order.ServiceOrderId)
+                ServiceOrderSpecs.ByIdFull(order.ServiceOrderId)
                 );
             return fullOrder!;
 
@@ -73,7 +77,7 @@ namespace Applications.Services
         {
             await using var tx = await _uow.BeginTransactionAsync();
 
-            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
+            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
         ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
 
             var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId))
@@ -87,23 +91,14 @@ namespace Applications.Services
             return order;
         }
 
-        public async Task<IReadOnlyList<ServiceOrder>> GetAllFilteredAsync ( ServiceOrderFilterDto filter )
-        {
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.Filtered(
-                status: filter.Status,
-                clientId: filter.ClientId,
-                start: filter.Start,
-                end: filter.End
-                );
-            return await _orderRepo.GetAllAsync ( spec );
-        }
+      
 
 
         public async Task<ServiceOrder?> SendToTryInAsync ( SendToTryInDto dto )
         {
             await using var tx = await _uow.BeginTransactionAsync();
 
-            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
+            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
         ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
 
             var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
@@ -125,7 +120,7 @@ namespace Applications.Services
 
             foreach ( var id in dto.ServiceOrderIds )
             {
-                var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
+                var spec = ServiceOrderSpecs.ByIdFull(id);
                 var order = await _orderRepo.GetEntityWithSpec(spec);
 
                 if ( order == null || order.Status == OrderStatus.Finished )
@@ -163,7 +158,7 @@ namespace Applications.Services
 
         public async Task<IReadOnlyList<ServiceOrder>> GetOutForTryInAsync ( int days )
         {
-            var baseSpec = ServiceOrderSpecification.ServiceOrderSpecs.OutForTryInMoreThanXDays(days);
+            var baseSpec = ServiceOrderSpecs.OutForTryInMoreThanXDays(days);
             var candidatos = await _orderRepo.GetAllAsync(baseSpec);
             return candidatos.Where ( o => o.OutForTryInMoreThan ( days ) ).ToList ( );
         }
@@ -172,7 +167,7 @@ namespace Applications.Services
         {
             if ( id <= 0 )
                 throw new CustomValidationException ( "ID da ordem de serviço inválido." );
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
+            var spec = ServiceOrderSpecs.ByIdFull(id);
             var order = await _orderRepo.GetEntityWithSpec(spec)
         ?? throw new NotFoundException($"Ordem de serviço {id} não encontrada.");
 
@@ -183,7 +178,7 @@ namespace Applications.Services
             // Troca de cliente
             if ( order.ClientId != dto.ClientId )
             {
-                var newClient = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId));
+                var newClient = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(dto.ClientId));
                 if ( newClient == null )
                     throw new InvalidOperationException ( "Cliente informado não existe." );
 
@@ -207,7 +202,7 @@ namespace Applications.Services
 
         public async Task<ServiceOrder?> DeleteOrderAsync ( int serviceOrderId )
         {
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(serviceOrderId);
+            var spec = ServiceOrderSpecs.ByIdFull(serviceOrderId);
             var order = await _orderRepo.GetEntityWithSpec(spec);
 
             if ( order == null )
@@ -223,9 +218,30 @@ namespace Applications.Services
             return order;
         }
 
+        public async Task<Pagination<ServiceOrderListProjection>> GetPaginatedAsync ( ServiceOrderParams p )
+        {
+            var spec = ServiceOrderSpecification.ServiceOrderSpecs.Paged(p);
+
+            var countSpec = new ServiceOrderSpecification(o =>
+        (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
+        (!p.Status.HasValue || o.Status == p.Status) &&
+        (string.IsNullOrEmpty(p.PatientName) || o.PatientName.ToLower().Contains(p.PatientName.ToLower())) &&
+        (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
+        (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value)
+    );
+
+            var totalItems = await _orderRepo.CountAsync(countSpec);
+            var orders = await _orderRepo.GetAllAsync(spec);
+
+            var projections = _mapper.Map<IReadOnlyList<ServiceOrderListProjection>>(orders);
+
+            return new Pagination<ServiceOrderListProjection> ( p.PageNumber, p.PageSize, totalItems, projections );
+        }
+
+
         public async Task<ServiceOrder?> ReopenOrderAsync ( int id )
         {
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
+            var spec = ServiceOrderSpecs.ByIdFull(id);
             var order = await _orderRepo.GetEntityWithSpec(spec);
 
             if ( order == null || order.Status != OrderStatus.Finished )
@@ -247,7 +263,7 @@ namespace Applications.Services
 
         private async Task<string> GenerateOrderNumberAsync ( int clientId )
         {
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.AllByClient(clientId);
+            var spec = ServiceOrderSpecs.AllByClient(clientId);
 
             var allOrders = await _orderRepo.GetAllAsync(spec);
             var maxSequence = allOrders

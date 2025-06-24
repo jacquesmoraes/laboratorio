@@ -2,38 +2,38 @@ using API.Extensions;
 using API.Middleware;
 using Infra.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddApplicationServices ( builder.Configuration );
 builder.Services.AddControllers ( );
+builder.Services.AddApplicationServices ( builder.Configuration );
 
+builder.Services.AddSwaggerDocumentation ( );
 
 var app = builder.Build();
 
 
-if ( app.Environment.IsDevelopment ( ) )
-{
-    app.UseSwagger ( );
-    app.UseSwaggerUI ( c =>
-    {
-        c.SwaggerEndpoint ( "/swagger/v1/swagger.json", "Minha API v1" );
-    } );
-}
-
 
 app.UseMiddleware<ExceptionMiddleware> ( );
-app.UseStaticFiles(); // necessário para servir os arquivos de /wwwroot
-
 app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );
+// Middleware de documentação
+if ( app.Environment.IsDevelopment ( ) )
+{
+    app.UseSwaggerDocumention ( );
+}
 
-app.UseHttpsRedirection ( );
+app.UseStaticFiles ( );
+
+app.UseAuthentication ( );
 app.UseAuthorization ( );
 
+
 app.MapControllers ( );
+
+
+
+// Seed dos bancos
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 var context = services.GetRequiredService<ApplicationContext>();
@@ -50,4 +50,3 @@ catch ( Exception ex )
     throw;
 }
 app.Run ( );
-

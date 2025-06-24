@@ -1,20 +1,33 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Clients;
+using Applications.Projections.Clients;
+using AutoMapper;
 using Core.Enums;
 using Core.Exceptions;
 using Core.FactorySpecifications;
 using Core.Interfaces;
+using Core.Models.Billing;
 using Core.Models.Clients;
+using Core.Models.Payments;
 using Core.Models.Pricing;
-using static Core.FactorySpecifications.ClientsFactorySpecifications.ClientSpecification;
+using static Core.FactorySpecifications.ClientsSpecifications.ClientSpecification;
 
 namespace Applications.Services
 {
-    public class ClientService ( IGenericRepository<Client> repository, IGenericRepository<TablePrice> tablePriceRepository ) :
-        GenericService<Client> ( repository ), IClientService
+    public class ClientService ( IGenericRepository<Client> clientRepository,
+        IGenericRepository<TablePrice> tablePriceRepository,
+        IGenericRepository<Payment> paymentRepository,
+        IGenericRepository<BillingInvoice> invoiceRepository,
+        IMapper mapper
+        ) :
+        GenericService<Client> ( clientRepository ), IClientService
     {
-        private readonly IGenericRepository<Client> _repository = repository;
+        private readonly IGenericRepository<Client> _clientRepo = clientRepository;
         private readonly IGenericRepository<TablePrice> _tablePriceRepository = tablePriceRepository;
+        private readonly IGenericRepository<Payment> _paymentRepository = paymentRepository;
+        private readonly IGenericRepository<BillingInvoice> _invoiceRepository = invoiceRepository;
+        private readonly IMapper _mapper = mapper;
+
         public async Task<Client> CreateClientAsync ( Client entity )
         {
             // Input validation
@@ -25,7 +38,7 @@ namespace Applications.Services
                 throw new CustomValidationException ( "É necessário informar uma Tabela de Preço válida." );
 
             // Validate table price if provided
-             if ( entity.TablePriceId.HasValue && entity.TablePriceId.Value > 0 )
+            if ( entity.TablePriceId.HasValue && entity.TablePriceId.Value > 0 )
             {
                 var tablePrice = await _tablePriceRepository.GetEntityWithSpec(
                     TablePriceSpecs.ById(entity.TablePriceId.Value)
@@ -44,7 +57,7 @@ namespace Applications.Services
                 throw new CustomValidationException ( "ID do cliente inválido." );
 
             var spec = ClientSpecs.ById(clientId);
-            var client = await _repository.GetEntityWithSpec(spec)
+            var client = await _clientRepo.GetEntityWithSpec(spec)
                 ?? throw new NotFoundException($"Cliente com ID {clientId} não encontrado.");
 
             if ( client.BillingMode != BillingMode.perMonth )
@@ -54,6 +67,32 @@ namespace Applications.Services
         }
 
 
+        public async Task<ClientResponseDetailsProjection> GetClientDetailsProjectionAsync ( int clientId )
+        {
+            var spec = ClientSpecs.ById(clientId);
+
+            var client = await _clientRepo.GetEntityWithSpec(spec)
+        ?? throw new NotFoundException("Cliente não encontrado.");
+
+            // Cálculos com consistência
+            var totalPaid = await _paymentRepository.SumAsync(
+        p => p.ClientId == clientId,
+        p => p.AmountPaid);
+
+            var totalInvoiced = await _invoiceRepository.SumAsync(
+        i => i.ClientId == clientId && i.Status != InvoiceStatus.Cancelled,
+        i => i.TotalServiceOrdersAmount);
+
+            // Mapeia e preenche os campos financeiros manualmente
+            var projection = _mapper.Map<ClientResponseDetailsProjection>(client);
+            projection = projection with
+            {
+                TotalPaid = totalPaid,
+                TotalInvoiced = totalInvoiced
+            };
+
+            return projection;
+        }
 
 
         public async Task<Client?> UpdateFromDtoAsync ( UpdateClientDto dto )
@@ -65,7 +104,7 @@ namespace Applications.Services
                 throw new CustomValidationException ( "O nome do cliente é obrigatório." );
 
             var spec = ClientSpecs.ById(dto.ClientId);
-            var existing = await _repository.GetEntityWithSpec(spec)
+            var existing = await _clientRepo.GetEntityWithSpec(spec)
                 ?? throw new NotFoundException($"Cliente com ID {dto.ClientId} não encontrado.");
             if ( dto.BillingMode != existing.BillingMode )
             {
@@ -89,7 +128,7 @@ namespace Applications.Services
             existing.Address.Neighborhood = dto.Address.Neighborhood;
             existing.Address.City = dto.Address.City;
 
-            var updated = await _repository.UpdateAsync(dto.ClientId, existing)
+            var updated = await _clientRepo.UpdateAsync(dto.ClientId, existing)
                 ?? throw new BusinessRuleException("Falha ao atualizar o cliente.");
 
             return updated;

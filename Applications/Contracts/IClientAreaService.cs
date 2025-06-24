@@ -1,4 +1,4 @@
-﻿using Applications.Dtos.Clients;
+﻿using Applications.Records.Clients;
 
 namespace Applications.Contracts
 {
@@ -9,6 +9,6 @@ namespace Applications.Contracts
         /// informações cadastrais, resumo financeiro e faturas.
         /// </summary>
         /// <param name="clientId">ID do cliente</param>
-        Task<ClientAreaDataDto> GetClientDashboardAsync ( int clientId, DateTime? startDate = null, DateTime? endDate = null  );
+        Task<ClientDashboardRecord> GetClientBasicDashboardAsync ( int clientId );
     }
 }

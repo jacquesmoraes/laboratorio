@@ -9,7 +9,6 @@ using Infra.Data;
 using Infra.Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 
 namespace API.Extensions
@@ -23,10 +22,7 @@ namespace API.Extensions
 
             services.AddEndpointsApiExplorer ( );
 
-            services.AddSwaggerGen ( c =>
-            {
-                c.SwaggerDoc ( "v1", new OpenApiInfo { Title = "My API", Version = "v1" } );
-            } );
+
 
             services.Configure<ApiBehaviorOptions> ( options =>
             {
@@ -69,7 +65,7 @@ namespace API.Extensions
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
             services.AddScoped<IPaymentService, PaymentService> ( );
             services.AddScoped<ISectorService, SectorService> ( );
-            
+
             services.AddScoped<IServiceOrderService, ServiceOrderService> ( );
             services.AddScoped<ISystemSettingsService, SystemSettingsService> ( );
             services.AddScoped<IBillingService, BillingService> ( );

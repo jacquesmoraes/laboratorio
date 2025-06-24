@@ -2,10 +2,11 @@
 using Core.Models.Billing;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
+using Core.Params;
 using Core.Specifications;
 using System.Linq.Expressions;
 
-namespace Core.FactorySpecifications.Billing
+namespace Core.FactorySpecifications.BillingSpecifications
 {
     public class BillingInvoiceSpecification : BaseSpecification<BillingInvoice>
     {
@@ -58,6 +59,40 @@ namespace Core.FactorySpecifications.Billing
                 spec.AddInclude ( i => i.Payments );
                 return spec;
             }
+            public static BillingInvoiceSpecification Paged ( InvoiceParams p )
+            {
+                Expression<Func<BillingInvoice, bool>> criteria = i =>
+        (!p.ClientId.HasValue || i.ClientId == p.ClientId) &&
+        (!p.Status.HasValue || i.Status == p.Status) &&
+        (!p.StartDate.HasValue || i.CreatedAt >= p.StartDate.Value) &&
+        (!p.EndDate.HasValue || i.CreatedAt <= p.EndDate.Value);
+
+                var spec = new BillingInvoiceSpecification(criteria);
+
+                // Includes padrão
+                spec.AddInclude ( i => i.Payments );
+                spec.AddInclude ( i => i.Client );
+                spec.AddInclude ( "Client.Address" );
+
+                // Paginação
+                spec.ApplySorting ( p.Sort );
+                spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
+
+                return spec;
+            }
+
+
+            public static BillingInvoiceSpecification PagedForCount ( InvoiceParams p )
+            {
+                Expression<Func<BillingInvoice, bool>> criteria = i =>
+        (!p.ClientId.HasValue || i.ClientId == p.ClientId) &&
+        (!p.Status.HasValue || i.Status == p.Status) &&
+        (!p.StartDate.HasValue || i.CreatedAt >= p.StartDate.Value) &&
+        (!p.EndDate.HasValue || i.CreatedAt <= p.EndDate.Value);
+
+                return new BillingInvoiceSpecification ( criteria );
+            }
+
         }
     }
 }

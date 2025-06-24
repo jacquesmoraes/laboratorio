@@ -11,7 +11,7 @@ public record BillingInvoiceResponseProjection
     public DateTime CreatedAt { get; init; }
     public string? Description { get; init; }
 
-    public ClientInvoiceRecord Client { get; init; } = new();
+ public ClientInvoiceRecord Client { get; init; } = new();
 
     public List<InvoiceServiceOrderRecord> ServiceOrders { get; init; } = [];
    
@@ -27,5 +27,6 @@ public record BillingInvoiceResponseProjection
     public decimal TotalPaid { get; init; }
 
     public decimal OutstandingBalance => TotalInvoiceAmount - TotalPaid;
-    public string? PdfDownloadUrl { get; init; }
+    public string? PdfDownloadUrl { get; set; }
+
 }

@@ -11,22 +11,22 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infra.Data
 {
-    public class ApplicationContext ( DbContextOptions options ) : DbContext ( options )
+    public class ApplicationContext ( DbContextOptions<ApplicationContext> options ) : DbContext ( options )
     {
-        public DbSet<Client> Clients { get; set; }
+         public DbSet<Client> Clients => Set<Client>();
 
-        public DbSet<Payment> ClientPayments { get; set; }
-        public DbSet<TablePrice> TablePrices { get; set; }
-        public DbSet<TablePriceItem> TablePriceItems { get; set; }
-        public DbSet<Scale> Scales { get; set; }
-        public DbSet<Shade> Shades { get; set; }
-        public DbSet<SystemSettings> SystemSettings { get; set; }
-        public DbSet<ProductionStage> ProductionStages { get; set; }
-        public DbSet<Sector> Sectors { get; set; }
-        public DbSet<ServiceOrder> ServiceOrders { get; set; }
-        public DbSet<Work> Works { get; set; }
-        public DbSet<WorkType> WorkTypes { get; set; }
-        public DbSet<WorkSection> WorkSections { get; set; }
+        public DbSet<Payment> ClientPayments => Set<Payment> ( );
+        public DbSet<TablePrice> TablePrices => Set<TablePrice> ( );
+        public DbSet<TablePriceItem> TablePriceItems => Set<TablePriceItem> ( );
+        public DbSet<Scale> Scales => Set<Scale> ( );
+        public DbSet<Shade> Shades => Set<Shade> ( );
+        public DbSet<SystemSettings> SystemSettings => Set<SystemSettings> ( );
+        public DbSet<ProductionStage> ProductionStages => Set<ProductionStage> ( );
+        public DbSet<Sector> Sectors => Set<Sector> ( );
+        public DbSet<ServiceOrder> ServiceOrders => Set<ServiceOrder> ( );
+        public DbSet<Work> Works => Set<Work> ( );
+        public DbSet<WorkType> WorkTypes => Set<WorkType> ( );
+        public DbSet<WorkSection> WorkSections => Set<WorkSection> ( );
 
         protected override void OnModelCreating ( ModelBuilder modelBuilder )
         {

@@ -11,9 +11,12 @@ namespace Applications.Projections.Clients
         public string? ClientPhoneNumber { get; init; }
         public string? City { get; init; }
         public bool IsInactive { get; init; }
-         public int BillingMode { get; init; }
+        public int BillingMode { get; init; }
         public string? TablePriceName { get; init; }
-        public ClientAddressRecord Address { get; init; } = new ClientAddressRecord();
+        public decimal TotalPaid { get; init; }
+        public decimal TotalInvoiced { get; init; }
+        public decimal Balance => TotalPaid - TotalInvoiced;
+        public ClientAddressRecord Address { get; init; } = new ClientAddressRecord ( );
         public List<ServiceOrderShortRecord> ServiceOrders { get; init; } = [];
         public List<ClientPaymentRecord> Payments { get; init; } = [];
     }

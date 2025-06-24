@@ -1,8 +1,11 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.Payments;
 using Applications.Records.Payments;
+using Applications.Responses;
+using Applications.Services;
 using AutoMapper;
-using Core.FactorySpecifications.PayementSpecifications;
+using Core.FactorySpecifications.PaymentSpecifications;
+using Core.Params;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Payments
@@ -33,6 +36,15 @@ namespace API.Controllers.Payments
                 return BadRequest ( new { error = ex.Message } );
             }
         }
+        /// <summary>
+        /// Retorna a lista paginada de pagamentos com filtros e ordenação.
+        /// </summary>
+        [HttpGet]
+        public async Task<ActionResult<Pagination<ClientPaymentRecord>>> GetAll([FromQuery] PaymentParams parameters)
+        {
+            var result = await _clientPaymentService.GetPaginatedAsync(parameters);
+            return Ok(result);
+        }
 
         /// <summary>
         /// Obtém um pagamento de cliente pelo seu ID.
@@ -53,40 +65,6 @@ namespace API.Controllers.Payments
             return Ok ( dto );
         }
 
-        /// <summary>
-        /// Lista os pagamentos de um cliente, com filtros por mês e ano.
-        /// </summary>
-        [HttpGet ( "client/byclient/{clientId}" )]
-        public async Task<IActionResult> GetClientPaymentsWithOptionalPeriod ( int clientId, [FromQuery] int? month, [FromQuery] int? year )
-        {
-            if ( month.HasValue && ( month < 1 || month > 12 ) )
-                return BadRequest ( "O mês deve estar entre 1 e 12" );
-
-            if ( year.HasValue && year < 1 )
-                return BadRequest ( "O ano deve ser maior que zero" );
-
-            var (start, end) = GetDateRange ( month, year );
-            var spec = start.HasValue && end.HasValue
-                ? PaymentSpecification.PaymentSpecs.ByClientAndDateRange(clientId, start.Value, end.Value)
-                : PaymentSpecification.PaymentSpecs.ByClientIdWithInvoice(clientId);
-
-            var payments = await _clientPaymentService.GetAllWithSpecAsync(spec);
-            var dto = _mapper.Map<List<ClientPaymentRecord>>(payments);
-            return Ok ( dto );
-        }
-
-        private static (DateTime? start, DateTime? end) GetDateRange ( int? month, int? year )
-        {
-            if ( !year.HasValue ) return (null, null);
-
-            if ( month.HasValue )
-            {
-                var start = new DateTime(year.Value, month.Value, 1, 0, 0, 0, DateTimeKind.Utc);
-                return (start, start.AddMonths ( 1 ));
-            }
-
-            var yearStart = new DateTime(year.Value, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            return (yearStart, yearStart.AddYears ( 1 ));
-        }
+        
     }
 }

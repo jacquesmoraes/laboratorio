@@ -1,5 +1,6 @@
 ﻿using Applications.Contracts;
 using Applications.Dtos.ServiceOrder;
+using Applications.Projections.ServiceOrder;
 using Applications.Services;
 using AutoMapper;
 using Core.Enums;
@@ -8,6 +9,7 @@ using Core.Interfaces;
 using Core.Models.Clients;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
+using Core.Params;
 using Core.Specifications;
 using FluentAssertions;
 using Moq;
@@ -98,11 +100,11 @@ namespace Tests.Unit.Applications
                 .Setup ( r => r.CreateAsync ( It.IsAny<ServiceOrder> ( ) ) )
                 .ReturnsAsync ( ( ServiceOrder o ) => o );
             _orderRepoMock
-                .Setup(r => r.GetEntityWithSpec(It.IsAny<ISpecification<ServiceOrder>>()))
-                .ReturnsAsync(order);
+                .Setup ( r => r.GetEntityWithSpec ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( order );
             _orderRepoMock
-                .Setup(r => r.GetAllAsync(It.IsAny<ISpecification<ServiceOrder>>()))
-                .ReturnsAsync([]); // ou um List<ServiceOrder> com 1 elemento fictício, se quiser simular uma ordem anterior
+                .Setup ( r => r.GetAllAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( [] ); // ou um List<ServiceOrder> com 1 elemento fictício, se quiser simular uma ordem anterior
 
             // Act
             var result = await _service.CreateOrderAsync(dto);
@@ -625,7 +627,259 @@ namespace Tests.Unit.Applications
             ex.Message.Should ( ).Contain ( "aberto" ); // ou ajuste a string conforme a mensagem exata da exceção
         }
 
+        [Fact]
+        public async Task GetPaginatedAsync_WithClientFilter_ShouldReturnOnlyClientOrders ( )
+        {
+            // Arrange
+            var clientId = 1;
+            var param = new ServiceOrderParams
+            {
+                ClientId = clientId,
+                PageNumber = 1,
+                PageSize = 10
+            };
+            var client = new Client { ClientId = clientId, ClientName = "Cliente Teste" };
 
+            var orders = new List<ServiceOrder>
+            {
+                new() { ServiceOrderId = 1, ClientId = clientId,Client = client , PatientName = "A", DateIn = DateTime.UtcNow,  Works = new List<Work>(), Stages = new List<ProductionStage>()  },
+                new() { ServiceOrderId = 2, ClientId = clientId,Client = client , PatientName = "A", DateIn = DateTime.UtcNow,  Works = new List<Work>(), Stages = new List<ProductionStage>()  }
+            };
+
+            _orderRepoMock.Setup ( r => r.CountAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders.Count );
+            _orderRepoMock.Setup ( r => r.GetAllAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders );
+
+            _mapperMock.Setup ( m => m.Map<IReadOnlyList<ServiceOrderListProjection>> ( orders ) )
+                .Returns ( orders.Select ( o => new ServiceOrderListProjection
+                {
+                    ServiceOrderId = o.ServiceOrderId,
+                    PatientName = o.PatientName,
+                    DateIn = o.DateIn,
+                    Status = o.Status.ToString ( )
+                } ).ToList ( ) );
+
+            // Act
+            var result = await _service.GetPaginatedAsync(param);
+
+            // Assert
+            result.Should ( ).NotBeNull ( );
+            result.Data.Should ( ).HaveCount ( 2 );
+            result.Data.All ( x => x.ServiceOrderId == 1 || x.ServiceOrderId == 2 ).Should ( ).BeTrue ( );
+        }
+
+
+        [Fact]
+        public async Task GetPaginatedAsync_WithStatusFilter_ShouldReturnOnlyMatchingStatus ( )
+        {
+            // Arrange
+            var param = new ServiceOrderParams
+            {
+                Status = OrderStatus.TryIn,
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            var client = new Client { ClientId = 1, ClientName = "Cliente Teste" };
+
+            var orders = new List<ServiceOrder>
+    {
+        new() { ServiceOrderId = 1, ClientId = 1, Client = client, PatientName = "Paciente 1", DateIn = DateTime.UtcNow, Status = OrderStatus.TryIn, Works = [], Stages = [] },
+        new() { ServiceOrderId = 2, ClientId = 1, Client = client, PatientName = "Paciente 2", DateIn = DateTime.UtcNow, Status = OrderStatus.TryIn, Works = [], Stages = [] }
+    };
+
+            _orderRepoMock.Setup ( r => r.CountAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders.Count );
+            _orderRepoMock.Setup ( r => r.GetAllAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders );
+
+            _mapperMock.Setup ( m => m.Map<IReadOnlyList<ServiceOrderListProjection>> ( orders ) )
+                .Returns ( orders.Select ( o => new ServiceOrderListProjection
+                {
+                    ServiceOrderId = o.ServiceOrderId,
+                    PatientName = o.PatientName,
+                    DateIn = o.DateIn,
+                    Status = o.Status.ToString ( )
+                } ).ToList ( ) );
+
+            // Act
+            var result = await _service.GetPaginatedAsync(param);
+
+            // Assert
+            result.Should ( ).NotBeNull ( );
+            result.Data.Should ( ).OnlyContain ( x => x.Status == OrderStatus.TryIn.ToString ( ) );
+        }
+
+        [Fact]
+        public async Task GetPaginatedAsync_WithPatientNameFilter_ShouldReturnMatchingOrders ( )
+        {
+            // Arrange
+            var param = new ServiceOrderParams
+            {
+                PatientName = "jo", // deve bater com "João", "JOSE", "Marjory", etc.
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            var client = new Client { ClientId = 1, ClientName = "Cliente Teste" };
+
+            var orders = new List<ServiceOrder>
+            {
+                new() { ServiceOrderId = 1, ClientId = 1, Client = client, PatientName = "João da Silva", DateIn = DateTime.UtcNow, Works = [], Stages = [] },
+                new() { ServiceOrderId = 2, ClientId = 1, Client = client, PatientName = "Marjory Alves", DateIn = DateTime.UtcNow, Works = [], Stages = [] }
+            };
+
+            _orderRepoMock.Setup ( r => r.CountAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders.Count );
+            _orderRepoMock.Setup ( r => r.GetAllAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders );
+
+            _mapperMock.Setup ( m => m.Map<IReadOnlyList<ServiceOrderListProjection>> ( orders ) )
+                .Returns ( orders.Select ( o => new ServiceOrderListProjection
+                {
+                    ServiceOrderId = o.ServiceOrderId,
+                    PatientName = o.PatientName,
+                    DateIn = o.DateIn,
+                    Status = o.Status.ToString ( )
+                } ).ToList ( ) );
+
+            // Act
+            var result = await _service.GetPaginatedAsync(param);
+
+            // Assert
+            result.Should ( ).NotBeNull ( );
+            result.Data.Should ( ).OnlyContain ( x =>
+                x.PatientName.Contains ( "jo", StringComparison.OrdinalIgnoreCase ) );
+        }
+
+
+        [Fact]
+        public async Task GetPaginatedAsync_WithDateRange_ShouldReturnOrdersWithinRange ( )
+        {
+            // Arrange
+            var start = DateTime.UtcNow.AddDays(-5);
+            var end = DateTime.UtcNow.AddDays(-1);
+
+            var param = new ServiceOrderParams
+            {
+                StartDate = start,
+                EndDate = end,
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            var client = new Client { ClientId = 1, ClientName = "Cliente Teste" };
+
+            var orders = new List<ServiceOrder>
+    {
+        new() { ServiceOrderId = 1, ClientId = 1, Client = client, DateIn = DateTime.UtcNow.AddDays(-4), Works = [], Stages = [] },
+        new() { ServiceOrderId = 2, ClientId = 1, Client = client, DateIn = DateTime.UtcNow.AddDays(-3), Works = [], Stages = [] }
+    };
+
+            _orderRepoMock.Setup ( r => r.CountAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders.Count );
+            _orderRepoMock.Setup ( r => r.GetAllAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders );
+
+            _mapperMock.Setup ( m => m.Map<IReadOnlyList<ServiceOrderListProjection>> ( orders ) )
+                .Returns ( orders.Select ( o => new ServiceOrderListProjection
+                {
+                    ServiceOrderId = o.ServiceOrderId,
+                    DateIn = o.DateIn,
+                    Status = o.Status.ToString ( )
+                } ).ToList ( ) );
+
+            // Act
+            var result = await _service.GetPaginatedAsync(param);
+
+            // Assert
+            result.Should ( ).NotBeNull ( );
+            result.Data.Should ( ).OnlyContain ( o => o.DateIn >= start && o.DateIn <= end );
+        }
+
+
+        [Fact]
+        public async Task GetPaginatedAsync_WithPageSize_ShouldReturnLimitedResults ( )
+        {
+            // Arrange
+            var param = new ServiceOrderParams
+            {
+                PageNumber = 1,
+                PageSize = 2
+            };
+
+            var client = new Client { ClientId = 1, ClientName = "Cliente Teste" };
+
+            var allOrders = new List<ServiceOrder>
+    {
+        new() { ServiceOrderId = 1, ClientId = 1, Client = client, DateIn = DateTime.UtcNow, Works = [], Stages = [] },
+        new() { ServiceOrderId = 2, ClientId = 1, Client = client, DateIn = DateTime.UtcNow, Works = [], Stages = [] },
+        new() { ServiceOrderId = 3, ClientId = 1, Client = client, DateIn = DateTime.UtcNow, Works = [], Stages = [] }
+    };
+
+            _orderRepoMock.Setup ( r => r.CountAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( allOrders.Count );
+
+            _orderRepoMock.Setup ( r => r.GetAllAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( allOrders.Take ( 2 ).ToList ( ) );
+
+            _mapperMock.Setup ( m => m.Map<IReadOnlyList<ServiceOrderListProjection>> ( It.IsAny<List<ServiceOrder>> ( ) ) )
+                .Returns ( ( List<ServiceOrder> input ) => input.Select ( o => new ServiceOrderListProjection
+                {
+                    ServiceOrderId = o.ServiceOrderId,
+                    DateIn = o.DateIn,
+                    Status = o.Status.ToString ( )
+                } ).ToList ( ) );
+
+            // Act
+            var result = await _service.GetPaginatedAsync(param);
+
+            // Assert
+            result.Should ( ).NotBeNull ( );
+            result.Data.Should ( ).HaveCount ( 2 );
+            result.TotalItems.Should ( ).Be ( 3 );
+        }
+
+        [Fact]
+        public async Task GetPaginatedAsync_WithSortByDateIn_ShouldReturnOrderedResults ( )
+        {
+            // Arrange
+            var param = new ServiceOrderParams
+            {
+                Sort = "DateInDesc",
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            var client = new Client { ClientId = 1, ClientName = "Cliente Teste" };
+
+            var orders = new List<ServiceOrder>
+    {
+        new() { ServiceOrderId = 1, ClientId = 1, Client = client, DateIn = DateTime.UtcNow.AddDays(-1), Works = [], Stages = [] },
+        new() { ServiceOrderId = 2, ClientId = 1, Client = client, DateIn = DateTime.UtcNow.AddDays(-2), Works = [], Stages = [] }
+    };
+
+            _orderRepoMock.Setup ( r => r.CountAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders.Count );
+            _orderRepoMock.Setup ( r => r.GetAllAsync ( It.IsAny<ISpecification<ServiceOrder>> ( ) ) )
+                .ReturnsAsync ( orders.OrderByDescending ( o => o.DateIn ).ToList ( ) );
+
+            _mapperMock.Setup ( m => m.Map<IReadOnlyList<ServiceOrderListProjection>> ( It.IsAny<List<ServiceOrder>> ( ) ) )
+                .Returns ( ( List<ServiceOrder> input ) => input.Select ( o => new ServiceOrderListProjection
+                {
+                    ServiceOrderId = o.ServiceOrderId,
+                    DateIn = o.DateIn,
+                    Status = o.Status.ToString ( )
+                } ).ToList ( ) );
+
+            // Act
+            var result = await _service.GetPaginatedAsync(param);
+
+            // Assert
+            result.Should ( ).NotBeNull ( );
+            result.Data.Should ( ).BeInDescendingOrder ( o => o.DateIn );
+        }
 
 
 

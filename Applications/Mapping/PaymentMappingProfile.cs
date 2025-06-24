@@ -15,9 +15,10 @@ namespace Applications.Mapping
 
             // Mapeamento de retorno — substitui ClientPaymentDto por record
             CreateMap<Payment, ClientPaymentRecord>()
-                .ForMember(dest => dest.ClientName, opt => opt.MapFrom(src => src.Client.ClientName))
-                .ForMember(dest => dest.InvoiceNumber, opt => opt.MapFrom(src =>
-                    src.BillingInvoice != null ? src.BillingInvoice.InvoiceNumber : null));
+    .ForMember(dest => dest.ClientName, opt => opt.MapFrom(src =>
+        src.Client != null ? src.Client.ClientName : string.Empty)) // evita NullReference
+    .ForMember(dest => dest.InvoiceNumber, opt => opt.MapFrom(src =>
+        src.BillingInvoice != null ? src.BillingInvoice.InvoiceNumber : null));
         }
     }
 }

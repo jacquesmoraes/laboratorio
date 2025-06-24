@@ -15,7 +15,6 @@ namespace Infra.Data
         {
             try
             {
-                // Seeds que não dependem de outros
                 await SeedWorkSections ( context, logger );
                 await SeedWorkTypes ( context, logger );
                 await SeedSectors ( context, logger );
@@ -24,11 +23,7 @@ namespace Infra.Data
                 await SeedTablePriceItems ( context, logger );
                 await SeedTablePrices ( context, logger );
                 await SeedSystemSettings ( context, logger );
-
-                // Seeds que dependem dos anteriores
                 await SeedClients ( context, logger );
-
-
 
                 logger.LogInformation ( "Database seeded successfully" );
             }
@@ -39,12 +34,20 @@ namespace Infra.Data
             }
         }
 
+        // 🔁 Helper para centralizar leitura dos arquivos JSON
+        private static string ReadSeedFile ( string fileName )
+        {
+            var basePath = Path.Combine(AppContext.BaseDirectory, "Data", "SeedData");
+            var path = Path.Combine(basePath, fileName);
+            return File.ReadAllText ( path );
+        }
+
 
         private static async Task SeedWorkSections ( ApplicationContext context, ILogger logger )
         {
             if ( !context.WorkSections.Any ( ) )
             {
-                var data = File.ReadAllText("../Infra/Data/SeedData/worksections.json");
+                var data = ReadSeedFile("worksections.json");
                 var sections = JsonSerializer.Deserialize<List<WorkSection>>(data);
                 if ( sections != null )
                 {
@@ -59,7 +62,7 @@ namespace Infra.Data
         {
             if ( !context.WorkTypes.Any ( ) )
             {
-                var data = File.ReadAllText("../Infra/Data/SeedData/worktypes.json");
+                var data = ReadSeedFile("worktypes.json");
                 var types = JsonSerializer.Deserialize<List<WorkType>>(data);
                 if ( types != null )
                 {
@@ -74,7 +77,7 @@ namespace Infra.Data
         {
             if ( !context.Sectors.Any ( ) )
             {
-                var data = File.ReadAllText("../Infra/Data/SeedData/sectors.json");
+                var data = ReadSeedFile("sectors.json");
                 var sectors = JsonSerializer.Deserialize<List<Sector>>(data);
                 if ( sectors != null )
                 {
@@ -89,7 +92,7 @@ namespace Infra.Data
         {
             if ( !context.Scales.Any ( ) )
             {
-                var data = File.ReadAllText("../Infra/Data/SeedData/scales.json");
+                var data = ReadSeedFile("scales.json");
                 var scales = JsonSerializer.Deserialize<List<Scale>>(data);
                 if ( scales != null )
                 {
@@ -104,7 +107,7 @@ namespace Infra.Data
         {
             if ( !context.Shades.Any ( ) )
             {
-                var data = File.ReadAllText("../Infra/Data/SeedData/shades.json");
+                var data = ReadSeedFile("shades.json");
                 var shades = JsonSerializer.Deserialize<List<Shade>>(data);
                 if ( shades != null )
                 {
@@ -114,15 +117,16 @@ namespace Infra.Data
                 }
             }
         }
+
         private static async Task SeedTablePriceItems ( ApplicationContext context, ILogger logger )
         {
             if ( !context.TablePriceItems.Any ( ) )
             {
-                var data = File.ReadAllText("../Infra/Data/SeedData/tablepriceitems.json");
+                var data = ReadSeedFile("tablepriceitems.json");
 
                 var items = JsonSerializer.Deserialize<List<TablePriceItem>>(data, new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true // ← evita erro de casing
+                    PropertyNameCaseInsensitive = true
                 });
 
                 if ( items != null )
@@ -134,12 +138,11 @@ namespace Infra.Data
             }
         }
 
-
         private static async Task SeedTablePrices ( ApplicationContext context, ILogger logger )
         {
             if ( !context.TablePrices.Any ( ) )
             {
-                var data = File.ReadAllText("../Infra/Data/SeedData/tableprices.json");
+                var data = ReadSeedFile("tableprices.json");
 
                 var rawTables = JsonSerializer.Deserialize<List<RawTablePriceDto>>(data, new JsonSerializerOptions
                 {
@@ -156,8 +159,8 @@ namespace Infra.Data
                             Description = raw.Description,
                             Status = raw.Status,
                             Items = context.TablePriceItems
-                        .Where(i => raw.Items.Select(x => x.TablePriceItemId).Contains(i.TablePriceItemId))
-                        .ToList()
+                                .Where(i => raw.Items.Select(x => x.TablePriceItemId).Contains(i.TablePriceItemId))
+                                .ToList()
                         };
 
                         await context.TablePrices.AddAsync ( table );
@@ -169,25 +172,11 @@ namespace Infra.Data
             }
         }
 
-        private record RawTablePriceDto
-        {
-            public string Name { get; set; } = string.Empty;
-            public string Description { get; set; } = string.Empty;
-            public bool Status { get; set; }
-            public List<RawTablePriceItemRef> Items { get; set; } = [];
-        }
-
-        private record RawTablePriceItemRef
-        {
-            public int TablePriceItemId { get; set; }
-        }
-
-
         private static async Task SeedClients ( ApplicationContext context, ILogger logger )
         {
             if ( !context.Clients.Any ( ) )
             {
-                var data = File.ReadAllText("../Infra/Data/SeedData/clients.json");
+                var data = ReadSeedFile("clients.json");
                 var clients = JsonSerializer.Deserialize<List<Client>>(data);
                 if ( clients != null )
                 {
@@ -197,7 +186,6 @@ namespace Infra.Data
                 }
             }
         }
-
 
         private static async Task SeedSystemSettings ( ApplicationContext context, ILogger logger )
         {
@@ -230,7 +218,17 @@ namespace Infra.Data
             }
         }
 
+        private record RawTablePriceDto
+        {
+            public string Name { get; set; } = string.Empty;
+            public string Description { get; set; } = string.Empty;
+            public bool Status { get; set; }
+            public List<RawTablePriceItemRef> Items { get; set; } = [];
+        }
 
-
+        private record RawTablePriceItemRef
+        {
+            public int TablePriceItemId { get; set; }
+        }
     }
 }

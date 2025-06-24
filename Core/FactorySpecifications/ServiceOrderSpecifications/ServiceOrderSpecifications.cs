@@ -3,9 +3,11 @@ using Core.Models.Production;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
 using Core.Specifications;
+using Core.Params;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
-namespace Core.FactorySpecifications.ServiceOrderFactorySpecifications
+namespace Core.FactorySpecifications.ServiceOrderSpecifications
 {
     public class ServiceOrderSpecification : BaseSpecification<ServiceOrder>
     {
@@ -19,8 +21,9 @@ namespace Core.FactorySpecifications.ServiceOrderFactorySpecifications
 
         public static class ServiceOrderSpecs
         {
-            public static BaseSpecification<ServiceOrder> AllByClient(int clientId)
-        => new(spec => spec.ClientId == clientId);
+            public static BaseSpecification<ServiceOrder> AllByClient ( int clientId )
+                => new ( spec => spec.ClientId == clientId );
+
             public static ServiceOrderSpecification ByIdFull ( int id )
             {
                 var spec = new ServiceOrderSpecification(id);
@@ -71,7 +74,42 @@ namespace Core.FactorySpecifications.ServiceOrderFactorySpecifications
                 return spec;
             }
 
-            //  Métodos auxiliares para evitar repetição
+            // ✅ NOVO: Paginação, filtro e ordenação dinâmicos
+            public static ServiceOrderSpecification Paged ( ServiceOrderParams p )
+            {
+                Expression<Func<ServiceOrder, bool>> criteria = o =>
+                    (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
+                    (!p.Status.HasValue || o.Status == p.Status) &&
+                    (string.IsNullOrEmpty(p.PatientName) || o.PatientName.ToLower().Contains(p.PatientName.ToLower())) &&
+                    (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
+                    (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value);
+
+                var spec = new ServiceOrderSpecification(criteria);
+
+                spec.AddInclude ( o => o.Client );
+                spec.AddInclude ( o => o.Works );
+                spec.AddInclude(o => o.Stages);
+                spec.AddInclude("Stages.Sector");
+                spec.ApplySorting ( p.Sort );
+                spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
+
+                return spec;
+            }
+
+            public static ServiceOrderSpecification PagedForCount ( ServiceOrderParams p )
+            {
+                Expression<Func<ServiceOrder, bool>> criteria = o =>
+        (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
+        (!p.Status.HasValue || o.Status == p.Status) &&
+        (string.IsNullOrEmpty(p.PatientName) || o.PatientName.ToLower().Contains(p.PatientName.ToLower())) &&
+        (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
+        (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value);
+
+                return new ServiceOrderSpecification ( criteria );
+            }
+
+
+            // Métodos auxiliares
             private static void AddFullIncludes ( ServiceOrderSpecification spec )
             {
                 spec.AddInclude ( o => o.Client );

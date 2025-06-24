@@ -23,7 +23,7 @@ namespace Applications.PdfDocuments
             container.Page ( page =>
             {
                 page.Margin ( 40 );
-                page.DefaultTextStyle ( x => x.FontFamily ( "Segoe UI" ).FontSize ( 12 ).FontColor ( "#2c3e50" ) );
+                page.DefaultTextStyle ( x => x.FontFamily ( "Segoe UI" ).FontSize ( 10 ).FontColor ( "#2c3e50" ) );
 
                 page.Header ( ).Row ( row =>
                 {
@@ -39,7 +39,7 @@ namespace Applications.PdfDocuments
                             col.Item ( ).Height ( 80 ).AlignCenter ( ).AlignMiddle ( )
                             .Text ( "[LOGO]" ).Italic ( ).FontColor ( Colors.Grey.Lighten1 );
                         }
-                        col.Item ( ).Text ( "FATURA" ).FontSize ( 16 ).FontColor ( "#3498db" ).Bold ( );
+                        
                         col.Item ( ).Text ( _invoice.InvoiceNumber ).FontSize ( 10 ).FontColor ( "#7f8c8d" );
 
                     } );

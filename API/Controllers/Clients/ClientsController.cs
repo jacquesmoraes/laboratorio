@@ -6,7 +6,7 @@ using AutoMapper;
 using Core.Exceptions;
 using Core.Models.Clients;
 using Microsoft.AspNetCore.Mvc;
-using static Core.FactorySpecifications.ClientsFactorySpecifications.ClientSpecification;
+using static Core.FactorySpecifications.ClientsSpecifications.ClientSpecification;
 
 namespace API.Controllers.Clients
 {
@@ -18,7 +18,7 @@ namespace API.Controllers.Clients
         private readonly IClientService _clientService = clientService;
         private readonly IMapper _mapper = mapper;
 
-        
+
 
 
         [HttpGet]
@@ -33,15 +33,16 @@ namespace API.Controllers.Clients
             return Ok ( response );
 
         }
-        
+
         [HttpGet ( "{id}" )]
         public async Task<IActionResult> GetById ( int id )
         {
-            var spec = ClientSpecs.ById(id);
-            var client = await _clientService.GetEntityWithSpecAsync(spec);
-            var response = _mapper.Map<ClientResponseDetailsProjection>(client);
-            return Ok ( response );
+            var dto = await _clientService.GetClientDetailsProjectionAsync(id);
+            return Ok ( dto );
         }
+
+        
+
 
         [HttpPost]
         public async Task<IActionResult> Create ( [FromBody] CreateClientDto dto )

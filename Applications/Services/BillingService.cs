@@ -2,10 +2,6 @@
 using Applications.Dtos.Billing;
 using Core.Exceptions;
 using Core.Enums;
-using Core.FactorySpecifications.Billing;
-using Core.FactorySpecifications.ClientsFactorySpecifications;
-using Core.FactorySpecifications.PayementSpecifications;
-using Core.FactorySpecifications.ServiceOrderFactorySpecifications;
 using Core.Interfaces;
 using Core.Models.Billing;
 using Core.Models.Clients;
@@ -13,6 +9,13 @@ using Core.Models.Payments;
 using Core.Models.ServiceOrders;
 using AutoMapper;
 using Applications.Records.Billing;
+using Core.FactorySpecifications.ClientsSpecifications;
+using Core.FactorySpecifications.ServiceOrderSpecifications;
+using Core.FactorySpecifications.BillingSpecifications;
+using Core.FactorySpecifications.PaymentSpecifications;
+using Applications.Projections.Billing;
+using Applications.Responses;
+using Core.Params;
 
 
 namespace Applications.Services
@@ -100,6 +103,24 @@ namespace Applications.Services
 
             return invoice;
         }
+
+        public async Task<Pagination<BillingInvoiceResponseProjection>> GetPaginatedInvoicesAsync ( InvoiceParams p )
+        {
+            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.Paged(p);
+            var countSpec = BillingInvoiceSpecification.BillingInvoiceSpecs.PagedForCount(p);
+
+            var totalItems = await _invoiceRepo.CountAsync(countSpec);
+            var invoices = await _invoiceRepo.GetAllAsync(spec);
+            var projections = _mapper.Map<IReadOnlyList<BillingInvoiceResponseProjection>>(invoices);
+
+            foreach ( var invoice in projections )
+            {
+                invoice.PdfDownloadUrl = $"/api/client-area/invoices/{invoice.BillingInvoiceId}/download";
+            }
+
+            return new Pagination<BillingInvoiceResponseProjection> ( p.PageNumber, p.PageSize, totalItems, projections );
+        }
+
 
 
         public async Task<BillingInvoice> CancelInvoiceAsync ( int id )
