@@ -2,6 +2,7 @@
 using Applications.PdfDocuments;
 using Applications.Records.Settings;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
@@ -28,6 +29,7 @@ namespace API.Controllers.Billing
         }
 
         [HttpGet ( "{id}/pdf" )]
+        
         public async Task<IActionResult> DownloadInvoicePdf ( int id )
         {
             try

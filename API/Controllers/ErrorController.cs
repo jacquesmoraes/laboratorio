@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Route ("api/[controller]")]
+    [Route ("errors")]
     [ApiController]
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ErrorController : BaseApiController
     {
 
-        [Route ("errors/{code}")]
+        [Route ("{code}")]
         
         public IActionResult Error ( int code )
         {

@@ -21,7 +21,8 @@ namespace Applications.Mapping
                     opt => opt.MapFrom(src => src.Payments != null ? src.Payments.Sum(p => p.AmountPaid) : 0m));
 
             // Projeção principal para geração de PDF
-            CreateMap<BillingInvoice, BillingInvoiceRecord>();
+            CreateMap<BillingInvoice, BillingInvoiceRecord>()
+                .ForMember(dest => dest.ClientId, opt => opt.MapFrom(src => src.ClientId));
 
             CreateMap<Client, ClientInvoiceRecord>()
                 .ForMember(dest => dest.Address,

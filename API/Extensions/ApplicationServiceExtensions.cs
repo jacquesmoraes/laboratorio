@@ -1,5 +1,7 @@
 ﻿using API.Models;
+using API.Services;
 using Applications.Contracts;
+using Applications.Contracts.Identity;
 using Applications.Mapping;
 using Applications.Services;
 using Core.Interfaces;
@@ -48,13 +50,27 @@ namespace API.Extensions
                     opt.JsonSerializerOptions.Converters.Add ( new JsonStringEnumConverter ( ) );
                 } );
 
-            services.AddDbContext<ApplicationContext> ( options =>
-                options.UseNpgsql ( config.GetConnectionString ( "DefaultConnection" ),
-                 o => o.UseQuerySplittingBehavior ( QuerySplittingBehavior.SplitQuery ) ) );
+           var environment = config["ASPNETCORE_ENVIRONMENT"] ?? "Development";
+            
+            if (environment == "Test")
+            {
+                // Para testes, usa InMemory
+                services.AddDbContext<ApplicationContext>(options =>
+                    options.UseInMemoryDatabase("TestDb"));
+            }
+            else
+            {
+                // Para produção/desenvolvimento, usa PostgreSQL
+                services.AddDbContext<ApplicationContext>(options =>
+                    options.UseNpgsql(config.GetConnectionString("DefaultConnection"),
+                     o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+            }
+
+
             services.AddScoped ( typeof ( IGenericRepository<> ), typeof ( GenericRepository<> ) );
             services.AddScoped ( typeof ( IGenericService<> ), typeof ( GenericService<> ) );
             services.AddScoped<IGenericService<Payment>, GenericService<Payment>> ( );
-
+            services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IGenericService<ServiceOrder>, GenericService<ServiceOrder>> ( );
             services.AddScoped<ITablePriceItemService, TablePriceItemService> ( );
             services.AddScoped<ITablePriceService, TablePriceService> ( );
@@ -65,7 +81,7 @@ namespace API.Extensions
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
             services.AddScoped<IPaymentService, PaymentService> ( );
             services.AddScoped<ISectorService, SectorService> ( );
-
+            
             services.AddScoped<IServiceOrderService, ServiceOrderService> ( );
             services.AddScoped<ISystemSettingsService, SystemSettingsService> ( );
             services.AddScoped<IBillingService, BillingService> ( );

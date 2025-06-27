@@ -8,6 +8,8 @@ namespace Applications.Records.Billing
         public string InvoiceNumber { get; init; } = string.Empty;
         public DateTime CreatedAt { get; init; }
         public string Description { get; init; } = string.Empty;
+        public int ClientId { get; init; }
+
         public ClientInvoiceRecord Client { get; init; } = default!;
         public List<InvoiceServiceOrderRecord> ServiceOrders { get; init; } = [];
         public decimal TotalServiceOrdersAmount { get; init; }
