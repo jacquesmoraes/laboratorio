@@ -40,7 +40,7 @@ namespace Applications.Services
             if (scale == null)
                 throw new NotFoundException($"Escala de cor {dto.ScaleId} não encontrada.");
 
-            existing.color = dto.Color;
+            existing.color = dto.Color ?? string.Empty;
             existing.ScaleId = dto.ScaleId;
 
             await _shadeRepo.UpdateAsync(id, existing);

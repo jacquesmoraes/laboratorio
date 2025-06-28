@@ -41,6 +41,11 @@ namespace Infra.Data.Repositories
             await _context.SaveChangesAsync ( );
             return existing;
         }
+        public async Task DeleteAsync ( T entity )
+        {
+            _dbSet.Remove ( entity );
+            await _context.SaveChangesAsync ( );
+        }
 
         public async Task<T?> DeleteAsync ( int id )
         {

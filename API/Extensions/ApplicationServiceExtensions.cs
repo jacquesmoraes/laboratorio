@@ -1,4 +1,5 @@
-﻿using API.Models;
+﻿using API.Filters;
+using API.Models;
 using API.Services;
 using Applications.Contracts;
 using Applications.Contracts.Identity;
@@ -75,13 +76,14 @@ namespace API.Extensions
             services.AddScoped<ITablePriceItemService, TablePriceItemService> ( );
             services.AddScoped<ITablePriceService, TablePriceService> ( );
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
+            services.AddScoped<UpdateOverdueStatusFilter>();
             services.AddScoped<IClientService, ClientService> ( );
             services.AddScoped<IClientAreaService, ClientAreaService> ( );
             services.AddScoped<IShadeService, ShadeService> ( );
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
             services.AddScoped<IPaymentService, PaymentService> ( );
             services.AddScoped<ISectorService, SectorService> ( );
-            
+            services.AddScoped<IScheduleService, ScheduleService> ( );
             services.AddScoped<IServiceOrderService, ServiceOrderService> ( );
             services.AddScoped<ISystemSettingsService, SystemSettingsService> ( );
             services.AddScoped<IBillingService, BillingService> ( );

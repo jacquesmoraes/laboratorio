@@ -1,8 +1,8 @@
-﻿using AutoMapper;
+﻿using Applications.Projections.ServiceOrder;
+using Applications.Records.ServiceOrders;
+using AutoMapper;
 using Core.Enums;
 using Core.Models.ServiceOrders;
-using Applications.Projections.ServiceOrder;
-using Applications.Records.ServiceOrders;
 
 namespace Applications.Mapping.Resolvers
 {
@@ -14,6 +14,7 @@ namespace Applications.Mapping.Resolvers
         public string? Resolve ( ServiceOrder src, ServiceOrderDetailsProjection dest, string? member, ResolutionContext context ) => ResolveInternal ( src );
         public string? Resolve ( ServiceOrder src, ServiceOrderListProjection dest, string? member, ResolutionContext context ) => ResolveInternal ( src );
         public string? Resolve ( ServiceOrder src, ServiceOrderAlertRecord dest, string? member, ResolutionContext context ) => ResolveInternal ( src );
+
 
         private string? ResolveInternal ( ServiceOrder src )
         {

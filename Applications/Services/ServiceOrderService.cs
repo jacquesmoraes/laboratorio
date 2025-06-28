@@ -9,9 +9,11 @@ using Core.Exceptions;
 using Core.FactorySpecifications.ServiceOrderSpecifications;
 using Core.Interfaces;
 using Core.Models.Clients;
+using Core.Models.Schedule;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
 using Core.Params;
+using static Core.FactorySpecifications.ScheduleSpecification.ScheduleSpecs;
 using static Core.FactorySpecifications.ClientsSpecifications.ClientSpecification;
 using static Core.FactorySpecifications.SectorSpecifications.SectorSpecification;
 using static Core.FactorySpecifications.ServiceOrderSpecifications.ServiceOrderSpecification;
@@ -23,6 +25,7 @@ namespace Applications.Services
         IGenericRepository<ServiceOrder> orderRepo,
         IGenericRepository<Client> clientRepo,
         IGenericRepository<Sector> sectorRepo,
+        IGenericRepository<ServiceOrderSchedule> scheduleRepo,
         IUnitOfWork uow )
         : GenericService<ServiceOrder> ( orderRepo ), IServiceOrderService
     {
@@ -30,6 +33,7 @@ namespace Applications.Services
         private readonly IGenericRepository<ServiceOrder> _orderRepo = orderRepo;
         private readonly IGenericRepository<Client>       _clientRepo = clientRepo;
         private readonly IGenericRepository<Sector>       _sectorRepo = sectorRepo;
+        private readonly IGenericRepository<ServiceOrderSchedule> _scheduleRepo = scheduleRepo;
         private readonly IUnitOfWork _uow = uow;
 
 
@@ -83,15 +87,27 @@ namespace Applications.Services
             var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId))
         ?? throw new NotFoundException($"Setor {dto.SectorId} não encontrado.");
 
+            //  Limpa agendamento ativo, se houver
+            var existingSchedule = await _scheduleRepo.GetEntityWithSpec(ActiveByServiceOrderId(dto.ServiceOrderId));
+            if ( existingSchedule is not null )
+            {
+                await _scheduleRepo.DeleteAsync ( existingSchedule );
+                // Se quiser manter histórico em vez de deletar:
+                // existingSchedule.IsDelivered = true;
+            }
+
+            //  Valida e aplica movimentação
             var dateInUtc = DateTime.SpecifyKind(dto.DateIn, DateTimeKind.Utc);
             ServiceOrderDateValidator.ValidateNewStageDate ( order.Stages, dateInUtc );
             order.MoveTo ( sector, dateInUtc );
+
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
             return order;
         }
 
-      
+
+
 
 
         public async Task<ServiceOrder?> SendToTryInAsync ( SendToTryInDto dto )

@@ -53,6 +53,9 @@ namespace API.Extensions
                 // Configurar para mostrar o botão Authorize
                 c.DisplayRequestDuration();
                 c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+
+                //  Injetar JavaScript customizado
+        c.InjectJavascript("/swagger-ui/custom.js");
             });
 
             return app;

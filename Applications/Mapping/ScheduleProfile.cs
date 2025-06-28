@@ -1,0 +1,34 @@
+﻿using Applications.Dtos.Schedule;
+using Applications.Mapping.Resolvers;
+using Applications.Records.Schedule;
+using AutoMapper;
+using Core.Models.Schedule;
+
+namespace Applications.Mapping
+{
+    public class ScheduleProfile : Profile
+    {
+        public ScheduleProfile ( )
+        {
+             CreateMap<ScheduleDeliveryDto, ServiceOrderSchedule>();
+        CreateMap<CreateScheduleDto, ServiceOrderSchedule>();
+
+            CreateMap<ServiceOrderSchedule, ScheduleItemRecord> ( )
+                .ForMember ( dest => dest.ScheduleId, opt => opt.MapFrom ( src => src.Id ) )
+                .ForMember ( dest => dest.ServiceOrderId, opt => opt.MapFrom ( src => src.ServiceOrderId ) )
+                .ForMember ( dest => dest.OrderNumber, opt => opt.MapFrom ( src => src.ServiceOrder.OrderNumber ) )
+                .ForMember ( dest => dest.PatientName, opt => opt.MapFrom ( src => src.ServiceOrder.PatientName ) )
+                .ForMember ( dest => dest.ClientName, opt => opt.MapFrom ( src => src.ServiceOrder.Client.ClientName ) )
+                .ForMember ( dest => dest.ScheduledDate, opt => opt.MapFrom ( src => src.ScheduledDate ) )
+                .ForMember ( dest => dest.DeliveryType, opt => opt.MapFrom ( src => src.DeliveryType ) )
+                .ForMember ( dest => dest.IsDelivered, opt => opt.MapFrom ( src => src.IsDelivered ) )
+                .ForMember ( dest => dest.IsOverdue, opt => opt.MapFrom ( src => src.IsOverdue ) )
+                .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src =>
+                    src.IsDelivered ? "Entregue" :
+                    src.IsOverdue ? "Atrasado" :
+                    src.ScheduledDate == DateTime.Today ? "Hoje" : "Agendado" ) )
+                .ForMember ( dest => dest.CurrentSectorName, opt => opt.MapFrom<ScheduleCurrentSectorNameResolver> ( ) );
+        }
+    }
+}
+

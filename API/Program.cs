@@ -21,7 +21,7 @@ builder.Services.AddSwaggerDocumentation ( );
 var app = builder.Build();
 
 
-
+app.UseStaticFiles ( );
 app.UseMiddleware<ExceptionMiddleware> ( );
 app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );
 // Middleware de documentação
@@ -29,9 +29,10 @@ if ( app.Environment.IsDevelopment ( ) || app.Environment.IsEnvironment ( "Test"
 
 {
     app.UseSwaggerDocumention ( );
+    
 }
 
-app.UseStaticFiles ( );
+
 
 app.UseAuthentication ( );
 app.UseAuthorization ( );

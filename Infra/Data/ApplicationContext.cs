@@ -3,6 +3,7 @@ using Core.Models.LabSettings;
 using Core.Models.Payments;
 using Core.Models.Pricing;
 using Core.Models.Production;
+using Core.Models.Schedule;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
 
@@ -27,6 +28,7 @@ namespace Infra.Data
         public DbSet<Work> Works => Set<Work> ( );
         public DbSet<WorkType> WorkTypes => Set<WorkType> ( );
         public DbSet<WorkSection> WorkSections => Set<WorkSection> ( );
+        public DbSet<ServiceOrderSchedule> ServiceOrderSchedules => Set<ServiceOrderSchedule> ( );
 
         protected override void OnModelCreating ( ModelBuilder modelBuilder )
         {
