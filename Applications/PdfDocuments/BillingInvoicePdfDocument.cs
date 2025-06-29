@@ -1,11 +1,4 @@
-﻿using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
-using Applications.Records.Billing;
-using Applications.Records.Settings;
-using System.Globalization;
-
-namespace Applications.PdfDocuments
+﻿namespace Applications.PdfDocuments
 {
     public class BillingInvoicePdfDocument (
         BillingInvoiceRecord invoice,
@@ -39,7 +32,7 @@ namespace Applications.PdfDocuments
                             col.Item ( ).Height ( 80 ).AlignCenter ( ).AlignMiddle ( )
                             .Text ( "[LOGO]" ).Italic ( ).FontColor ( Colors.Grey.Lighten1 );
                         }
-                        
+
                         col.Item ( ).Text ( _invoice.InvoiceNumber ).FontSize ( 10 ).FontColor ( "#7f8c8d" );
 
                     } );
@@ -59,19 +52,19 @@ namespace Applications.PdfDocuments
                 {
                     col.Spacing ( 20 );
 
-                   col.Item().Background("#f8f9fa").Padding(20).Column(client =>
-{
-    var addr = _invoice.Client.Address;
-    var addressFormatted = $"{addr.Street}, {addr.Number}" +
+                    col.Item ( ).Background ( "#f8f9fa" ).Padding ( 20 ).Column ( client =>
+ {
+     var addr = _invoice.Client.Address;
+     var addressFormatted = $"{addr.Street}, {addr.Number}" +
         (!string.IsNullOrWhiteSpace(addr.Complement) ? $" - {addr.Complement}" : "") +
         $", {addr.Neighborhood}, {addr.City}";
 
-    client.Item().AlignCenter().Text($"Cliente: {_invoice.Client.ClientName}").Bold();
-    client.Item().AlignCenter().Text($"Endereço: {addressFormatted}");
-    client.Item().AlignCenter().Text($"Telefone: {_invoice.Client.PhoneNumber}");
-    client.Item().AlignCenter().Text($"Descrição: {_invoice.Description}");
-    client.Item().AlignCenter().Text($"Data de Emissão: {_invoice.CreatedAt:dd/MM/yyyy}");
-});
+     client.Item ( ).AlignCenter ( ).Text ( $"Cliente: {_invoice.Client.ClientName}" ).Bold ( );
+     client.Item ( ).AlignCenter ( ).Text ( $"Endereço: {addressFormatted}" );
+     client.Item ( ).AlignCenter ( ).Text ( $"Telefone: {_invoice.Client.PhoneNumber}" );
+     client.Item ( ).AlignCenter ( ).Text ( $"Descrição: {_invoice.Description}" );
+     client.Item ( ).AlignCenter ( ).Text ( $"Data de Emissão: {_invoice.CreatedAt:dd/MM/yyyy}" );
+ } );
 
 
                     col.Item ( ).Table ( table =>

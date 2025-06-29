@@ -1,6 +1,4 @@
-﻿using Applications.Records.Settings;
-
-namespace Applications.Dtos.Settings
+﻿namespace Applications.Dtos.Settings
 {
     public class UpdateSystemSettingsDto
     {

@@ -1,8 +1,4 @@
-﻿using Applications.Records.Clients;
-using Core.Enums;
-using System.ComponentModel.DataAnnotations;
-
-namespace Applications.Dtos.Clients
+﻿namespace Applications.Dtos.Clients
 {
     public class UpdateClientDto
     {
@@ -11,10 +7,10 @@ namespace Applications.Dtos.Clients
         public string? ClientEmail { get; set; }
         public string? ClientPhoneNumber { get; set; }
         public string? ClientCpf { get; set; }
-        [EnumDataType(typeof(BillingMode), ErrorMessage = "Modo de faturamento inválido.")]
+        [EnumDataType ( typeof ( BillingMode ), ErrorMessage = "Invalid Billing Mode." )]
         public BillingMode BillingMode { get; set; }
         public int TablePriceId { get; set; }
-        public ClientAddressRecord Address { get; set; } = new();
+        public ClientAddressRecord Address { get; set; } = new ( );
 
     }
 }

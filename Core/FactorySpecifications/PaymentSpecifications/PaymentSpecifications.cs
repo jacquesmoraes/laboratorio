@@ -36,7 +36,7 @@ namespace Core.FactorySpecifications.PaymentSpecifications
                 var spec = new PaymentSpecification(criteria);
 
                 spec.AddInclude ( x => x.Client );
-                spec.AddInclude ( x => x.BillingInvoice );
+                spec.AddInclude ( x => x.BillingInvoice! );
 
                 spec.ApplySorting ( p.Sort );
                 spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );

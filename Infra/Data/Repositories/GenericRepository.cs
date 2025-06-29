@@ -1,7 +1,6 @@
 ﻿
 using Core.Interfaces;
 using Core.Specifications;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infra.Data.Repositories
@@ -40,6 +39,11 @@ namespace Infra.Data.Repositories
             _context.Entry ( existing ).CurrentValues.SetValues ( entity );
             await _context.SaveChangesAsync ( );
             return existing;
+        }
+        public async Task DeleteAsync ( T entity )
+        {
+            _dbSet.Remove ( entity );
+            await _context.SaveChangesAsync ( );
         }
 
         public async Task<T?> DeleteAsync ( int id )

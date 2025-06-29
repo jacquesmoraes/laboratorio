@@ -17,7 +17,7 @@ namespace Infra.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -263,6 +263,47 @@ namespace Infra.Migrations
                     b.HasIndex("ScaleId");
 
                     b.ToTable("Shades");
+                });
+
+            modelBuilder.Entity("Core.Models.Schedule.ServiceOrderSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int?>("DeliveryType")
+                        .HasColumnType("integer")
+                        .HasColumnName("DeliveryType");
+
+                    b.Property<bool>("IsDelivered")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsOverdue")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("ScheduledDate")
+                        .HasColumnType("timestamptz");
+
+                    b.Property<int?>("SectorId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ServiceOrderId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SectorId");
+
+                    b.HasIndex("ServiceOrderId");
+
+                    b.ToTable("ServiceOrderSchedules", (string)null);
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ProductionStage", b =>
@@ -609,6 +650,24 @@ namespace Infra.Migrations
                         .IsRequired();
 
                     b.Navigation("Scale");
+                });
+
+            modelBuilder.Entity("Core.Models.Schedule.ServiceOrderSchedule", b =>
+                {
+                    b.HasOne("Core.Models.ServiceOrders.Sector", "Sector")
+                        .WithMany()
+                        .HasForeignKey("SectorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Core.Models.ServiceOrders.ServiceOrder", "ServiceOrder")
+                        .WithMany()
+                        .HasForeignKey("ServiceOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sector");
+
+                    b.Navigation("ServiceOrder");
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ProductionStage", b =>

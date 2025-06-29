@@ -1,21 +1,10 @@
-﻿using API.Models;
-using Core.Exceptions;
-using System.Text.Json;
-
-namespace API.Middleware
+﻿namespace API.Middleware
 {
-    public class ExceptionMiddleware
+    public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger;
-        private readonly IHostEnvironment _env;
-
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
-        {
-            _next = next;
-            _logger = logger;
-            _env = env;
-        }
+        private readonly RequestDelegate _next = next;
+        private readonly ILogger<ExceptionMiddleware> _logger = logger;
+        private readonly IHostEnvironment _env = env;
 
         public async Task InvokeAsync(HttpContext context)
         {
@@ -23,7 +12,7 @@ namespace API.Middleware
             {
                 await _next(context);
 
-                // 🔍 Captura status code após o pipeline (ex: 401, 403, 404)
+                //  Capture HTTP status codes after pipeline (e.g., 401, 403, 404)
                 await HandleStatusCodeAsync(context);
             }
             catch (Exception ex)
@@ -50,13 +39,13 @@ namespace API.Middleware
             }
         }
 
-        // 🧠 Tratar status HTTP padrão (sem exceção)
+        //  Handle default HTTP status codes (without thrown exceptions)
         private async Task HandleStatusCodeAsync(HttpContext context)
         {
             if (context.Response.HasStarted)
                 return;
-             if (context.Response.ContentLength != null || !context.Response.Body.CanWrite)
-        return;
+            if (context.Response.ContentLength != null || !context.Response.Body.CanWrite)
+                return;
 
             if (context.Response.StatusCode >= 400 &&
                 !context.Request.Path.StartsWithSegments("/swagger"))
@@ -65,12 +54,12 @@ namespace API.Middleware
 
                 var response = context.Response.StatusCode switch
                 {
-                    401 => new ApiResponse(401, "Não autorizado. Faça login para continuar."),
-                    403 => new ApiResponse(403, "Acesso negado. Você não tem permissão para este recurso."),
-                    404 => new ApiResponse(404, "Recurso não encontrado."),
-                    422 => new ApiResponse(422, "Entidade não processável."),
-                    500 => new ApiResponse(500, "Erro interno do servidor."),
-                    _ => new ApiResponse(context.Response.StatusCode, "Erro inesperado.")
+                    401 => new ApiResponse(401, "Unauthorized. Please log in to continue."),
+                    403 => new ApiResponse(403, "Access denied. You do not have permission to access this resource."),
+                    404 => new ApiResponse(404, "Resource not found."),
+                    422 => new ApiResponse(422, "Unprocessable entity."),
+                    500 => new ApiResponse(500, "Internal server error."),
+                    _ => new ApiResponse(context.Response.StatusCode, "Unexpected error.")
                 };
 
                 await WriteResponse(context, response);
@@ -90,7 +79,7 @@ namespace API.Middleware
             new ApiException(403, ex.Message);
 
         private ApiResponse HandleInvalidException(Exception ex) =>
-            new ApiException(400, "Operação inválida: " + ex.Message);
+            new ApiException(400, "Invalid operation: " + ex.Message);
 
         private ApiResponse HandleValidationException(Exception ex)
         {
@@ -117,7 +106,7 @@ namespace API.Middleware
         private ApiResponse HandleGenericException(Exception ex) =>
             _env.IsDevelopment()
                 ? new ApiException(500, ex.Message, ex.StackTrace)
-                : new ApiException(500, "Erro inesperado no servidor.");
+                : new ApiException(500, "Unexpected server error.");
 
         private async Task WriteResponse(HttpContext context, ApiResponse response)
         {

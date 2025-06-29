@@ -1,11 +1,8 @@
-﻿using Applications.Dtos.Production;
-using Core.Models.Production;
-
-namespace Applications.Contracts
+﻿namespace Applications.Contracts
 {
     public interface IShadeService : IGenericService<Shade>
     {
-        Task<Shade> CreateShade(CreateShadeDto dto);
-        Task<Shade?> UpdateWithValidationAsync(int id, CreateShadeDto dto);
+        Task<Shade> CreateShade ( CreateShadeDto dto );
+        Task<Shade?> UpdateWithValidationAsync ( int id, CreateShadeDto dto );
     }
 }

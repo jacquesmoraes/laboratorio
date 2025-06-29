@@ -1,8 +1,4 @@
-﻿using Applications.Records.Clients;
-using Applications.Records.Payments;
-using Applications.Records.ServiceOrders;
-
-namespace Applications.Projections.Clients
+﻿namespace Applications.Projections.Clients
 {
     public record ClientResponseDetailsProjection
     {

@@ -1,8 +1,4 @@
-﻿using Applications.Contracts;
-using Core.Interfaces;
-using Core.Specifications;
-
-namespace Applications.Services
+﻿namespace Applications.Services
 {
     public class GenericService<T> ( IGenericRepository<T> repository ) : IGenericService<T> where T : class
     {
@@ -21,6 +17,9 @@ namespace Applications.Services
 
         public Task<T> CreateAsync ( T entity ) =>
             _repository.CreateAsync ( entity );
+        public Task DeleteAsync ( T entity ) =>
+            _repository.DeleteAsync ( entity );
+
 
         public Task<T?> UpdateAsync ( int id, T entity ) =>
             _repository.UpdateAsync ( id, entity );

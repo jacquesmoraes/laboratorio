@@ -1,20 +1,15 @@
-﻿using Applications.Records.Sector;
-using Applications.Dtos.Sector;
-using AutoMapper;
-using Core.Models.ServiceOrders;
-
-namespace Applications.Mapping
+﻿namespace Applications.Mapping
 {
     public class SectorMappingProfile : Profile
     {
-        public SectorMappingProfile()
+        public SectorMappingProfile ( )
         {
             // Resposta GET
-            CreateMap<Sector, SectorRecord>();
+            CreateMap<Sector, SectorRecord> ( );
 
             // Entradas POST/PUT
-            CreateMap<CreateSectorDto, Sector>();
-            CreateMap<UpdateSectorDto, Sector>();
+            CreateMap<CreateSectorDto, Sector> ( );
+            CreateMap<UpdateSectorDto, Sector> ( );
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using Applications.Records.Clients;
-using Applications.Records.Pricing;
-
-namespace Applications.Projections.Pricing
+﻿namespace Applications.Projections.Pricing
 {
     public record TablePriceResponseProjection
     {

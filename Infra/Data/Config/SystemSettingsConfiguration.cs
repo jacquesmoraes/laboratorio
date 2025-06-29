@@ -1,6 +1,4 @@
-﻿using Core.Models.LabSettings;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infra.Data.Config
 {

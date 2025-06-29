@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Applications.Dtos.Sector
+﻿namespace Applications.Dtos.Sector
 {
     public class UpdateSectorDto
     {

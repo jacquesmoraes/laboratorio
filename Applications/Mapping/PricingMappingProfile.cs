@@ -1,9 +1,4 @@
-﻿using Applications.Dtos.Pricing;
-using Applications.Projections.Pricing;
-using Applications.Records.Pricing;
-using AutoMapper;
-using Core.Models.Pricing;
-
+﻿
 namespace Applications.Mapping
 {
     public class PricingMappingProfile : Profile
@@ -11,8 +6,8 @@ namespace Applications.Mapping
         public PricingMappingProfile ( )
         {
             // Criação (POST)
-            CreateMap<CreateTablePriceDto, TablePrice>()
-                .ForMember(dest => dest.Items, opt => opt.Ignore()); // vai ser resolvido manualmente no serviço
+            CreateMap<CreateTablePriceDto, TablePrice> ( )
+                .ForMember ( dest => dest.Items, opt => opt.Ignore ( ) ); // vai ser resolvido manualmente no serviço
 
             CreateMap<CreateTablePriceItemDto, TablePriceItem> ( )
                 .ForMember ( dest => dest.TablePrice, opt => opt.Ignore ( ) );

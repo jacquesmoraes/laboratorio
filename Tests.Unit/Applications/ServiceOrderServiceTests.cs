@@ -7,6 +7,7 @@ using Core.Enums;
 using Core.Exceptions;
 using Core.Interfaces;
 using Core.Models.Clients;
+using Core.Models.Schedule;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
 using Core.Params;
@@ -20,6 +21,8 @@ namespace Tests.Unit.Applications
     {
         private readonly Mock<IMapper> _mapperMock;
         private readonly Mock<IGenericRepository<ServiceOrder>> _orderRepoMock;
+        private readonly Mock<IGenericRepository<ServiceOrderSchedule>> _scheduleRepoMock;
+
         private readonly Mock<IGenericRepository<Client>> _clientRepoMock;
         private readonly Mock<IGenericRepository<Sector>> _sectorRepoMock;
         private readonly Mock<IUnitOfWork> _uowMock;
@@ -32,12 +35,14 @@ namespace Tests.Unit.Applications
             _clientRepoMock = new Mock<IGenericRepository<Client>> ( );
             _sectorRepoMock = new Mock<IGenericRepository<Sector>> ( );
             _uowMock = new Mock<IUnitOfWork> ( );
+            _scheduleRepoMock = new Mock<IGenericRepository<ServiceOrderSchedule>>();
 
             _service = new ServiceOrderService (
                 _mapperMock.Object,
                 _orderRepoMock.Object,
                 _clientRepoMock.Object,
                 _sectorRepoMock.Object,
+                _scheduleRepoMock.Object,
                 _uowMock.Object
             );
         }

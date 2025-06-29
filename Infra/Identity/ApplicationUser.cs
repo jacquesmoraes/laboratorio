@@ -1,7 +1,4 @@
-﻿using Core.Models.Identity;
-using Microsoft.AspNetCore.Identity;
-
-namespace Infra.Identity
+﻿namespace Infra.Identity
 {
     public class ApplicationUser : IdentityUser, IApplicationUser
     {

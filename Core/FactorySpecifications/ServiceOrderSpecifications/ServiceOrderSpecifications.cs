@@ -31,6 +31,12 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
                 return spec;
             }
 
+            public static ServiceOrderSpecification AvailableForScheduling ( )
+            {
+                var spec = new ServiceOrderSpecification(o => o.Status != OrderStatus.Finished);
+                AddFullIncludes ( spec );
+                return spec;
+            }
             public static ServiceOrderSpecification ByIds ( List<int> ids )
             {
                 var spec = new ServiceOrderSpecification(o => ids.Contains(o.ServiceOrderId));
@@ -88,8 +94,8 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
 
                 spec.AddInclude ( o => o.Client );
                 spec.AddInclude ( o => o.Works );
-                spec.AddInclude(o => o.Stages);
-                spec.AddInclude("Stages.Sector");
+                spec.AddInclude ( o => o.Stages );
+                spec.AddInclude ( "Stages.Sector" );
                 spec.ApplySorting ( p.Sort );
                 spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
 

@@ -1,11 +1,4 @@
-﻿using Applications.Contracts;
-using Applications.Dtos.Billing;
-using Applications.Projections.Billing;
-using AutoMapper;
-using Core.FactorySpecifications.BillingSpecifications;
-using Microsoft.AspNetCore.Mvc;
-
-namespace API.Controllers.Billing
+﻿namespace API.Controllers.Billing
 {
     [ApiController]
     [Route ( "api/[controller]" )]

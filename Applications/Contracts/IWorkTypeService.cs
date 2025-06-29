@@ -1,6 +1,4 @@
-﻿using Core.Models.Works;
-
-namespace Applications.Contracts
+﻿namespace Applications.Contracts
 {
     public interface IWorkTypeService : IGenericService<WorkType>
     {
