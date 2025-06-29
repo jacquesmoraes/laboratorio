@@ -1,20 +1,4 @@
-﻿using API.Filters;
-using API.Models;
-using API.Services;
-using Applications.Contracts;
-using Applications.Contracts.Identity;
-using Applications.Mapping;
-using Applications.Services;
-using Core.Interfaces;
-using Core.Models.Payments;
-using Core.Models.ServiceOrders;
-using Infra.Data;
-using Infra.Data.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-
-namespace API.Extensions
+﻿namespace API.Extensions
 {
     public static class ApplicationServiceExtensions
     {
@@ -51,32 +35,32 @@ namespace API.Extensions
                     opt.JsonSerializerOptions.Converters.Add ( new JsonStringEnumConverter ( ) );
                 } );
 
-           var environment = config["ASPNETCORE_ENVIRONMENT"] ?? "Development";
-            
-            if (environment == "Test")
+            var environment = config["ASPNETCORE_ENVIRONMENT"] ?? "Development";
+
+            if ( environment == "Test" )
             {
-                // Para testes, usa InMemory
-                services.AddDbContext<ApplicationContext>(options =>
-                    options.UseInMemoryDatabase("TestDb"));
+                // for tests, use InMemory
+                services.AddDbContext<ApplicationContext> ( options =>
+                    options.UseInMemoryDatabase ( "TestDb" ) );
             }
             else
             {
-                // Para produção/desenvolvimento, usa PostgreSQL
-                services.AddDbContext<ApplicationContext>(options =>
-                    options.UseNpgsql(config.GetConnectionString("DefaultConnection"),
-                     o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+                // for production/development, use PostgreSQL
+                services.AddDbContext<ApplicationContext> ( options =>
+                    options.UseNpgsql ( config.GetConnectionString ( "DefaultConnection" ),
+                     o => o.UseQuerySplittingBehavior ( QuerySplittingBehavior.SplitQuery ) ) );
             }
 
 
             services.AddScoped ( typeof ( IGenericRepository<> ), typeof ( GenericRepository<> ) );
             services.AddScoped ( typeof ( IGenericService<> ), typeof ( GenericService<> ) );
             services.AddScoped<IGenericService<Payment>, GenericService<Payment>> ( );
-            services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IIdentityService, IdentityService> ( );
             services.AddScoped<IGenericService<ServiceOrder>, GenericService<ServiceOrder>> ( );
             services.AddScoped<ITablePriceItemService, TablePriceItemService> ( );
             services.AddScoped<ITablePriceService, TablePriceService> ( );
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
-            services.AddScoped<UpdateOverdueStatusFilter>();
+            services.AddScoped<UpdateOverdueStatusFilter> ( );
             services.AddScoped<IClientService, ClientService> ( );
             services.AddScoped<IClientAreaService, ClientAreaService> ( );
             services.AddScoped<IShadeService, ShadeService> ( );

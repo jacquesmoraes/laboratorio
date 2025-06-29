@@ -1,18 +1,11 @@
-using API.Extensions;
-using API.Middleware;
-using Infra.Data;
-using Infra.Identity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddEnvironmentVariables();
+    .SetBasePath ( Directory.GetCurrentDirectory ( ) )
+    .AddJsonFile ( "appsettings.json", optional: false )
+    .AddJsonFile ( $"appsettings.{builder.Environment.EnvironmentName}.json", optional: true )
+    .AddEnvironmentVariables ( );
 builder.Services.AddControllers ( );
 builder.Services.AddApplicationServices ( builder.Configuration );
 builder.Services.AddIdentityServices ( builder.Configuration );
@@ -23,24 +16,21 @@ var app = builder.Build();
 
 app.UseStaticFiles ( );
 app.UseMiddleware<ExceptionMiddleware> ( );
-app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );
+if ( !app.Environment.IsEnvironment ( "Test" ) )
+{
+    app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );
+}
 // Middleware de documentação
 if ( app.Environment.IsDevelopment ( ) || app.Environment.IsEnvironment ( "Test" ) )
 
 {
     app.UseSwaggerDocumention ( );
-    
+
 }
-
-
 
 app.UseAuthentication ( );
 app.UseAuthorization ( );
-
-
 app.MapControllers ( );
-
-
 
 // Seed dos bancos
 using var scope = app.Services.CreateScope();

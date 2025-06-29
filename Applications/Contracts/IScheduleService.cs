@@ -1,52 +1,39 @@
-﻿using Applications.Dtos.Schedule;
-using Applications.Records.Schedule;
-using Core.Models.Schedule;
-
-namespace Applications.Contracts
+﻿namespace Applications.Contracts
 {
     public interface IScheduleService : IGenericService<ServiceOrderSchedule>
     {
         /// <summary>
-        /// Agenda uma entrega para uma OS
+        /// Schedules a delivery for a service order.
         /// </summary>
         Task<ScheduleItemRecord> ScheduleDeliveryAsync(ScheduleDeliveryDto dto);
-        
+
         /// <summary>
-        /// Atualiza um agendamento existente
+        /// Updates an existing schedule.
         /// </summary>
         Task<ServiceOrderSchedule?> UpdateScheduleAsync(int scheduleId, ScheduleDeliveryDto dto);
-        
+
         /// <summary>
-        /// Remove um agendamento
+        /// Removes a schedule.
         /// </summary>
         Task<bool> RemoveScheduleAsync(int scheduleId);
-        
+
         /// <summary>
-        /// Obtém a agenda completa por setor para uma data específica
+        /// Gets the full schedule per sector for a specific date.
         /// </summary>
         Task<List<SectorScheduleRecord>> GetScheduleByDateAsync(DateTime date);
-        
+
         /// <summary>
-        /// Obtém a agenda de hoje destacando as OS em atraso
+        /// Gets today's schedule, highlighting overdue service orders.
         /// </summary>
         Task<List<SectorScheduleRecord>> GetTodayScheduleAsync();
-        
+
         Task<SectorScheduleRecord?> GetScheduleByCurrentSectorAsync(int sectorId, DateTime date);
-        
-        
+
         /// <summary>
-        /// Marca uma entrega como realizada
-        /// </summary>
-        //Task<bool> MarkAsDeliveredAsync(int scheduleId);
-        
-        /// <summary>
-        /// Atualiza automaticamente o status de atraso das OS
+        /// Automatically updates the overdue status of service orders.
         /// </summary>
         Task UpdateOverdueStatusAsync();
-        
-        /// <summary>
-        /// Obtém OS que podem ser agendadas (não finalizadas e não já agendadas)
-        /// </summary>
-        //Task<List<ServiceOrderSchedule>> GetAvailableForSchedulingAsync();
+
+       
     }
 }

@@ -1,33 +1,13 @@
-﻿using Applications.Contracts;
-using Applications.Dtos.Billing;
-using Core.Exceptions;
-using Core.Enums;
-using Core.Interfaces;
-using Core.Models.Billing;
-using Core.Models.Clients;
-using Core.Models.Payments;
-using Core.Models.ServiceOrders;
-using AutoMapper;
-using Applications.Records.Billing;
-using Core.FactorySpecifications.ClientsSpecifications;
-using Core.FactorySpecifications.ServiceOrderSpecifications;
-using Core.FactorySpecifications.BillingSpecifications;
-using Core.FactorySpecifications.PaymentSpecifications;
-using Applications.Projections.Billing;
-using Applications.Responses;
-using Core.Params;
-
-
-namespace Applications.Services
+﻿namespace Applications.Services
 {
     public class BillingService (
-     IGenericRepository<BillingInvoice> invoiceRepo,
-     IGenericRepository<Client> clientRepo,
-     IGenericRepository<ServiceOrder> orderRepo,
-     IGenericRepository<Payment> paymentRepo,
-     IUnitOfWork uow,
+        IGenericRepository<BillingInvoice> invoiceRepo,
+        IGenericRepository<Client> clientRepo,
+        IGenericRepository<ServiceOrder> orderRepo,
+        IGenericRepository<Payment> paymentRepo,
+        IUnitOfWork uow,
         IMapper mapper
- ) : GenericService<BillingInvoice> ( invoiceRepo ), IBillingService
+    ) : GenericService<BillingInvoice> ( invoiceRepo ), IBillingService
     {
         private readonly IGenericRepository<Client> _clientRepo = clientRepo;
         private readonly IGenericRepository<ServiceOrder> _orderRepo = orderRepo;
@@ -36,22 +16,21 @@ namespace Applications.Services
         private readonly IUnitOfWork _uow = uow;
         private readonly IMapper _mapper = mapper;
 
-
         public async Task<BillingInvoice> GenerateInvoiceAsync ( CreateBillingInvoiceDto dto )
         {
             await using var tx = await _uow.BeginTransactionAsync();
 
-            var client = await _clientRepo.GetEntityWithSpec(ClientSpecification.ClientSpecs.ById(dto.ClientId))
-        ?? throw new NotFoundException ("Cliente não encontrado.");
+            var client = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(dto.ClientId))
+                ?? throw new NotFoundException("Client not found.");
 
-            // Valida ordens
-            var orders = await _orderRepo.GetAllAsync(ServiceOrderSpecification.ServiceOrderSpecs.ByIds(dto.ServiceOrderIds));
+            // Validate orders
+            var orders = await _orderRepo.GetAllAsync(ServiceOrderSpecs.ByIds(dto.ServiceOrderIds));
 
             if ( orders.Any ( o => o.BillingInvoiceId != null ) )
-                throw new ConflictException ( "Uma ou mais ordens já estão associadas a uma fatura." );
+                throw new ConflictException ( "One or more service orders are already linked to an invoice." );
 
             if ( orders.Any ( o => o.Status != OrderStatus.Finished ) )
-                throw new UnprocessableEntityException ( "Só é possível faturar ordens já finalizadas." );
+                throw new UnprocessableEntityException ( "Only finished service orders can be invoiced." );
 
             var invoice = new BillingInvoice
             {
@@ -61,41 +40,39 @@ namespace Applications.Services
                 ClientId = client.ClientId,
                 Client = client,
                 Status = InvoiceStatus.Open,
-                ServiceOrders = [.. orders],
+                ServiceOrders = [..orders],
                 TotalServiceOrdersAmount = orders.Sum(o => o.OrderTotal)
             };
 
-            // Fecha fatura anterior se existir
-            var faturasAntigas = (await _invoiceRepo.GetAllAsync(
-        BillingInvoiceSpecification.BillingInvoiceSpecs.AllByClient(client.ClientId)))
-        .Where(i => i.Status != InvoiceStatus.Cancelled)
-        .OrderByDescending(i => i.CreatedAt)
-        .ToList();
+            // Close previous invoice if it exists
+            var previousInvoices = (await _invoiceRepo.GetAllAsync(
+                BillingInvoiceSpecs.AllByClient(client.ClientId)))
+                .Where(i => i.Status != InvoiceStatus.Cancelled)
+                .OrderByDescending(i => i.CreatedAt)
+                .ToList();
 
-            var faturaAnterior = faturasAntigas.FirstOrDefault();
+            var lastInvoice = previousInvoices.FirstOrDefault();
 
-            if ( faturaAnterior != null )
+            if ( lastInvoice != null )
             {
-                faturaAnterior.Status = InvoiceStatus.Closed;
+                lastInvoice.Status = InvoiceStatus.Closed;
 
-                // Calcula saldo anterior
-                var pagamentos = await _paymentRepo.GetAllAsync(
-            PaymentSpecification.PaymentSpecs.ByInvoiceId(faturaAnterior.BillingInvoiceId));
+                // Calculate balance from previous invoice
+                var payments = await _paymentRepo.GetAllAsync(
+                    PaymentSpecs.ByInvoiceId(lastInvoice.BillingInvoiceId));
 
-                var totalPagoAnterior = pagamentos.Sum(p => p.AmountPaid);
-                var diff = totalPagoAnterior - faturaAnterior.TotalInvoiceAmount;
+                var totalPaid = payments.Sum(p => p.AmountPaid);
+                var balanceDifference = totalPaid - lastInvoice.TotalInvoiceAmount;
 
-                if ( diff > 0 )
-                    invoice.PreviousCredit = diff;
-                else if ( diff < 0 )
-                    invoice.PreviousDebit = Math.Abs ( diff );
+                if ( balanceDifference > 0 )
+                    invoice.PreviousCredit = balanceDifference;
+                else if ( balanceDifference < 0 )
+                    invoice.PreviousDebit = Math.Abs ( balanceDifference );
             }
 
-            // Atualiza relacionamento com OS
+            // Link orders to invoice
             foreach ( var order in invoice.ServiceOrders )
                 order.BillingInvoice = invoice;
-
-
 
             await _invoiceRepo.CreateAsync ( invoice );
             await _uow.SaveChangesAsync ( );
@@ -106,8 +83,8 @@ namespace Applications.Services
 
         public async Task<Pagination<BillingInvoiceResponseProjection>> GetPaginatedInvoicesAsync ( InvoiceParams p )
         {
-            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.Paged(p);
-            var countSpec = BillingInvoiceSpecification.BillingInvoiceSpecs.PagedForCount(p);
+            var spec = BillingInvoiceSpecs.Paged(p);
+            var countSpec = BillingInvoiceSpecs.PagedForCount(p);
 
             var totalItems = await _invoiceRepo.CountAsync(countSpec);
             var invoices = await _invoiceRepo.GetAllAsync(spec);
@@ -121,23 +98,21 @@ namespace Applications.Services
             return new Pagination<BillingInvoiceResponseProjection> ( p.PageNumber, p.PageSize, totalItems, projections );
         }
 
-
-
         public async Task<BillingInvoice> CancelInvoiceAsync ( int id )
         {
             await using var tx = await _uow.BeginTransactionAsync();
 
-            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.ByIdFull(id);
+            var spec = BillingInvoiceSpecs.ByIdFull(id);
             var invoice = await GetEntityWithSpecAsync(spec);
 
             if ( invoice == null )
-                throw new NotFoundException ( "Fatura não encontrada." );
+                throw new NotFoundException ( "Invoice not found." );
 
             if ( invoice.Status == InvoiceStatus.Cancelled )
-                throw new ConflictException ( "Fatura já está cancelada." );
+                throw new ConflictException ( "Invoice is already cancelled." );
 
             if ( invoice.Status == InvoiceStatus.Paid )
-                throw new UnprocessableEntityException ( "Faturas pagas não podem ser canceladas." );
+                throw new UnprocessableEntityException ( "Paid invoices cannot be cancelled." );
 
             foreach ( var order in invoice.ServiceOrders )
                 order.BillingInvoiceId = null;
@@ -152,7 +127,7 @@ namespace Applications.Services
 
         public async Task<BillingInvoiceRecord?> GetInvoiceRecordByIdAsync ( int id )
         {
-            var spec = BillingInvoiceSpecification.BillingInvoiceSpecs.ByIdFull(id);
+            var spec = BillingInvoiceSpecs.ByIdFull(id);
             var invoice = await _invoiceRepo.GetEntityWithSpec(spec);
 
             return invoice == null
@@ -160,11 +135,9 @@ namespace Applications.Services
                 : _mapper.Map<BillingInvoiceRecord> ( invoice );
         }
 
-
         private static string GenerateInvoiceNumber ( int clientId )
         {
-            return $"FAT-{DateTime.UtcNow:yyyyMM}-C{clientId:D4}-{Guid.NewGuid ( ).ToString ( "N" ) [..6].ToUpper ( )}";
+            return $"INV-{DateTime.UtcNow:yyyyMM}-C{clientId:D4}-{Guid.NewGuid ( ).ToString ( "N" ) [..6].ToUpper ( )}";
         }
-
     }
 }

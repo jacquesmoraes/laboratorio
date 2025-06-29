@@ -1,17 +1,8 @@
-﻿using Applications.Contracts;
-using Applications.PdfDocuments;
-using Applications.Records.Settings;
-using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using QuestPDF.Fluent;
-using QuestPDF.Infrastructure;
-
-namespace API.Controllers.Billing
+﻿namespace API.Controllers.Billing
 {
-    [Route ( "api/invoices" )]
+    [Route("api/invoices")]
     [ApiController]
-    public class InvoicesController (
+    public class InvoicesController(
         IBillingService billingService,
         ISystemSettingsService settingsService,
         IMapper mapper,
@@ -23,44 +14,42 @@ namespace API.Controllers.Billing
         private readonly IMapper _mapper = mapper;
         private readonly IWebHostEnvironment _env = env;
 
-        static InvoicesController ( )
+        static InvoicesController()
         {
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
-        [HttpGet ( "{id}/pdf" )]
-        
-        public async Task<IActionResult> DownloadInvoicePdf ( int id )
+        [HttpGet("{id}/pdf")]
+        public async Task<IActionResult> DownloadInvoicePdf(int id)
         {
             try
             {
-                // Buscar fatura
+                // Fetch invoice
                 var invoice = await _billingService.GetInvoiceRecordByIdAsync(id);
-                if ( invoice == null )
-                    return NotFound ( "Fatura não encontrada." );
+                if (invoice == null)
+                    return NotFound("Invoice not found.");
 
-                // Buscar configurações
+                // Fetch system settings
                 var settingsEntity = await _settingsService.GetAsync();
                 var settings = _mapper.Map<SystemSettingsRecord>(settingsEntity);
 
-                // Resolver caminho absoluto do logo
+                // Resolve absolute logo path
                 var logoPath = string.IsNullOrEmpty(settings.LogoUrl)
                     ? null
                     : Path.Combine(_env.WebRootPath, "uploads", "logos", Path.GetFileName(settings.LogoUrl));
 
-                // Gerar PDF
+                // Generate PDF
                 var document = new BillingInvoicePdfDocument(invoice, settings, logoPath);
                 var pdfBytes = document.GeneratePdf();
 
-                // Retornar PDF inline
-                Response.Headers ["Content-Disposition"] = $"inline; filename=fatura-{invoice.InvoiceNumber}.pdf";
-                return File ( pdfBytes, "application/pdf" );
-
+                // Return PDF inline
+                Response.Headers["Content-Disposition"] = $"inline; filename=invoice-{invoice.InvoiceNumber}.pdf";
+                return File(pdfBytes, "application/pdf");
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                // Log em produção via ILogger
-                return StatusCode ( 500, $"Erro ao gerar PDF: {ex.Message}" );
+                // Log in production via ILogger
+                return StatusCode(500, $"Error generating PDF: {ex.Message}");
             }
         }
     }

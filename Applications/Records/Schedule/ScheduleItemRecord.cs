@@ -1,6 +1,4 @@
-﻿using Core.Enums;
-
-namespace Applications.Records.Schedule
+﻿namespace Applications.Records.Schedule
 {
     public record ScheduleItemRecord
     {
@@ -15,5 +13,7 @@ namespace Applications.Records.Schedule
         public bool IsDelivered { get; init; }
         public string Status { get; init; } = string.Empty;
         public string? CurrentSectorName { get; init; }
+        public string? TargetSectorName { get; init; }
+
     }
 }

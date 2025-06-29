@@ -90,7 +90,7 @@ namespace Core.FactorySpecifications
                 spec.AddInclude ( s => s.ServiceOrder );
                 spec.AddInclude ( s => s.ServiceOrder.Client );
                 spec.AddInclude ( s => s.Sector! );
-                spec.AddInclude ( "ServiceOrder.Stages.Sector" ); // ✅ garante o setor atual
+                spec.AddInclude ( "ServiceOrder.Stages.Sector" ); 
 
             }
         }

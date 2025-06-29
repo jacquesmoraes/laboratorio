@@ -1,43 +1,27 @@
-﻿using Applications.Contracts;
-using Applications.Dtos.Payments;
-using Applications.Records.Payments;
-using Applications.Responses;
-using Applications.Services;
-using AutoMapper;
-using Core.FactorySpecifications.PaymentSpecifications;
-using Core.Params;
-using Microsoft.AspNetCore.Mvc;
-
-namespace API.Controllers.Payments
+﻿namespace API.Controllers.Payments
 {
-    [Route ( "api/[controller]" )]
+    [Route("api/[controller]")]
     [ApiController]
-    public class PaymentsController (
+    public class PaymentsController(
         IPaymentService clientPaymentService,
-        IMapper mapper ) : BaseApiController
+        IMapper mapper) : BaseApiController
     {
         private readonly IPaymentService _clientPaymentService = clientPaymentService;
         private readonly IMapper _mapper = mapper;
 
         /// <summary>
-        /// Cria um novo pagamento para um cliente.
+        /// Creates a new payment for a client.
         /// </summary>
-        [HttpPost ( "client" )]
-        public async Task<IActionResult> CreateClientPayment ( [FromBody] CreatePaymentDto dto )
+        [HttpPost("client")]
+        public async Task<IActionResult> CreateClientPayment([FromBody] CreatePaymentDto dto)
         {
-            try
-            {
-                var payment = await _clientPaymentService.RegisterClientPaymentAsync(dto);
-                var response = _mapper.Map<ClientPaymentRecord>(payment);
-                return CreatedAtAction ( nameof ( GetClientPaymentById ), new { id = response.Id }, response );
-            }
-            catch ( Exception ex )
-            {
-                return BadRequest ( new { error = ex.Message } );
-            }
+            var payment = await _clientPaymentService.RegisterClientPaymentAsync(dto);
+            var response = _mapper.Map<ClientPaymentRecord>(payment);
+            return CreatedAtAction(nameof(GetClientPaymentById), new { id = response.Id }, response);
         }
+
         /// <summary>
-        /// Retorna a lista paginada de pagamentos com filtros e ordenação.
+        /// Returns a paginated list of payments with filters and sorting.
         /// </summary>
         [HttpGet]
         public async Task<ActionResult<Pagination<ClientPaymentRecord>>> GetAll([FromQuery] PaymentParams parameters)
@@ -47,24 +31,22 @@ namespace API.Controllers.Payments
         }
 
         /// <summary>
-        /// Obtém um pagamento de cliente pelo seu ID.
+        /// Gets a client payment by its ID.
         /// </summary>
-        [HttpGet ( "client/{id}" )]
-        public async Task<IActionResult> GetClientPaymentById ( int id )
+        [HttpGet("client/{id}")]
+        public async Task<IActionResult> GetClientPaymentById(int id)
         {
-            if ( id <= 0 )
-                return BadRequest ( "ID do pagamento inválido" );
+            if (id <= 0)
+                return BadRequest("Invalid payment ID.");
 
             var spec = PaymentSpecification.PaymentSpecs.ById(id);
             var payment = await _clientPaymentService.GetEntityWithSpecAsync(spec);
 
-            if ( payment == null )
-                return NotFound ( $"Pagamento com ID {id} não encontrado" );
+            if (payment == null)
+                return NotFound($"Payment with ID {id} not found.");
 
             var dto = _mapper.Map<ClientPaymentRecord>(payment);
-            return Ok ( dto );
+            return Ok(dto);
         }
-
-        
     }
 }

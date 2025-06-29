@@ -1,21 +1,15 @@
-﻿using Applications.Contracts;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿
 
 namespace API.Filters
 {
-    public class UpdateOverdueStatusFilter : IAsyncActionFilter
+    public class UpdateOverdueStatusFilter ( IScheduleService scheduleService ) : IAsyncActionFilter
     {
-        private readonly IScheduleService _scheduleService;
-
-        public UpdateOverdueStatusFilter ( IScheduleService scheduleService )
-        {
-            _scheduleService = scheduleService;
-        }
+        private readonly IScheduleService _scheduleService = scheduleService;
 
         public async Task OnActionExecutionAsync ( ActionExecutingContext context, ActionExecutionDelegate next )
         {
-            await _scheduleService.UpdateOverdueStatusAsync ( ); 
-            await next ( ); // Executa a action original
+            await _scheduleService.UpdateOverdueStatusAsync ( );
+            await next ( ); 
         }
     }
 }

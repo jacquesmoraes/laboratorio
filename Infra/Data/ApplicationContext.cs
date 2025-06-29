@@ -1,20 +1,8 @@
-﻿using Core.Models.Clients;
-using Core.Models.LabSettings;
-using Core.Models.Payments;
-using Core.Models.Pricing;
-using Core.Models.Production;
-using Core.Models.Schedule;
-using Core.Models.ServiceOrders;
-using Core.Models.Works;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
-namespace Infra.Data
+﻿namespace Infra.Data
 {
     public class ApplicationContext ( DbContextOptions<ApplicationContext> options ) : DbContext ( options )
     {
-         public DbSet<Client> Clients => Set<Client>();
+        public DbSet<Client> Clients => Set<Client> ( );
 
         public DbSet<Payment> ClientPayments => Set<Payment> ( );
         public DbSet<TablePrice> TablePrices => Set<TablePrice> ( );

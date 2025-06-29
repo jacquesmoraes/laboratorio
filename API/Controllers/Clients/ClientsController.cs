@@ -1,14 +1,4 @@
-﻿using Applications.Contracts;
-using Applications.Dtos.Clients;
-using Applications.Projections.Clients;
-using Applications.Records.Clients;
-using AutoMapper;
-using Core.Exceptions;
-using Core.Models.Clients;
-using Microsoft.AspNetCore.Mvc;
-using static Core.FactorySpecifications.ClientsSpecifications.ClientSpecification;
-
-namespace API.Controllers.Clients
+﻿namespace API.Controllers.Clients
 {
     [Route ( "api/[controller]" )]
     [ApiController]
@@ -41,7 +31,7 @@ namespace API.Controllers.Clients
             return Ok ( dto );
         }
 
-        
+
 
 
         [HttpPost]

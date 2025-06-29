@@ -1,84 +1,75 @@
-﻿using Applications.Contracts;
-using Applications.Dtos.Pricing;
-using Applications.Projections.Pricing;
-using AutoMapper;
-using Core.FactorySpecifications;
-using Core.Models.Pricing;
-using Microsoft.AspNetCore.Mvc;
-
-namespace API.Controllers.Pricing
+﻿namespace API.Controllers.Pricing
 {
-    [Route ( "api/[controller]" )]
+    [Route("api/[controller]")]
     [ApiController]
-    public class TablePriceController ( IMapper mapper, ITablePriceService tablePriceService )
+    public class TablePriceController(IMapper mapper, ITablePriceService tablePriceService)
         : BaseApiController
     {
         private readonly IMapper _mapper = mapper;
         private readonly ITablePriceService _tablePriceService = tablePriceService;
 
         /// <summary>
-        /// Retorna todas as tabelas de preço com seus itens e clientes vinculados.
+        /// Returns all price tables with their associated items and clients.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAll ( )
+        public async Task<IActionResult> GetAll()
         {
             var spec = TablePriceSpecs.AllWithRelations();
             var result = await _tablePriceService.GetAllWithSpecAsync(spec);
 
             var response = _mapper.Map<List<TablePriceResponseProjection>>(result);
-            return Ok ( response );
+            return Ok(response);
         }
 
         /// <summary>
-        /// Retorna uma tabela de preço específica com seus itens e clientes vinculados.
+        /// Returns a specific price table with its associated items and clients.
         /// </summary>
-        [HttpGet ( "{id}" )]
-        public async Task<IActionResult> GetById ( int id )
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
             var spec = TablePriceSpecs.ByIdWithRelations(id);
             var result = await _tablePriceService.GetEntityWithSpecAsync(spec);
-            if ( result == null ) return NotFound ( );
+            if (result == null) return NotFound();
 
             var response = _mapper.Map<TablePriceResponseProjection>(result);
-            return Ok ( response );
+            return Ok(response);
         }
 
         /// <summary>
-        /// Cria uma nova tabela de preço.
+        /// Creates a new price table.
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Create ( [FromBody] CreateTablePriceDto dto )
+        public async Task<IActionResult> Create([FromBody] CreateTablePriceDto dto)
         {
             var created = await _tablePriceService.CreateFromDtoAsync(dto);
             var response = _mapper.Map<TablePriceResponseProjection>(created);
-            return CreatedAtAction ( nameof ( GetById ), new { id = created.Id }, response );
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, response);
         }
 
-
         /// <summary>
-        /// Atualiza uma tabela de preço existente.
+        /// Updates an existing price table.
         /// </summary>
-        [HttpPut ( "{id}" )]
-        public async Task<IActionResult> Update ( int id, [FromBody] UpdateTablePriceDto dto )
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateTablePriceDto dto)
         {
-            if ( id != dto.Id )
-                return BadRequest ( "ID inconsistente" );
+            if (id != dto.Id)
+                return BadRequest("Inconsistent ID.");
 
             var updated = await _tablePriceService.UpdateFromDtoAsync(dto);
-            if ( updated == null ) return NotFound ( );
+            if (updated == null) return NotFound();
 
             var response = _mapper.Map<TablePriceResponseProjection>(updated);
-            return Ok ( response );
+            return Ok(response);
         }
 
         /// <summary>
-        /// Remove uma tabela de preço.
+        /// Deletes a price table.
         /// </summary>
-        [HttpDelete ( "{id}" )]
-        public async Task<IActionResult> Delete ( int id )
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             var result = await _tablePriceService.DeleteAsync(id);
-            return result == null ? NotFound ( ) : NoContent ( );
+            return result == null ? NotFound() : NoContent();
         }
     }
 }

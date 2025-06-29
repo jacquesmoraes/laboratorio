@@ -1,11 +1,9 @@
-﻿using API.Models;
-using Microsoft.AspNetCore.Mvc;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [Route ( "errors/{code}" )]
     [ApiController]
     [ApiExplorerSettings ( IgnoreApi = true )]
+
     public class ErrorController : BaseApiController
     {
 

@@ -1,0 +1,13 @@
+﻿global using Core.Models.Identity;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore;
+global using Core.Models.Clients;
+global using Core.Models.LabSettings;
+global using Core.Models.Payments;
+global using Core.Models.Pricing;
+global using Core.Models.Production;
+global using Core.Models.Schedule;
+global using Core.Models.ServiceOrders;
+global using Core.Models.Works;
+global using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

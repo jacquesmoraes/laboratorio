@@ -1,19 +1,4 @@
-﻿using Applications.Contracts;
-using Applications.Dtos.Schedule;
-using Applications.Records.Schedule;
-using AutoMapper;
-using Core.Enums;
-using Core.Exceptions;
-using Core.FactorySpecifications.SectorSpecifications;
-using Core.Interfaces;
-using Core.Models.Schedule;
-using Core.Models.ServiceOrders;
-using static Core.FactorySpecifications.ScheduleSpecification;
-using static Core.FactorySpecifications.ScheduleSpecification.ScheduleSpecs;
-using static Core.FactorySpecifications.SectorSpecifications.SectorSpecification;
-using static Core.FactorySpecifications.ServiceOrderSpecifications.ServiceOrderSpecification.ServiceOrderSpecs;
-
-namespace Applications.Services
+﻿namespace Applications.Services
 {
     public class ScheduleService (
         IGenericRepository<ServiceOrderSchedule> scheduleRepo,
@@ -31,54 +16,106 @@ namespace Applications.Services
 
         public async Task<ScheduleItemRecord> ScheduleDeliveryAsync ( ScheduleDeliveryDto dto )
         {
-            var order = await _orderRepo.GetEntityWithSpec(ByIdFull(dto.ServiceOrderId))
-                ?? throw new NotFoundException($"OS {dto.ServiceOrderId} não encontrada.");
+            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
+                ?? throw new NotFoundException($"Service order {dto.ServiceOrderId} not found.");
 
             if ( order.Status == OrderStatus.Finished )
-                throw new BusinessRuleException ( "Não é possível agendar uma OS finalizada." );
+                throw new BusinessRuleException ( "Cannot schedule a finished service order." );
 
-            var existing = await _scheduleRepo.GetEntityWithSpec(ActiveByServiceOrderId(dto.ServiceOrderId));
+            if ( order.Status == OrderStatus.TryIn )
+                throw new BusinessRuleException ( "Cannot schedule a service order that is in try-in stage." );
+
+            var existing = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ActiveByServiceOrderId(dto.ServiceOrderId));
             if ( existing != null )
-                throw new ConflictException ( "Já existe um agendamento ativo para esta OS." );
+                throw new ConflictException ( "An active schedule already exists for this service order." );
 
+            // Validate sector (if provided)
             if ( dto.SectorId.HasValue )
             {
-                var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId.Value))
-
-                    ?? throw new NotFoundException($"Setor {dto.SectorId.Value} não encontrado.");
+                var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId.Value));
+                if ( sector == null )
+                    throw new NotFoundException ( $"Sector with ID {dto.SectorId.Value} not found." );
             }
+
+            // Specific rules for sector transfer
+            if ( dto.DeliveryType == ScheduledDeliveryType.SectorTransfer )
+            {
+                if ( !dto.SectorId.HasValue )
+                    throw new BusinessRuleException ( "For 'Sector Transfer' scheduling, the destination sector must be provided." );
+
+                var currentSectorId = order.Stages?
+                    .Where(s => s.DateOut == null)
+                    .OrderByDescending(s => s.DateIn)
+                    .FirstOrDefault()?.SectorId;
+
+                if ( currentSectorId.HasValue && dto.SectorId.Value == currentSectorId.Value )
+                    throw new BusinessRuleException ( "Destination sector must be different from the current sector." );
+            }
+
+            // Validate scheduled date
+            var lastDateIn = order.Stages?.Max(s => s.DateIn);
+            if ( lastDateIn.HasValue && dto.ScheduledDate <= lastDateIn.Value )
+                throw new BusinessRuleException (
+                    $"Scheduled date ({dto.ScheduledDate:yyyy-MM-dd}) must be after the last stage entry date ({lastDateIn:yyyy-MM-dd})." );
 
             var entity = new ServiceOrderSchedule
             {
                 ServiceOrderId = dto.ServiceOrderId,
-                ScheduledDate = dto.ScheduledDate?.ToLocalTime() ?? DateTime.Today, // Converter para local time
+                ScheduledDate = dto.ScheduledDate?.ToLocalTime() ?? DateTime.Now,
                 DeliveryType = dto.DeliveryType ?? ScheduledDeliveryType.FinalDelivery,
                 SectorId = dto.SectorId,
                 IsDelivered = false,
                 IsOverdue = false,
-                CreatedAt = DateTime.Now // Converter para local time
+                CreatedAt = DateTime.Now
             };
 
             var created = await base.CreateAsync(entity);
             return _mapper.Map<ScheduleItemRecord> ( created );
-
         }
 
         public async Task<ServiceOrderSchedule?> UpdateScheduleAsync ( int scheduleId, ScheduleDeliveryDto dto )
         {
             var schedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ById(scheduleId))
-                ?? throw new NotFoundException($"Agendamento {scheduleId} não encontrado.");
+                ?? throw new NotFoundException($"Schedule {scheduleId} not found.");
 
             if ( schedule.IsDelivered )
-                throw new BusinessRuleException ( "Não é possível alterar um agendamento já entregue." );
+                throw new BusinessRuleException ( "Cannot update a schedule that has already been delivered." );
 
+            var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(schedule.ServiceOrderId))
+                ?? throw new NotFoundException($"Service order {schedule.ServiceOrderId} not found.");
+
+            // Validate sector (if provided)
             if ( dto.SectorId.HasValue )
             {
-                var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId.Value))
-                    ?? throw new NotFoundException($"Setor {dto.SectorId.Value} não encontrado.");
+                var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId.Value));
+                if ( sector == null )
+                    throw new NotFoundException ( $"Sector with ID {dto.SectorId.Value} not found." );
             }
 
-            schedule.ScheduledDate = dto.ScheduledDate ?? schedule.ScheduledDate;
+            // Specific rules for sector transfer
+            if ( dto.DeliveryType == ScheduledDeliveryType.SectorTransfer )
+            {
+                if ( !dto.SectorId.HasValue )
+                    throw new BusinessRuleException ( "For 'Sector Transfer' scheduling, the destination sector must be provided." );
+
+                var currentSectorId = order.Stages?
+                    .Where(s => s.DateOut == null)
+                    .OrderByDescending(s => s.DateIn)
+                    .FirstOrDefault()?.SectorId;
+
+                if ( currentSectorId.HasValue && dto.SectorId.Value == currentSectorId.Value )
+                    throw new BusinessRuleException ( "Destination sector must be different from the current sector." );
+            }
+
+            // Validate new date
+            var newDate = dto.ScheduledDate ?? schedule.ScheduledDate;
+            var lastDateIn = order.Stages?.Max(s => s.DateIn);
+
+            if ( lastDateIn.HasValue && newDate <= lastDateIn.Value )
+                throw new BusinessRuleException (
+                    $"New schedule date ({newDate:yyyy-MM-dd}) must be after the last stage entry date ({lastDateIn:yyyy-MM-dd})." );
+
+            schedule.ScheduledDate = newDate;
             schedule.DeliveryType = dto.DeliveryType ?? schedule.DeliveryType;
             schedule.SectorId = dto.SectorId;
 
@@ -87,12 +124,11 @@ namespace Applications.Services
 
         public async Task<bool> RemoveScheduleAsync ( int scheduleId )
         {
-            var schedule = await _scheduleRepo.GetEntityWithSpec(ById(scheduleId))
-
-                ?? throw new NotFoundException($"Agendamento {scheduleId} não encontrado.");
+            var schedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ById(scheduleId))
+                ?? throw new NotFoundException($"Schedule {scheduleId} not found.");
 
             if ( schedule.IsDelivered )
-                throw new BusinessRuleException ( "Não é possível remover um agendamento já entregue." );
+                throw new BusinessRuleException ( "Cannot remove a schedule that has already been delivered." );
 
             await _scheduleRepo.DeleteAsync ( scheduleId );
             await _uow.SaveChangesAsync ( );
@@ -101,7 +137,7 @@ namespace Applications.Services
 
         public async Task<List<SectorScheduleRecord>> GetScheduleByDateAsync ( DateTime date )
         {
-            var spec = ForDate(date);
+            var spec = ScheduleSpecs.ForDate(date);
             var schedules = await _scheduleRepo.GetAllAsync(spec);
 
             return schedules
@@ -109,7 +145,7 @@ namespace Applications.Services
                 .Select ( g => new SectorScheduleRecord
                 {
                     SectorId = g.Key ?? 0,
-                    SectorName = g.First ( ).Sector?.Name ?? "Sem Setor",
+                    SectorName = g.First ( ).Sector?.Name ?? "No Sector",
                     Deliveries = g.Select ( _mapper.Map<ScheduleItemRecord> ).ToList ( )
                 } ).ToList ( );
         }
@@ -119,21 +155,9 @@ namespace Applications.Services
             return await GetScheduleByDateAsync ( DateTime.Today );
         }
 
-
-
-        //public async Task<bool> MarkAsDeliveredAsync ( int scheduleId )
-        //{
-        //    var schedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ById(scheduleId))
-        //        ?? throw new NotFoundException($"Agendamento {scheduleId} não encontrado.");
-
-        //    schedule.IsDelivered = true;
-        //    await _uow.SaveChangesAsync ( );
-        //    return true;
-        //}
-
         public async Task UpdateOverdueStatusAsync ( )
         {
-            var spec = OverdueDeliveries();
+            var spec = ScheduleSpecs.OverdueDeliveries();
             var overdue = await _scheduleRepo.GetAllAsync(spec);
 
             foreach ( var s in overdue )
@@ -142,7 +166,6 @@ namespace Applications.Services
             if ( overdue.Any ( ) )
                 await _uow.SaveChangesAsync ( );
         }
-
 
         public async Task<SectorScheduleRecord?> GetScheduleByCurrentSectorAsync ( int sectorId, DateTime date )
         {
@@ -155,28 +178,11 @@ namespace Applications.Services
             var record = new SectorScheduleRecord
             {
                 SectorId = sectorId,
-                SectorName = items.First().Sector?.Name ?? "Sem Nome",
+                SectorName = items.First().Sector?.Name ?? "Unnamed Sector",
                 Deliveries = _mapper.Map<List<ScheduleItemRecord>>(items)
             };
 
             return record;
         }
-
-
-
-
-        //public async Task<List<ServiceOrderSchedule>> GetAvailableForSchedulingAsync ( )
-        //{
-        //    var spec = AvailableForScheduling();
-        //    var orders = await _orderRepo.GetAllAsync(spec);
-
-        //    return orders.Select ( o => new ServiceOrderSchedule
-        //    {
-        //        ServiceOrderId = o.ServiceOrderId,
-        //        ServiceOrder = o,
-        //        IsDelivered = false,
-        //        IsOverdue = false
-        //    } ).ToList ( );
-        //}
     }
 }

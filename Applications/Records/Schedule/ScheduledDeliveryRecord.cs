@@ -1,6 +1,4 @@
-﻿using Core.Enums;
-
-namespace Applications.Records.Schedule
+﻿namespace Applications.Records.Schedule
 {
     public record ScheduledDeliveryRecord
     {

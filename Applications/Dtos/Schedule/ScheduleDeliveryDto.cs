@@ -1,6 +1,4 @@
-﻿using Core.Enums;
-
-namespace Applications.Dtos.Schedule
+﻿namespace Applications.Dtos.Schedule
 {
     public class ScheduleDeliveryDto
     {

@@ -30,7 +30,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 else
                 {
                     // Se não encontrar, adiciona configuração JWT inline para testes
-                    config.AddInMemoryCollection(new Dictionary<string, string>
+                    config.AddInMemoryCollection(new Dictionary<string, string?>
                     {
                         ["Jwt:Key"] = "chave-fake-segura-para-testes-com-32-caracteres",
                         ["Jwt:Issuer"] = "LabSystem",

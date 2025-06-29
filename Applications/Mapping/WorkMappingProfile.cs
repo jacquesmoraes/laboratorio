@@ -1,9 +1,4 @@
-﻿using Applications.Dtos.Work;
-using Applications.Records.Work;
-using AutoMapper;
-using Core.Models.Works;
-
-namespace Applications.Mapping
+﻿namespace Applications.Mapping
 {
     public class WorkMappingProfile : Profile
     {

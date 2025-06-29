@@ -1,41 +1,31 @@
-﻿using Applications.Contracts;
-using Applications.Dtos.Pricing;
-using Core.Exceptions;
-using Core.FactorySpecifications;
-using Core.Interfaces;
-using Core.Models.Pricing;
-
-namespace Applications.Services
+﻿namespace Applications.Services
 {
-    public class TablePriceItemService ( IGenericRepository<TablePriceItem> repository ) : GenericService<TablePriceItem> ( repository ), ITablePriceItemService
+    public class TablePriceItemService ( IGenericRepository<TablePriceItem> repository ) 
+        : GenericService<TablePriceItem> ( repository ), ITablePriceItemService
     {
         private readonly IGenericRepository<TablePriceItem> _repository = repository;
 
-        public async Task<TablePriceItem?> UpdateFromDtoAsync(int id, UpdateTablePriceItemDto dto)
-    {
-        if (id <= 0)
-            throw new CustomValidationException("ID do item da tabela de preço inválido.");
+        public async Task<TablePriceItem?> UpdateFromDtoAsync ( int id, UpdateTablePriceItemDto dto )
+        {
+            if ( id <= 0 )
+                throw new CustomValidationException ( "Invalid table price item ID." );
 
-        if (string.IsNullOrWhiteSpace(dto.ItemName))
-            throw new CustomValidationException("O nome do item é obrigatório.");
+            if ( string.IsNullOrWhiteSpace ( dto.ItemName ) )
+                throw new CustomValidationException ( "Item name is required." );
 
-        if (dto.Price < 0)
-            throw new CustomValidationException("O preço não pode ser negativo.");
+            if ( dto.Price < 0 )
+                throw new CustomValidationException ( "Price cannot be negative." );
 
-        var existing = await _repository.GetEntityWithSpec(TablePriceItemSpecs.ByIdWithRelations(id))
-            ?? throw new NotFoundException($"Item da tabela de preço com ID {id} não encontrado.");
+            var existing = await _repository.GetEntityWithSpec(TablePriceItemSpecs.ByIdWithRelations(id))
+            ?? throw new NotFoundException($"Table price item with ID {id} not found.");
 
-        
             existing.ItemName = dto.ItemName;
-        existing.Price = dto.Price;
+            existing.Price = dto.Price;
 
-        var updated = await _repository.UpdateAsync(id, existing)
-            ?? throw new BusinessRuleException("Falha ao atualizar o item da tabela de preço.");
+            var updated = await _repository.UpdateAsync(id, existing)
+            ?? throw new BusinessRuleException("Failed to update table price item.");
 
-        return updated;
+            return updated;
+        }
     }
-
-
-    }
-
 }

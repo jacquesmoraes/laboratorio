@@ -1,7 +1,4 @@
-﻿using Core.Models.Pricing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Reflection.Emit;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infra.Data.Config
 {
@@ -9,7 +6,7 @@ namespace Infra.Data.Config
     {
         public void Configure ( EntityTypeBuilder<TablePriceItem> builder )
         {
-            builder   
+            builder
                 .HasOne ( i => i.TablePrice )
                 .WithMany ( p => p.Items )
                 .HasForeignKey ( i => i.TablePriceId )

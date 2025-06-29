@@ -1,6 +1,4 @@
-﻿using Core.Models.Schedule;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infra.Data.Config
 {
@@ -40,7 +38,7 @@ namespace Infra.Data.Config
                 .WithMany ( )
                 .HasForeignKey ( x => x.SectorId )
                 .OnDelete ( DeleteBehavior.Restrict );
-        
+
         }
-}
+    }
 }

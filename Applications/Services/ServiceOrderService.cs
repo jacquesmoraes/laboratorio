@@ -1,24 +1,4 @@
-﻿using Applications.Contracts;
-using Applications.Dtos.ServiceOrder;
-using Applications.Projections.ServiceOrder;
-using Applications.Responses;
-using Applications.Services.Validators;
-using AutoMapper;
-using Core.Enums;
-using Core.Exceptions;
-using Core.FactorySpecifications.ServiceOrderSpecifications;
-using Core.Interfaces;
-using Core.Models.Clients;
-using Core.Models.Schedule;
-using Core.Models.ServiceOrders;
-using Core.Models.Works;
-using Core.Params;
-using static Core.FactorySpecifications.ScheduleSpecification.ScheduleSpecs;
-using static Core.FactorySpecifications.ClientsSpecifications.ClientSpecification;
-using static Core.FactorySpecifications.SectorSpecifications.SectorSpecification;
-using static Core.FactorySpecifications.ServiceOrderSpecifications.ServiceOrderSpecification;
-
-namespace Applications.Services
+﻿namespace Applications.Services
 {
     public class ServiceOrderService (
         IMapper mapper,
@@ -42,7 +22,7 @@ namespace Applications.Services
             await using var tx = await _uow.BeginTransactionAsync();
 
             var client = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(dto.ClientId))
-        ?? throw new NotFoundException("Cliente não encontrado.");
+        ?? throw new NotFoundException("Client not found.");
 
             var order = _mapper.Map<ServiceOrder>(dto);
             order.ClientId = client.ClientId;
@@ -52,7 +32,7 @@ namespace Applications.Services
             order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
 
             var firstSector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.FirstSectorId))
-        ?? throw new NotFoundException("Setor inicial não encontrado.");
+        ?? throw new NotFoundException("Initial sector not found.");
 
             order.Stages.Add ( new ProductionStage
             {
@@ -66,37 +46,30 @@ namespace Applications.Services
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
 
-
-
-            var fullOrder = await _orderRepo.GetEntityWithSpec(
-                ServiceOrderSpecs.ByIdFull(order.ServiceOrderId)
-                );
+            var fullOrder = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(order.ServiceOrderId));
             return fullOrder!;
-
         }
-
-
 
         public async Task<ServiceOrder?> MoveToStageAsync ( MoveToStageDto dto )
         {
             await using var tx = await _uow.BeginTransactionAsync();
 
             var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
-        ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
+        ?? throw new NotFoundException($"Service Order {dto.ServiceOrderId} not found.");
 
             var sector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.SectorId))
-        ?? throw new NotFoundException($"Setor {dto.SectorId} não encontrado.");
+        ?? throw new NotFoundException($"Sector {dto.SectorId} not found.");
 
-            //  Limpa agendamento ativo, se houver
-            var existingSchedule = await _scheduleRepo.GetEntityWithSpec(ActiveByServiceOrderId(dto.ServiceOrderId));
+            // Clear active schedule, if any
+            var existingSchedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ActiveByServiceOrderId(dto.ServiceOrderId));
             if ( existingSchedule is not null )
             {
                 await _scheduleRepo.DeleteAsync ( existingSchedule );
-                // Se quiser manter histórico em vez de deletar:
+                // If you prefer to keep history instead of deleting:
                 // existingSchedule.IsDelivered = true;
             }
 
-            //  Valida e aplica movimentação
+            // Validate and apply stage move
             var dateInUtc = DateTime.SpecifyKind(dto.DateIn, DateTimeKind.Utc);
             ServiceOrderDateValidator.ValidateNewStageDate ( order.Stages, dateInUtc );
             order.MoveTo ( sector, dateInUtc );
@@ -106,16 +79,18 @@ namespace Applications.Services
             return order;
         }
 
-
-
-
-
         public async Task<ServiceOrder?> SendToTryInAsync ( SendToTryInDto dto )
         {
             await using var tx = await _uow.BeginTransactionAsync();
 
             var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
-        ?? throw new NotFoundException($"Ordem de serviço {dto.ServiceOrderId} não encontrada.");
+        ?? throw new NotFoundException($"Service Order {dto.ServiceOrderId} not found.");
+
+            var existingSchedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ActiveByServiceOrderId(dto.ServiceOrderId));
+            if ( existingSchedule is not null )
+            {
+                await _scheduleRepo.DeleteAsync ( existingSchedule );
+            }
 
             var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
             ServiceOrderDateValidator.ValidateTryInDate ( order.Stages, dateOutUtc );
@@ -126,7 +101,6 @@ namespace Applications.Services
 
             return order;
         }
-
 
         public async Task<List<ServiceOrder>> FinishOrdersAsync ( FinishOrderDto dto )
         {
@@ -146,12 +120,12 @@ namespace Applications.Services
             }
 
             if ( !serviceOrders.Any ( ) )
-                throw new BusinessRuleException ( "Nenhuma ordem válida encontrada." );
+                throw new BusinessRuleException ( "No valid service order found." );
 
-            // Validação de cliente único
+            // Validate that all orders belong to the same client
             var clientId = serviceOrders.First().ClientId;
             if ( serviceOrders.Any ( o => o.ClientId != clientId ) )
-                throw new BusinessRuleException ( "Todas as ordens devem ser do mesmo cliente." );
+                throw new BusinessRuleException ( "All service orders must belong to the same client." );
 
             var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
 
@@ -159,54 +133,52 @@ namespace Applications.Services
             {
                 ServiceOrderDateValidator.ValidateFinishDate ( serviceOrders.First ( ), dateOutUtc );
             }
+
             foreach ( var order in serviceOrders )
             {
                 order.Finish ( dateOutUtc );
             }
+
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
 
             return serviceOrders;
         }
 
-
-
-
         public async Task<IReadOnlyList<ServiceOrder>> GetOutForTryInAsync ( int days )
         {
             var baseSpec = ServiceOrderSpecs.OutForTryInMoreThanXDays(days);
-            var candidatos = await _orderRepo.GetAllAsync(baseSpec);
-            return candidatos.Where ( o => o.OutForTryInMoreThan ( days ) ).ToList ( );
+            var candidates = await _orderRepo.GetAllAsync(baseSpec);
+            return candidates.Where ( o => o.OutForTryInMoreThan ( days ) ).ToList ( );
         }
 
         public async Task<ServiceOrder?> UpdateOrderAsync ( int id, CreateServiceOrderDto dto )
         {
             if ( id <= 0 )
-                throw new CustomValidationException ( "ID da ordem de serviço inválido." );
+                throw new CustomValidationException ( "Invalid service order ID." );
+
             var spec = ServiceOrderSpecs.ByIdFull(id);
             var order = await _orderRepo.GetEntityWithSpec(spec)
-        ?? throw new NotFoundException($"Ordem de serviço {id} não encontrada.");
-
+        ?? throw new NotFoundException($"Service Order {id} not found.");
 
             if ( order.Status == OrderStatus.Finished )
-                throw new BusinessRuleException ( "Não é permitido editar uma OS finalizada." );
+                throw new BusinessRuleException ( "Editing a finished service order is not allowed." );
 
-            // Troca de cliente
+            // Change client if needed
             if ( order.ClientId != dto.ClientId )
             {
                 var newClient = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(dto.ClientId));
                 if ( newClient == null )
-                    throw new InvalidOperationException ( "Cliente informado não existe." );
+                    throw new InvalidOperationException ( "Specified client does not exist." );
 
                 order.ClientId = newClient.ClientId;
                 order.Client = newClient;
             }
 
-
             order.PatientName = dto.PatientName;
             order.DateIn = DateTime.SpecifyKind ( dto.DateIn, DateTimeKind.Utc );
 
-            // Atualiza os trabalhos
+            // Update works
             order.Works.Clear ( );
             order.Works = _mapper.Map<List<Work>> ( dto.Works );
             order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
@@ -214,7 +186,6 @@ namespace Applications.Services
             await _uow.SaveChangesAsync ( );
             return order;
         }
-
 
         public async Task<ServiceOrder?> DeleteOrderAsync ( int serviceOrderId )
         {
@@ -224,9 +195,9 @@ namespace Applications.Services
             if ( order == null )
                 return null;
 
-            // Validação adicional (opcional)
+            // Optional: additional validation
             if ( order.Status == OrderStatus.Finished )
-                throw new InvalidOperationException ( "Não é permitido excluir ordens finalizadas." );
+                throw new InvalidOperationException ( "Deleting finished service orders is not allowed." );
 
             await _orderRepo.DeleteAsync ( order.ServiceOrderId );
             await _uow.SaveChangesAsync ( );
@@ -236,15 +207,15 @@ namespace Applications.Services
 
         public async Task<Pagination<ServiceOrderListProjection>> GetPaginatedAsync ( ServiceOrderParams p )
         {
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.Paged(p);
+            var spec = ServiceOrderSpecs.Paged(p);
 
             var countSpec = new ServiceOrderSpecification(o =>
-        (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
-        (!p.Status.HasValue || o.Status == p.Status) &&
-        (string.IsNullOrEmpty(p.PatientName) || o.PatientName.ToLower().Contains(p.PatientName.ToLower())) &&
-        (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
-        (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value)
-    );
+                (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
+                (!p.Status.HasValue || o.Status == p.Status) &&
+                (string.IsNullOrEmpty(p.PatientName) || o.PatientName.ToLower().Contains(p.PatientName.ToLower())) &&
+                (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
+                (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value)
+            );
 
             var totalItems = await _orderRepo.CountAsync(countSpec);
             var orders = await _orderRepo.GetAllAsync(spec);
@@ -253,7 +224,6 @@ namespace Applications.Services
 
             return new Pagination<ServiceOrderListProjection> ( p.PageNumber, p.PageSize, totalItems, projections );
         }
-
 
         public async Task<ServiceOrder?> ReopenOrderAsync ( int id )
         {
@@ -276,28 +246,23 @@ namespace Applications.Services
             return order;
         }
 
-
         private async Task<string> GenerateOrderNumberAsync ( int clientId )
         {
             var spec = ServiceOrderSpecs.AllByClient(clientId);
 
             var allOrders = await _orderRepo.GetAllAsync(spec);
             var maxSequence = allOrders
-        .Select(o =>
-        {
-            var parts = o.OrderNumber?.Split('-');
-            return parts != null && int.TryParse(parts[0], out var n) ? n : 0;
-        })
-        .DefaultIfEmpty(0)
-        .Max();
+                .Select(o =>
+                {
+                    var parts = o.OrderNumber?.Split('-');
+                    return parts != null && int.TryParse(parts[0], out var n) ? n : 0;
+                })
+                .DefaultIfEmpty(0)
+                .Max();
 
             var nextSequence = maxSequence + 1;
 
             return $"{nextSequence}-{clientId}";
         }
-
-
-
-
     }
 }

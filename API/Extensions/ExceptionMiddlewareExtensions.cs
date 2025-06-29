@@ -1,6 +1,4 @@
-﻿using API.Middleware;
-
-namespace API.Extensions
+﻿namespace API.Extensions
 {
     public static class ExceptionMiddlewareExtensions
     {

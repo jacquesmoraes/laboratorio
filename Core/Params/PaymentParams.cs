@@ -2,12 +2,10 @@
 {
     public class PaymentParams : QueryParams
     {
-    
         /// <summary>
-        /// Filtro por cliente (usado na dashboard do sistema).
-        /// Na área do cliente, esse valor será fixado com base na claim.
+        /// Filter by client (used in the system dashboard).
+        /// In the client area, this value will be fixed based on the claim.
         /// </summary>
         public int? ClientId { get; set; }
-
     }
 }

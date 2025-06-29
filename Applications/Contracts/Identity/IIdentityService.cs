@@ -1,7 +1,4 @@
-﻿using Applications.Dtos.Identity;
-using Applications.Identity;
-
-namespace Applications.Contracts.Identity
+﻿namespace Applications.Contracts.Identity
 {
     public interface IIdentityService
     {
@@ -15,5 +12,8 @@ namespace Applications.Contracts.Identity
         // PRIMEIRO ACESSO (2 etapas)
         Task<bool> ValidateAccessCodeAsync(ValidateAccessCodeDto dto);
         Task<AuthResponseRecord> CompleteFirstAccessAsync(FirstAccessPasswordResetDto dto);
+
+        Task<string> RegenerateAccessCodeAsync(string userId);
+
     }
 }

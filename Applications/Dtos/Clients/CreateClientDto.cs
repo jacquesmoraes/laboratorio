@@ -1,8 +1,4 @@
-﻿using Applications.Records.Clients;
-using Core.Enums;
-using System.ComponentModel.DataAnnotations;
-
-namespace Applications.Dtos.Clients
+﻿namespace Applications.Dtos.Clients
 {
     public class CreateClientDto
     {

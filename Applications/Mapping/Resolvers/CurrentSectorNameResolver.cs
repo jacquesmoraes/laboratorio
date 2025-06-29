@@ -1,8 +1,4 @@
-﻿using Applications.Projections.ServiceOrder;
-using Applications.Records.ServiceOrders;
-using AutoMapper;
-using Core.Enums;
-using Core.Models.ServiceOrders;
+﻿
 
 namespace Applications.Mapping.Resolvers
 {

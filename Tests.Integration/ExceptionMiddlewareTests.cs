@@ -21,20 +21,22 @@ public class ExceptionMiddlewareTests : IClassFixture<CustomWebApplicationFactor
     [InlineData ( "/test/notfound", HttpStatusCode.NotFound, "Resource not found" )]
     [InlineData ( "/test/conflict", HttpStatusCode.Conflict, "Conflict occurred" )]
     [InlineData ( "/test/unprocessable", HttpStatusCode.UnprocessableEntity, "Unprocessable entity" )]
-    [InlineData ( "/test/invalid", HttpStatusCode.BadRequest, "Operação inválida" )]
-    [InlineData ( "/test/unexpected", HttpStatusCode.InternalServerError, "Erro inesperado" )]
-
-
+    [InlineData ( "/test/invalid", HttpStatusCode.BadRequest, "Invalid operation" )]
+    [InlineData ( "/test/unexpected", HttpStatusCode.InternalServerError, "Unexpected server error" )]
     public async Task Middleware_Should_Handle_Exception_Types_Correctly ( string url, HttpStatusCode expectedStatus, string expectedMessage )
     {
         // Act
         var response = await _client.GetAsync(url);
         var content = await response.Content.ReadAsStringAsync();
 
-        // Assert
-        response.StatusCode.Should ( ).Be ( expectedStatus );
-        content.Should ( ).ContainEquivalentOf ( expectedMessage );
+        // Assert - status code
+        response.StatusCode.Should().Be(expectedStatus);
 
+        // Assert - error message
+        using var doc = JsonDocument.Parse(content);
+        var message = doc.RootElement.GetProperty("message").GetString();
+
+        message.Should().Contain(expectedMessage);
     }
 
     [Fact]
@@ -42,10 +44,19 @@ public class ExceptionMiddlewareTests : IClassFixture<CustomWebApplicationFactor
     {
         var response = await _client.GetAsync("/rota-invalida-qualquer");
 
-        response.StatusCode.Should ( ).Be ( HttpStatusCode.NotFound );
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
         var content = await response.Content.ReadAsStringAsync();
-        content.Should ( ).Contain ( "Recurso não encontrado" );
+
+        // Deserialize JSON to avoid encoding issues
+        var result = JsonSerializer.Deserialize<ApiResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        result.Should().NotBeNull();
+        result!.StatusCode.Should().Be(404);
+        result.Message.Should().Contain("Resource not found");
     }
 
     [Fact]
@@ -56,23 +67,36 @@ public class ExceptionMiddlewareTests : IClassFixture<CustomWebApplicationFactor
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert - status code
-        response.StatusCode.Should ( ).Be ( HttpStatusCode.Unauthorized );
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
-        // Desserializa a resposta JSON
+        // Deserialize JSON response
         var result = JsonSerializer.Deserialize<ApiResponse>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
 
-        result.Should ( ).NotBeNull ( );
-        result!.StatusCode.Should ( ).Be ( 401 );
+        result.Should().NotBeNull();
+        result!.StatusCode.Should().Be(401);
 
-        // Valida a mensagem da resposta com flexibilidade
-        Assert.True (
-            result.Message.Contains ( "Não autorizado", StringComparison.OrdinalIgnoreCase ) ||
-            result.Message.Contains ( "unauthorized", StringComparison.OrdinalIgnoreCase ),
-            $"Mensagem esperada: 'Não autorizado' ou 'unauthorized'. Mensagem real: {result.Message}"
+        // Validate response message with flexibility
+        Assert.True(
+            result.Message.Contains("unauthorized", StringComparison.OrdinalIgnoreCase),
+            $"Expected message: 'unauthorized'. Actual message: {result.Message}"
         );
     }
 
+    [Fact]
+    public async Task Debug_404_Test ( )
+    {
+        var response = await _client.GetAsync("/rota-invalida-qualquer");
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        // Debug: print status code and content
+        Console.WriteLine($"Status Code: {response.StatusCode}");
+        Console.WriteLine($"Content: {content}");
+
+        // Accepting multiple statuses during debugging
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.Unauthorized);
+    }
 }

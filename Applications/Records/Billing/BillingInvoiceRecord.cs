@@ -1,6 +1,4 @@
-﻿using Applications.Records.Clients;
-
-namespace Applications.Records.Billing
+﻿namespace Applications.Records.Billing
 {
     public record BillingInvoiceRecord
     {

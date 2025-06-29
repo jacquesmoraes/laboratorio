@@ -1,12 +1,4 @@
-﻿using Core.Models.Clients;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infra.Data.Config
 {
@@ -14,21 +6,21 @@ namespace Infra.Data.Config
     {
         public void Configure ( EntityTypeBuilder<Client> builder )
         {
-           builder.OwnsOne ( c => c.Address );
+            builder.OwnsOne ( c => c.Address );
 
 
-           
-                builder.OwnsMany ( c => c.Patients, pb =>
-                {
-                    pb.WithOwner ( ).HasForeignKey ( "ClientId" );
-                    // Cria uma coluna de ID interno auto incrementável por cliente
-                    pb.Property<int> ( "PatientInternalId" );
-                    pb.HasKey ( "ClientId", "PatientInternalId" );
-                    pb.Property ( p => p.Name ).IsRequired ( );
-                    pb.Property ( p => p.Notes );
-                    pb.ToTable ( "Patients" );
-                } );
-            
+
+            builder.OwnsMany ( c => c.Patients, pb =>
+            {
+                pb.WithOwner ( ).HasForeignKey ( "ClientId" );
+                // Cria uma coluna de ID interno auto incrementável por cliente
+                pb.Property<int> ( "PatientInternalId" );
+                pb.HasKey ( "ClientId", "PatientInternalId" );
+                pb.Property ( p => p.Name ).IsRequired ( );
+                pb.Property ( p => p.Notes );
+                pb.ToTable ( "Patients" );
+            } );
+
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿
 using Core.Interfaces;
 using Core.Specifications;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infra.Data.Repositories

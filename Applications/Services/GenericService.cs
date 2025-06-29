@@ -1,8 +1,4 @@
-﻿using Applications.Contracts;
-using Core.Interfaces;
-using Core.Specifications;
-
-namespace Applications.Services
+﻿namespace Applications.Services
 {
     public class GenericService<T> ( IGenericRepository<T> repository ) : IGenericService<T> where T : class
     {

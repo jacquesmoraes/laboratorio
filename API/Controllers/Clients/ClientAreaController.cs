@@ -1,18 +1,4 @@
-﻿using Applications.Contracts;
-using Applications.PdfDocuments;
-using Applications.Projections.Billing;
-using Applications.Projections.ServiceOrder;
-using Applications.Records.Payments;
-using Applications.Records.Settings;
-using Applications.Responses;
-using AutoMapper;
-using Core.Params;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using QuestPDF.Fluent;
-using QuestPDF.Infrastructure;
-
-namespace API.Controllers.Clients
+﻿namespace API.Controllers.Clients
 {
     [Authorize(Roles = "client")]
     [ApiController]
@@ -22,7 +8,7 @@ namespace API.Controllers.Clients
         IPaymentService paymentService,
         IBillingService billingService,
         IServiceOrderService serviceOrderService
-         ) : ControllerBase
+    ) : ControllerBase
     {
         private readonly IClientAreaService _clientAreaService = clientAreaService;
         private readonly IPaymentService _paymentService = paymentService;
@@ -35,8 +21,8 @@ namespace API.Controllers.Clients
         }
 
         /// <summary>
-        /// Retorna o dashboard resumido do cliente, incluindo dados cadastrais,
-        /// totais financeiros e faturas com link para download.
+        /// Returns the client's summary dashboard, including personal data,
+        /// financial totals and invoices with download link.
         /// </summary>
         [HttpGet("dashboard")]
         public async Task<IActionResult> GetDashboard()
@@ -76,10 +62,8 @@ namespace API.Controllers.Clients
             return Ok(result);
         }
 
-        
-        
         /// <summary>
-        /// Faz o download do PDF da fatura para o cliente.
+        /// Downloads the invoice PDF for the logged-in client.
         /// </summary>
         [HttpGet("invoices/{id}/download")]
         public async Task<IActionResult> DownloadInvoicePdf(
@@ -93,49 +77,49 @@ namespace API.Controllers.Clients
             {
                 var userClientId = GetUserClientId();
 
-                // Buscar fatura
+                // Fetch invoice
                 var invoice = await billingService.GetInvoiceRecordByIdAsync(id);
                 if (invoice == null)
-                    return NotFound("Fatura não encontrada.");
+                    return NotFound("Invoice not found.");
 
-                // Validar se a fatura pertence ao cliente logado
+                // Validate invoice ownership
                 if (invoice.ClientId != userClientId)
                 {
-                    return Forbid("Você só pode baixar suas próprias faturas.");
+                    return Forbid("You can only download your own invoices.");
                 }
 
-                // Buscar configurações do sistema
+                // Fetch system settings
                 var settingsEntity = await settingsService.GetAsync();
                 var settings = mapper.Map<SystemSettingsRecord>(settingsEntity);
 
-                // Caminho absoluto do logo
+                // Resolve absolute logo path
                 var logoPath = string.IsNullOrEmpty(settings.LogoUrl)
                     ? null
                     : Path.Combine(env.WebRootPath, "uploads", "logos", Path.GetFileName(settings.LogoUrl));
 
-                // Criar PDF
+                // Generate PDF
                 var document = new BillingInvoicePdfDocument(invoice, settings, logoPath);
                 var pdfBytes = document.GeneratePdf();
 
-                // Retornar PDF inline
-                Response.Headers["Content-Disposition"] = $"inline; filename=fatura-{invoice.InvoiceNumber}.pdf";
+                // Return PDF inline
+                Response.Headers["Content-Disposition"] = $"inline; filename=invoice-{invoice.InvoiceNumber}.pdf";
                 return File(pdfBytes, "application/pdf");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro ao gerar PDF: {ex.Message}");
+                return StatusCode(500, $"Error generating PDF: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Método auxiliar para obter o clientId do usuário logado
+        /// Helper method to extract clientId from the logged-in user's claims.
         /// </summary>
         private int GetUserClientId()
         {
             var userClientIdClaim = User.FindFirst("clientId")?.Value;
             if (string.IsNullOrEmpty(userClientIdClaim) || !int.TryParse(userClientIdClaim, out var userClientId))
             {
-                throw new UnauthorizedAccessException("Usuário não possui clientId válido.");
+                throw new UnauthorizedAccessException("User does not have a valid clientId.");
             }
             return userClientId;
         }

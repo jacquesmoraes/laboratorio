@@ -1,14 +1,12 @@
-﻿using Applications.Records.Clients;
-
-namespace Applications.Contracts
+﻿namespace Applications.Contracts
 {
     public interface IClientAreaService
     {
-        /// <summary>
-        /// Retorna os dados consolidados da área do cliente:
-        /// informações cadastrais, resumo financeiro e faturas.
+          /// <summary>
+        /// Returns consolidated data for the client area:
+        /// personal information, financial summary, and invoices.
         /// </summary>
-        /// <param name="clientId">ID do cliente</param>
+        /// <param name="clientId">Client ID</param>
         Task<ClientDashboardRecord> GetClientBasicDashboardAsync ( int clientId );
     }
 }

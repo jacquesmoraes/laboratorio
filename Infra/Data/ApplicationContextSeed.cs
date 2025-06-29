@@ -1,10 +1,4 @@
-﻿using Core.Models.Clients;
-using Core.Models.LabSettings;
-using Core.Models.Pricing;
-using Core.Models.Production;
-using Core.Models.ServiceOrders;
-using Core.Models.Works;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Infra.Data

@@ -1,12 +1,8 @@
-﻿using Core.Exceptions;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace API.Controllers.Tests
+﻿namespace API.Controllers.Tests
 {
     [ApiController]
     [Route ( "test" )]
-    public class TestController : BaseApiController
+    public class TestController : ControllerBase
     {
         [HttpGet ( "badrequest" )]
         public IActionResult ThrowBadRequest ( ) => throw new BadRequestException ( "BadRequest test exception" );

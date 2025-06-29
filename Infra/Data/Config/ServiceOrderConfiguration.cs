@@ -1,6 +1,4 @@
-﻿using Core.Models.ServiceOrders;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infra.Data.Config
 {

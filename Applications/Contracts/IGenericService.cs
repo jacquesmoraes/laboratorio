@@ -1,6 +1,4 @@
-﻿using Core.Specifications;
-
-namespace Applications.Contracts
+﻿namespace Applications.Contracts
 {
     public interface IGenericService<T> where T : class
     {
