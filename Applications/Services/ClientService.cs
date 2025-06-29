@@ -37,20 +37,20 @@
             return await base.CreateAsync ( entity );
         }
 
-        public async Task<Client?> GetClientIfEligibleForPerClientPayment ( int clientId )
-        {
-            if ( clientId <= 0 )
-                throw new CustomValidationException ( "Invalid client ID." );
+        //public async Task<Client?> GetClientIfEligibleForPerClientPayment ( int clientId )
+        //{
+        //    if ( clientId <= 0 )
+        //        throw new CustomValidationException ( "Invalid client ID." );
 
-            var spec = ClientSpecs.ById(clientId);
-            var client = await _clientRepo.GetEntityWithSpec(spec)
-                ?? throw new NotFoundException($"Client with ID {clientId} not found.");
+        //    var spec = ClientSpecs.ById(clientId);
+        //    var client = await _clientRepo.GetEntityWithSpec(spec)
+        //        ?? throw new NotFoundException($"Client with ID {clientId} not found.");
 
-            if ( client.BillingMode != BillingMode.perMonth )
-                throw new BusinessRuleException ( "Only clients with monthly billing are eligible for per-client payments." );
+        //    if ( client.BillingMode != BillingMode.perMonth )
+        //        throw new BusinessRuleException ( "Only clients with monthly billing are eligible for per-client payments." );
 
-            return client;
-        }
+        //    return client;
+        //}
 
         public async Task<ClientResponseDetailsProjection> GetClientDetailsProjectionAsync ( int clientId )
         {
