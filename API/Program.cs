@@ -20,13 +20,14 @@ if ( !app.Environment.IsEnvironment ( "Test" ) )
 {
     app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );
 }
-// Middleware de documentação
-if ( app.Environment.IsDevelopment ( ) || app.Environment.IsEnvironment ( "Test" ) )
+// Middleware de documentaï¿½ï¿½o
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Test"))
 
 {
-    app.UseSwaggerDocumention ( );
+    app.UseSwaggerDocumention();
 
 }
+app.UseCors("AllowOrigin");
 
 app.UseAuthentication ( );
 app.UseAuthorization ( );

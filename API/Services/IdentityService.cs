@@ -59,8 +59,6 @@
                 IsActive = false,
                 IsFirstLogin = true,
                 CreatedAt = DateTime.UtcNow,
-
-
             };
 
             var tempPassword = Guid.NewGuid().ToString("N")[..10];
@@ -71,7 +69,7 @@
             await EnsureRoleExistsAsync ( "client" );
             await _userManager.AddToRoleAsync ( user, "client" );
 
-            // You can trigger a notification service here to send the access code
+            // TODO: You can trigger a notification service here to send the access code
             return BuildAuthResponse ( user, "client" );
         }
 
@@ -96,20 +94,22 @@
             return BuildAuthResponse ( user, roles.FirstOrDefault ( ) ?? "client" );
         }
 
-        public async Task<bool> ValidateAccessCodeAsync ( ValidateAccessCodeDto dto )
-        {
-            var user = await _userManager.FindByEmailAsync(dto.Email);
-            if ( user == null || !user.IsFirstLogin || !user.AccessCodeExpiresAt.HasValue )
-                return false;
-
-            return user.AccessCode == dto.AccessCode &&
-                   user.AccessCodeExpiresAt > DateTime.UtcNow;
-        }
-
         public async Task<AuthResponseRecord> CompleteFirstAccessAsync ( FirstAccessPasswordResetDto dto )
         {
             var user = await _userManager.FindByEmailAsync(dto.Email)
                 ?? throw new NotFoundException("User not found.");
+
+            // Validate if user is in first access
+            if ( !user.IsFirstLogin || !user.AccessCodeExpiresAt.HasValue )
+                throw new BadRequestException ( "User is not in first access state." );
+
+            // Validate if the access code has expired
+            if ( user.AccessCodeExpiresAt <= DateTime.UtcNow )
+                throw new BadRequestException ( "The access code has expired. Request a new one from the administrator." );
+
+            // Validate the access code
+            if ( user.AccessCode != dto.AccessCode )
+                throw new BadRequestException ( "Invalid access code." );
 
             if ( dto.NewPassword != dto.ConfirmNewPassword )
                 throw new BadRequestException ( "Passwords do not match." );
@@ -128,6 +128,27 @@
 
             var roles = await _userManager.GetRolesAsync(user);
             return BuildAuthResponse ( user, roles.FirstOrDefault ( ) ?? "client" );
+        }
+
+        public async Task<string> RegenerateAccessCodeByClientIdAsync ( int clientId )
+        {
+            var user = await _userManager.Users
+                .Where(u => u.ClientId == clientId && u.IsFirstLogin)
+                .FirstOrDefaultAsync();
+
+            if ( user is null )
+                throw new NotFoundException ( "Client user not found or has already completed first access." );
+
+            user.AccessCode = GenerateAccessCode();
+            user.AccessCodeExpiresAt = DateTime.UtcNow.AddHours(24); // Always use UTC for consistency
+
+            var result = await _userManager.UpdateAsync(user);
+            if ( !result.Succeeded )
+                throw new Exception ( "Failed to update access code." );
+
+            _logger.LogInformation ( "Access code regenerated for client {ClientId} ({Email})", clientId, user.Email );
+
+            return user.AccessCode;
         }
 
         // ---------- PRIVATE METHODS ----------
@@ -175,40 +196,18 @@
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler ( ).WriteToken ( token );
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private static string GenerateAccessCode ( )
+        private static string GenerateAccessCode()
         {
-            return Random.Shared.Next ( 100000, 999999 ).ToString ( );
+            return Random.Shared.Next(100000, 999999).ToString();
         }
 
-        private async Task EnsureRoleExistsAsync ( string roleName )
+        private async Task EnsureRoleExistsAsync(string roleName)
         {
-            if ( !await _roleManager.RoleExistsAsync ( roleName ) )
-                await _roleManager.CreateAsync ( new ApplicationRole { Name = roleName } );
+            if ( !await _roleManager.RoleExistsAsync(roleName) )
+                await _roleManager.CreateAsync(new ApplicationRole { Name = roleName });
         }
-
-
-        public async Task<string> RegenerateAccessCodeAsync ( string userId )
-        {
-            var user = await _userManager.FindByIdAsync(userId)
-        ?? throw new NotFoundException("client not found");
-
-            if ( !user.IsFirstLogin )
-                throw new BusinessRuleException ( "the client has completed de first access." );
-
-            var newAccessCode = GenerateAccessCode();
-
-            user.AccessCode = newAccessCode;
-            user.AccessCodeExpiresAt = DateTime.UtcNow.AddHours ( 24 );
-
-            await _userManager.UpdateAsync ( user );
-
-            _logger.LogInformation ( "New access code for client {Email}", user.Email );
-
-            return newAccessCode;
-        }
-
     }
 }

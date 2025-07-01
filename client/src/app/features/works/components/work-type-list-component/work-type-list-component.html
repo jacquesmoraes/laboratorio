@@ -1,0 +1,75 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Tipos de Trabalho</mat-card-title>
+    <mat-card-subtitle>Gerencie os tipos de trabalho do laboratório</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="actions-bar">
+      <button mat-raised-button color="primary" routerLink="new">
+        <mat-icon>add</mat-icon>
+        Novo Tipo
+      </button>
+    </div>
+
+    <div class="table-container" *ngIf="!loading; else loadingTemplate">
+      <mat-table [dataSource]="workTypes" class="mat-elevation-z8">
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.id }}</mat-cell>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef>Nome</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
+        </ng-container>
+
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <mat-header-cell *matHeaderCellDef>Descrição</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.description || '-' }}</mat-cell>
+        </ng-container>
+
+        <!-- Work Section Column -->
+        <ng-container matColumnDef="workSectionName">
+          <mat-header-cell *matHeaderCellDef>Seção</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.workSectionName }}</mat-cell>
+        </ng-container>
+
+        <!-- Active Column -->
+        <ng-container matColumnDef="isActive">
+          <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <mat-chip [color]="element.isActive ? 'accent' : 'warn'" selected>
+              {{ element.isActive ? 'Ativo' : 'Inativo' }}
+            </mat-chip>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button mat-icon-button color="primary" [routerLink]="['edit', element.id]">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteWorkType(element.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+    </div>
+
+    <ng-template #loadingTemplate>
+      <div class="loading-container">
+        <p>Carregando tipos de trabalho...</p>
+      </div>
+    </ng-template>
+  </mat-card-content>
+</mat-card>

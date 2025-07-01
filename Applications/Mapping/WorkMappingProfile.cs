@@ -21,6 +21,9 @@
 
             // Applications/Mapping/WorkMappingProfile.cs
             CreateMap<WorkSection, WorkSectionRecord> ( );
+            
+            CreateMap<CreateWorkSectionDto, WorkSection>();
+            CreateMap<UpdateWorkSectionDto, WorkSection>();
 
         }
     }

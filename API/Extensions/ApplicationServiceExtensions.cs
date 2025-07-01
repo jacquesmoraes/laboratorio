@@ -50,6 +50,18 @@
                     options.UseNpgsql ( config.GetConnectionString ( "DefaultConnection" ),
                      o => o.UseQuerySplittingBehavior ( QuerySplittingBehavior.SplitQuery ) ) );
             }
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy(
+                    name: "AllowOrigin",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                    });
+            });
+
 
 
             services.AddScoped ( typeof ( IGenericRepository<> ), typeof ( GenericRepository<> ) );

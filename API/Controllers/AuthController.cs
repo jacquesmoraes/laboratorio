@@ -1,8 +1,4 @@
-﻿using Applications.Contracts.Identity;
-using Applications.Dtos.Identity;
-using Applications.Identity;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
     [ApiController]
     [Route ( "auth" )]
@@ -15,6 +11,7 @@ namespace API.Controllers
         // ---------------------------
 
         [HttpPost ( "register-admin" )]
+        [Authorize ( Roles = "admin" )]
         public async Task<IActionResult> RegisterAdmin ( [FromBody] RegisterAdminUserDto dto )
         {
             var result = await _identityService.RegisterAdminUserAsync(dto);
@@ -22,6 +19,7 @@ namespace API.Controllers
         }
 
         [HttpPost ( "register-client" )]
+        [Authorize ( Roles = "admin" )]
         public async Task<IActionResult> RegisterClient ( [FromBody] RegisterClientUserDto dto )
         {
             var result = await _identityService.RegisterClientUserAsync(dto);
@@ -43,12 +41,7 @@ namespace API.Controllers
         // PRIMEIRO ACESSO
         // ---------------------------
 
-        [HttpPost ( "validate-access-code" )]
-        public async Task<IActionResult> ValidateAccessCode ( [FromBody] ValidateAccessCodeDto dto )
-        {
-            var isValid = await _identityService.ValidateAccessCodeAsync(dto);
-            return Ok ( new { isValid } );
-        }
+       
 
         [HttpPost ( "complete-first-access" )]
         public async Task<IActionResult> CompleteFirstAccess ( [FromBody] FirstAccessPasswordResetDto dto )
@@ -57,13 +50,14 @@ namespace API.Controllers
             return Ok ( result );
         }
 
-        [HttpPost ( "resend-access-code/{userId}" )]
+        [HttpPost ( "resend-access-code/{clientId}" )]
         [Authorize ( Roles = "admin" )]
-        public async Task<IActionResult> ResendAccessCode ( [FromRoute] string userId )
+        public async Task<IActionResult> ResendAccessCodeByClientId ( [FromRoute] int clientId )
         {
-            var newCode = await _identityService.RegenerateAccessCodeAsync(userId);
+            var newCode = await _identityService.RegenerateAccessCodeByClientIdAsync(clientId);
             return Ok ( new { accessCode = newCode } );
         }
+
 
     }
 }

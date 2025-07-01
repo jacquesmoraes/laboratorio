@@ -28,20 +28,24 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create ( [FromBody] WorkSection section )
+        public async Task<IActionResult> Create ( [FromBody] CreateWorkSectionDto dto )
         {
-            var created = await _sectionService.CreateAsync(section);
+            var entity = _mapper.Map<WorkSection>(dto);
+            var created = await _sectionService.CreateAsync(entity);
             var response = _mapper.Map<WorkSectionRecord>(created);
             return CreatedAtAction ( nameof ( GetById ), new { id = created.Id }, response );
         }
 
         [HttpPut ( "{id}" )]
-        public async Task<IActionResult> Update ( int id, [FromBody] WorkSection updated )
+        public async Task<IActionResult> Update ( int id, [FromBody] UpdateWorkSectionDto dto )
         {
-            var result = await _sectionService.UpdateAsync(id, updated);
-            if ( result == null ) return NotFound ( );
+            var spec = new WorkSectionSpecification(id);
+            var existing = await _sectionService.GetEntityWithSpecAsync(spec);
+            if ( existing == null ) return NotFound ( );
 
-            var response = _mapper.Map<WorkSectionRecord>(result);
+            _mapper.Map ( dto, existing );
+            var updated = await _sectionService.UpdateAsync(id, existing);
+            var response = _mapper.Map<WorkSectionRecord>(updated);
             return Ok ( response );
         }
 

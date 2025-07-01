@@ -10,10 +10,11 @@
         Task<AuthResponseRecord> LoginAsync(LoginDto dto);
 
         // PRIMEIRO ACESSO (2 etapas)
-        Task<bool> ValidateAccessCodeAsync(ValidateAccessCodeDto dto);
+
         Task<AuthResponseRecord> CompleteFirstAccessAsync(FirstAccessPasswordResetDto dto);
 
-        Task<string> RegenerateAccessCodeAsync(string userId);
+        Task<string> RegenerateAccessCodeByClientIdAsync(int clientId);
+
 
     }
 }

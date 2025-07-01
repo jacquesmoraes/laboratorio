@@ -1,0 +1,36 @@
+.actions-bar {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+mat-card {
+  margin: 1rem;
+}
+
+mat-table {
+  width: 100%;
+}
+
+.mat-column-id {
+  width: 60px;
+}
+
+.mat-column-isActive {
+  width: 100px;
+}
+
+.mat-column-actions {
+  width: 120px;
+}
