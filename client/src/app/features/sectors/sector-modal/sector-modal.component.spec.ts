@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { WorkTypeFormComponent } from './work-type-form-component';
+import { SectorFormComponent } from './sector-modal.component';
 
-describe('WorkTypeFormComponent', () => {
-  let component: WorkTypeFormComponent;
-  let fixture: ComponentFixture<WorkTypeFormComponent>;
+describe('SectorForm', () => {
+  let component: SectorFormComponent;
+  let fixture: ComponentFixture<SectorFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WorkTypeFormComponent]
+      imports: [SectorFormComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(WorkTypeFormComponent);
+    fixture = TestBed.createComponent(SectorFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

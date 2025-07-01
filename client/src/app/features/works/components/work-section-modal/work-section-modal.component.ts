@@ -1,19 +1,23 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 
-
+import { WorkSection } from '../../models/work-section.interface';
 import { WorkSectionService } from '../../services/works-section.service';
 
+export interface WorkSectionModalData {
+  workSection?: WorkSection;
+  isEditMode: boolean;
+}
+
 @Component({
-  selector: 'app-work-section-form-component',
+  selector: 'app-work-section-modal',
   standalone: true,
   imports: [
     CommonModule,
@@ -22,26 +26,29 @@ import { WorkSectionService } from '../../services/works-section.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatCardModule,
-    RouterModule
+    MatDialogModule
   ],
-  templateUrl: './work-section-form-component.html',
-  styleUrl: './work-section-form-component.scss'
+  templateUrl: './work-section-modal.component.html',
+  styleUrls: ['./work-section-modal.component.scss']
 })
-export class WorkSectionFormComponent implements OnInit {
+export class WorkSectionModalComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private workSectionService = inject(WorkSectionService);
+  private dialogRef = inject(MatDialogRef<WorkSectionModalComponent>);
+  private data = inject<WorkSectionModalData>(MAT_DIALOG_DATA);
 
   workSectionForm!: FormGroup;
-  isEditMode = false;
-  workSectionId: number | null = null;
-  loading = false;
+  isEditMode = this.data.isEditMode;
+  workSectionId?: number;
 
   ngOnInit(): void {
     this.initForm();
-    this.checkEditMode();
+    if (this.isEditMode && this.data.workSection) {
+      this.workSectionId = this.data.workSection.id;
+      this.workSectionForm.patchValue({
+        name: this.data.workSection.name
+      });
+    }
   }
 
   private initForm(): void {
@@ -50,40 +57,8 @@ export class WorkSectionFormComponent implements OnInit {
     });
   }
 
-  private checkEditMode(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.isEditMode = true;
-      this.workSectionId = +id;
-      this.loadWorkSection(this.workSectionId);
-    }
-  }
-
-  private loadWorkSection(id: number): void {
-    this.loading = true;
-    this.workSectionService.getById(id).subscribe({
-      next: (workSection) => {
-        this.workSectionForm.patchValue({
-          name: workSection.name
-        });
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Erro ao carregar seção de trabalho:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Erro ao carregar seção de trabalho',
-          confirmButtonText: 'OK'
-        });
-        this.loading = false;
-      }
-    });
-  }
-
   onSubmit(): void {
     if (this.workSectionForm.valid) {
-      this.loading = true;
       const formData = this.workSectionForm.value;
 
       if (this.isEditMode && this.workSectionId) {
@@ -93,10 +68,10 @@ export class WorkSectionFormComponent implements OnInit {
               icon: 'success',
               title: 'Sucesso!',
               text: 'Seção de trabalho atualizada com sucesso',
-              timer: 2000,
+              timer: 1000,
               showConfirmButton: false
             });
-            this.router.navigate(['/work-sections']);
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Erro ao atualizar seção de trabalho:', error);
@@ -106,7 +81,6 @@ export class WorkSectionFormComponent implements OnInit {
               text: 'Erro ao atualizar seção de trabalho',
               confirmButtonText: 'OK'
             });
-            this.loading = false;
           }
         });
       } else {
@@ -116,10 +90,10 @@ export class WorkSectionFormComponent implements OnInit {
               icon: 'success',
               title: 'Sucesso!',
               text: 'Seção de trabalho criada com sucesso',
-              timer: 2000,
+              timer: 1000,
               showConfirmButton: false
             });
-            this.router.navigate(['/work-sections']);
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Erro ao criar seção de trabalho:', error);
@@ -129,7 +103,6 @@ export class WorkSectionFormComponent implements OnInit {
               text: 'Erro ao criar seção de trabalho',
               confirmButtonText: 'OK'
             });
-            this.loading = false;
           }
         });
       }
@@ -137,17 +110,6 @@ export class WorkSectionFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/work-sections']);
-  }
-
-  getErrorMessage(fieldName: string): string {
-    const field = this.workSectionForm.get(fieldName);
-    if (field?.hasError('required')) {
-      return 'Este campo é obrigatório';
-    }
-    if (field?.hasError('minlength')) {
-      return 'Mínimo de 2 caracteres';
-    }
-    return '';
+    this.dialogRef.close();
   }
 }

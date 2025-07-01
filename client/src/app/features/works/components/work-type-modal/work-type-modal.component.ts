@@ -1,23 +1,27 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 
 import { WorkType, CreateWorkTypeDto, UpdateWorkTypeDto } from '../../models/work-type.interface';
-import { WorkTypeService } from '../../services/work-type.service';
 import { WorkSection } from '../../models/work-section.interface';
+import { WorkTypeService } from '../../services/work-type.service';
 import { WorkSectionService } from '../../services/works-section.service';
 
+export interface WorkTypeModalData {
+  workType?: WorkType;
+  isEditMode: boolean;
+}
+
 @Component({
-  selector: 'app-work-type-form-component',
+  selector: 'app-work-type-modal',
   standalone: true,
   imports: [
     CommonModule,
@@ -26,31 +30,28 @@ import { WorkSectionService } from '../../services/works-section.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatCardModule,
     MatSelectModule,
     MatCheckboxModule,
-    RouterModule
+    MatDialogModule
   ],
-  templateUrl: './work-type-form-component.html',
-  styleUrl: './work-type-form-component.scss'
+  templateUrl: './work-type-modal.component.html',
+  styleUrls: ['./work-type-modal.component.scss']
 })
-export class WorkTypeFormComponent implements OnInit {
+export class WorkTypeModalComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private workTypeService = inject(WorkTypeService);
   private workSectionService = inject(WorkSectionService);
+  private dialogRef = inject(MatDialogRef<WorkTypeModalComponent>);
+  private data = inject<WorkTypeModalData>(MAT_DIALOG_DATA);
 
   workTypeForm!: FormGroup;
-  isEditMode = false;
-  workTypeId: number | null = null;
-  loading = false;
+  isEditMode = this.data.isEditMode;
+  workTypeId?: number;
   workSections: WorkSection[] = [];
 
   ngOnInit(): void {
     this.initForm();
     this.loadWorkSections();
-    this.checkEditMode();
   }
 
   private initForm(): void {
@@ -58,7 +59,7 @@ export class WorkTypeFormComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(2)]],
       description: [''],
       isActive: [true],
-      workSectionId: ['', Validators.required]
+      workSectionId: [null, Validators.required] // Mudança aqui: null em vez de string vazia
     });
   }
 
@@ -66,6 +67,17 @@ export class WorkTypeFormComponent implements OnInit {
     this.workSectionService.getAll().subscribe({
       next: (sections) => {
         this.workSections = sections;
+        
+        // Preencher o formulário após carregar as seções (se for edição)
+        if (this.isEditMode && this.data.workType) {
+          this.workTypeId = this.data.workType.id;
+          this.workTypeForm.patchValue({
+            name: this.data.workType.name,
+            description: this.data.workType.description || '',
+            isActive: this.data.workType.isActive,
+            workSectionId: this.data.workType.workSectionId
+          });
+        }
       },
       error: (error) => {
         console.error('Erro ao carregar seções de trabalho:', error);
@@ -79,44 +91,20 @@ export class WorkTypeFormComponent implements OnInit {
     });
   }
 
-  private checkEditMode(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.isEditMode = true;
-      this.workTypeId = +id;
-      this.loadWorkType(this.workTypeId);
-    }
-  }
-
-  private loadWorkType(id: number): void {
-    this.loading = true;
-    this.workTypeService.getById(id).subscribe({
-      next: (workType) => {
-        this.workTypeForm.patchValue({
-          name: workType.name,
-          description: workType.description || '',
-          isActive: workType.isActive,
-          workSectionId: workType.workSectionId
-        });
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Erro ao carregar tipo de trabalho:', error);
+  onSubmit(): void {
+    if (this.workTypeForm.valid) {
+      const formData = this.workTypeForm.value;
+      
+      // Verificar se workSectionId é válido
+      if (!formData.workSectionId || formData.workSectionId === 0) {
         Swal.fire({
           icon: 'error',
           title: 'Erro!',
-          text: 'Erro ao carregar tipo de trabalho',
+          text: 'Selecione uma seção de trabalho',
           confirmButtonText: 'OK'
         });
-        this.loading = false;
+        return;
       }
-    });
-  }
-
-  onSubmit(): void {
-    if (this.workTypeForm.valid) {
-      this.loading = true;
-      const formData = this.workTypeForm.value;
 
       if (this.isEditMode && this.workTypeId) {
         const updateData: UpdateWorkTypeDto = {
@@ -132,10 +120,10 @@ export class WorkTypeFormComponent implements OnInit {
               icon: 'success',
               title: 'Sucesso!',
               text: 'Tipo de trabalho atualizado com sucesso',
-              timer: 2000,
+              timer: 1000,
               showConfirmButton: false
             });
-            this.router.navigate(['/work-types']);
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Erro ao atualizar tipo de trabalho:', error);
@@ -145,7 +133,6 @@ export class WorkTypeFormComponent implements OnInit {
               text: 'Erro ao atualizar tipo de trabalho',
               confirmButtonText: 'OK'
             });
-            this.loading = false;
           }
         });
       } else {
@@ -162,10 +149,10 @@ export class WorkTypeFormComponent implements OnInit {
               icon: 'success',
               title: 'Sucesso!',
               text: 'Tipo de trabalho criado com sucesso',
-              timer: 2000,
+              timer: 1000,
               showConfirmButton: false
             });
-            this.router.navigate(['/work-types']);
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Erro ao criar tipo de trabalho:', error);
@@ -175,7 +162,6 @@ export class WorkTypeFormComponent implements OnInit {
               text: 'Erro ao criar tipo de trabalho',
               confirmButtonText: 'OK'
             });
-            this.loading = false;
           }
         });
       }
@@ -183,17 +169,6 @@ export class WorkTypeFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/work-types']);
-  }
-
-  getErrorMessage(fieldName: string): string {
-    const field = this.workTypeForm.get(fieldName);
-    if (field?.hasError('required')) {
-      return 'Este campo é obrigatório';
-    }
-    if (field?.hasError('minlength')) {
-      return 'Mínimo de 2 caracteres';
-    }
-    return '';
+    this.dialogRef.close();
   }
 }

@@ -6,13 +6,13 @@
 
   <mat-card-content>
     <div class="actions-bar">
-      <button mat-raised-button color="primary" routerLink="new">
+      <button mat-raised-button color="primary" (click)="onNew()">
         <mat-icon>add</mat-icon>
         Novo Tipo
       </button>
     </div>
 
-    <div class="table-container" *ngIf="!loading; else loadingTemplate">
+    <div class="table-container">
       <mat-table [dataSource]="workTypes" class="mat-elevation-z8">
         <!-- ID Column -->
         <ng-container matColumnDef="id">
@@ -52,7 +52,7 @@
         <ng-container matColumnDef="actions">
           <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
           <mat-cell *matCellDef="let element">
-            <button mat-icon-button color="primary" [routerLink]="['edit', element.id]">
+            <button mat-icon-button color="primary" (click)="onEdit(element)">
               <mat-icon>edit</mat-icon>
             </button>
             <button mat-icon-button color="warn" (click)="deleteWorkType(element.id)">
@@ -65,11 +65,5 @@
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
       </mat-table>
     </div>
-
-    <ng-template #loadingTemplate>
-      <div class="loading-container">
-        <p>Carregando tipos de trabalho...</p>
-      </div>
-    </ng-template>
   </mat-card-content>
 </mat-card>

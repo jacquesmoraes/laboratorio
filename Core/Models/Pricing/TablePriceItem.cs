@@ -9,5 +9,6 @@
         public int? TablePriceId { get; set; }
         public TablePrice? TablePrice { get; set; }
 
+
     }
 }

@@ -29,16 +29,14 @@
             mat-raised-button 
             color="primary" 
             type="submit" 
-            [disabled]="sectorForm.invalid || loading">
-            <mat-icon *ngIf="loading">hourglass_empty</mat-icon>
+            [disabled]="sectorForm.invalid">
             {{ isEditMode ? 'Atualizar' : 'Criar' }}
           </button>
           
           <button 
             mat-stroked-button 
             type="button" 
-            (click)="onCancel()"
-            [disabled]="loading">
+            (click)="onCancel()">
             Cancelar
           </button>
         </div>

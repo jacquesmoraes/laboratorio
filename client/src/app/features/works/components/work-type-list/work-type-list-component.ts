@@ -1,50 +1,47 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 
 import { WorkType } from '../../models/work-type.interface';
 import { WorkTypeService } from '../../services/work-type.service';
+import { WorkTypeModalComponent, WorkTypeModalData } from '../work-type-modal/work-type-modal.component';
 
 @Component({
   selector: 'app-work-type-list-component',
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
     MatTableModule,
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDialogModule
   ],
   templateUrl: './work-type-list-component.html',
   styleUrl: './work-type-list-component.scss'
 })
 export class WorkTypeListComponent implements OnInit {
+  private workTypeService = inject(WorkTypeService);
+  private dialog = inject(MatDialog);
+
   workTypes: WorkType[] = [];
   displayedColumns: string[] = ['id', 'name', 'description', 'workSectionName', 'isActive', 'actions'];
-  loading = false;
-
-  constructor(
-    private workTypeService: WorkTypeService
-  ) { }
 
   ngOnInit(): void {
     this.loadWorkTypes();
   }
 
   loadWorkTypes(): void {
-    this.loading = true;
     this.workTypeService.getAll().subscribe({
       next: (data) => {
         this.workTypes = data;
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erro ao carregar tipos de trabalho:', error);
@@ -54,7 +51,32 @@ export class WorkTypeListComponent implements OnInit {
           text: 'Erro ao carregar tipos de trabalho',
           confirmButtonText: 'OK'
         });
-        this.loading = false;
+      }
+    });
+  }
+
+  onNew(): void {
+    const dialogRef = this.dialog.open(WorkTypeModalComponent, {
+      data: { isEditMode: false } as WorkTypeModalData,
+      width: '550px'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadWorkTypes();
+      }
+    });
+  }
+
+  onEdit(workType: WorkType): void {
+    const dialogRef = this.dialog.open(WorkTypeModalComponent, {
+      data: { workType, isEditMode: true } as WorkTypeModalData,
+      width: '550px'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadWorkTypes();
       }
     });
   }

@@ -3,37 +3,35 @@ import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterModule } from '@angular/router';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
 
 import { Sector } from '../models/sector.interface';
 import { SectorService } from '../service/sector.service';
+import { SectorModalComponent, SectorModalData } from '../sector-modal/sector-modal.component';
 
 @Component({
   selector: 'app-sector-list',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, RouterModule],
+  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatDialogModule],
   templateUrl: './sector-list.component.html',
   styleUrls: ['./sector-list.component.scss'],
 })
 export class SectorListComponent implements OnInit {
   private sectorService = inject(SectorService);
-  private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   protected sectors = signal<Sector[]>([]);
   protected displayedColumns = ['name', 'actions'];
-  protected loading = false;
 
   ngOnInit(): void {
     this.loadSectors();
   }
 
   private loadSectors(): void {
-    this.loading = true;
     this.sectorService.getAll().subscribe({
       next: (sectors) => {
         this.sectors.set(sectors);
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erro ao carregar setores:', error);
@@ -43,13 +41,34 @@ export class SectorListComponent implements OnInit {
           text: 'Erro ao carregar setores',
           confirmButtonText: 'OK'
         });
-        this.loading = false;
+      }
+    });
+  }
+
+  protected onNew(): void {
+    const dialogRef = this.dialog.open(SectorModalComponent, {
+      data: { isEditMode: false } as SectorModalData,
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadSectors();
       }
     });
   }
 
   protected onEdit(sector: Sector): void {
-    this.router.navigate(['/sectors', sector.id, 'edit']);
+    const dialogRef = this.dialog.open(SectorModalComponent, {
+      data: { sector, isEditMode: true } as SectorModalData,
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadSectors();
+      }
+    });
   }
 
   protected onDelete(sector: Sector): void {

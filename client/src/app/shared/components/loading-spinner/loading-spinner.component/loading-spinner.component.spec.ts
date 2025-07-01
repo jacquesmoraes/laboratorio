@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { WorkSectionFormComponent } from './work-section-form-component';
+import { LoadingSpinnerComponent } from './loading-spinner.component';
 
-describe('WorkSectionFormComponent', () => {
-  let component: WorkSectionFormComponent;
-  let fixture: ComponentFixture<WorkSectionFormComponent>;
+describe('LoadingSpinnerComponent', () => {
+  let component: LoadingSpinnerComponent;
+  let fixture: ComponentFixture<LoadingSpinnerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WorkSectionFormComponent]
+      imports: [LoadingSpinnerComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(WorkSectionFormComponent);
+    fixture = TestBed.createComponent(LoadingSpinnerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

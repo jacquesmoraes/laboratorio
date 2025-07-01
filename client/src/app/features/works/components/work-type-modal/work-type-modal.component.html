@@ -1,0 +1,56 @@
+<div class="modal-container">
+  <h2 mat-dialog-title>
+    {{ isEditMode ? 'Editar' : 'Novo' }} Tipo de Trabalho
+  </h2>
+
+  <form [formGroup]="workTypeForm" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Nome</mat-label>
+        <input matInput formControlName="name" placeholder="Digite o nome do tipo de trabalho">
+        <mat-error *ngIf="workTypeForm.get('name')?.hasError('required')">
+          Nome é obrigatório
+        </mat-error>
+        <mat-error *ngIf="workTypeForm.get('name')?.hasError('minlength')">
+          Nome deve ter pelo menos 2 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Descrição (opcional)</mat-label>
+        <textarea matInput formControlName="description" placeholder="Digite uma descrição"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Seção de Trabalho</mat-label>
+        <mat-select formControlName="workSectionId">
+          <mat-option *ngFor="let section of workSections" [value]="section.id">
+            {{ section.name }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="workTypeForm.get('workSectionId')?.hasError('required')">
+          Seção de trabalho é obrigatória
+        </mat-error>
+      </mat-form-field>
+
+      <div class="checkbox-container">
+        <mat-checkbox formControlName="isActive" color="primary">
+          Ativo
+        </mat-checkbox>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit" 
+        [disabled]="workTypeForm.invalid">
+        {{ isEditMode ? 'Atualizar' : 'Criar' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>
