@@ -1,0 +1,199 @@
+<div class="client-details-container">
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Carregando cliente...</p>
+      </div>
+    </div>
+  } @else if (client()) {
+    <div class="header">
+      <div class="header-content">
+        <h1>{{ client()?.clientName }}</h1>
+        <div class="header-actions">
+          <button 
+            class="btn btn-secondary" 
+            (click)="editClient()"
+            [disabled]="loading()">
+            Editar
+          </button>
+          <button 
+            class="btn btn-primary" 
+            (click)="goBack()"
+            [disabled]="loading()">
+            Voltar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Informações Básicas -->
+      <div class="card">
+        <h2>Informações Básicas</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nome:</label>
+            <span>{{ client()?.clientName }}</span>
+          </div>
+          <div class="info-item">
+            <label>Email:</label>
+            <span>{{ client()?.clientEmail || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Telefone:</label>
+            <span>{{ client()?.clientPhoneNumber || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>CPF:</label>
+            <span>{{ client()?.clientCpf || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>CNPJ:</label>
+            <span>{{ client()?.cnpj || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>CRO:</label>
+            <span>{{ client()?.cro || 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Data de Nascimento:</label>
+            <span>{{ client()?.birthDate ? (client()?.birthDate | date:'dd/MM/yyyy') : 'Não informado' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Modo de Cobrança:</label>
+            <span>{{ getBillingModeLabel(client()?.billingMode) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Tabela de Preços:</label>
+            <span>{{ client()?.tablePriceName || 'Não definida' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Status:</label>
+            <span class="status-badge" [class.inactive]="client()?.isInactive">
+              {{ client()?.isInactive ? 'Inativo' : 'Ativo' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Endereço -->
+      <div class="card">
+        <h2>Endereço</h2>
+        <div class="address-info">
+          <p>
+            {{ client()?.address?.street }}, {{ client()?.address?.number }}
+            @if (client()?.address?.complement) {
+              - {{ client()?.address?.complement }}
+            }
+          </p>
+          <p>{{ client()?.address?.neighborhood }}</p>
+          <p>{{ client()?.address?.city }}</p>
+        </div>
+      </div>
+
+      <!-- Resumo Financeiro -->
+      <div class="card">
+        <h2>Resumo Financeiro</h2>
+        <div class="financial-summary">
+          <div class="financial-item">
+            <label>Total Faturado:</label>
+            <span class="amount invoiced">{{ client()?.totalInvoiced | currency:'BRL' }}</span>
+          </div>
+          <div class="financial-item">
+            <label>Total Pago:</label>
+            <span class="amount paid">{{ client()?.totalPaid | currency:'BRL' }}</span>
+          </div>
+          <div class="financial-item">
+            <label>Saldo:</label>
+             <span class="amount balance" [class.negative]="(client()?.balance ?? 0) < 0">
+              {{ client()?.balance | currency:'BRL' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pedidos de Serviço -->
+      <div class="card">
+        <h2>Pedidos de Serviço</h2>
+        @if ((client()?.serviceOrders ?? []).length > 0) {
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Número</th>
+                  <th>Data entrada</th>
+                  <th>Paciente</th>
+                  <th>Status</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of client()?.serviceOrders; track order.serviceOrderId) {
+                  <tr>
+                    <td>{{ order.orderNumber }}</td>
+                    <td>{{ order.dateIn | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ order.patientName }}</td>
+                    <td>
+                      <span class="status-badge {{ getStatusClass(order.status) }}">
+                        {{ getStatusLabel(order.status) }}
+                      </span>
+                    </td>
+                    <td>{{ order.orderTotal | currency:'BRL' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="no-data">Nenhum pedido de serviço encontrado.</p>
+        }
+      </div>
+
+      <!-- Pagamentos -->
+      <div class="card">
+        <h2>Pagamentos</h2>
+        @if ((client()?.payments ?? []).length > 0) {
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Valor</th>
+                  <th>Descrição</th>
+                  <th>Fatura</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (payment of client()?.payments; track payment.id) {
+                  <tr>
+                    <td>{{ payment.paymentDate | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ payment.amountPaid | currency:'BRL' }}</td>
+                    <td>{{ payment.description || '-' }}</td>
+                    <td>{{ payment.invoiceNumber || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="no-data">Nenhum pagamento registrado.</p>
+        }
+      </div>
+
+      @if (client()?.notes) {
+        <div class="card">
+          <h2>Observações</h2>
+          <p class="notes">{{ client()?.notes }}</p>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="error-message">
+      <h2>Cliente não encontrado</h2>
+      <p>O cliente solicitado não foi encontrado ou não existe.</p>
+      <button class="btn btn-primary" (click)="goBack()">Voltar</button>
+    </div>
+  }
+</div>

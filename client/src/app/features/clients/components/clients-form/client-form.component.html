@@ -1,0 +1,199 @@
+<div class="form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="header-icon">person</mat-icon>
+        {{ isEditMode() ? 'Editar Cliente' : 'Novo Cliente' }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isEditMode() ? 'Atualize as informações do cliente' : 'Cadastre um novo cliente no sistema' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>{{ isEditMode() ? 'Carregando cliente...' : 'Salvando...' }}</p>
+        </div>
+      } @else {
+        <form [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+          <!-- Informações Básicas -->
+          <div class="section">
+            <h3 class="section-title">
+              <mat-icon>person</mat-icon>
+              Informações Básicas
+            </h3>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Nome do Cliente</mat-label>
+                <input matInput formControlName="name" placeholder="Digite o nome completo" />
+                <mat-error *ngIf="clientForm.get('name')?.hasError('required')">
+                  Nome é obrigatório
+                </mat-error>
+                <mat-error *ngIf="clientForm.get('name')?.hasError('minlength')">
+                  Nome deve ter pelo menos 2 caracteres
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" placeholder="email@exemplo.com" />
+                <mat-error *ngIf="clientForm.get('email')?.hasError('email')">
+                  Email inválido
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Telefone</mat-label>
+                <input matInput formControlName="phoneNumber" placeholder="(11) 99999-9999" />
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-33">
+                <mat-label>CPF</mat-label>
+                <input matInput formControlName="cpf" placeholder="000.000.000-00" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-33">
+                <mat-label>CNPJ</mat-label>
+                <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-33">
+                <mat-label>CRO</mat-label>
+                <input matInput formControlName="cro" placeholder="CRO" />
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Data de Nascimento</mat-label>
+                <input matInput type="date" formControlName="birthDate" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Faturamento -->
+          <div class="section">
+            <h3 class="section-title">
+              <mat-icon>payment</mat-icon>
+              Faturamento
+            </h3>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Modo de Faturamento</mat-label>
+                <mat-select formControlName="billingMode">
+                  <mat-option *ngFor="let mode of billingModes" [value]="mode.value">
+                    {{ mode.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="clientForm.get('billingMode')?.hasError('required')">
+                  Modo de faturamento é obrigatório
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Tabela de Preços</mat-label>
+                <mat-select formControlName="tablePriceId">
+                  <mat-option [value]="null">Selecione uma tabela</mat-option>
+                  @if (loadingTablePrices()) {
+                    <mat-option disabled>Carregando...</mat-option>
+                  } @else {
+                    <mat-option *ngFor="let option of tablePriceOptions()" [value]="option.value">
+                      {{ option.label }}
+                      @if (option.description) {
+                        <span class="option-description"> - {{ option.description }}</span>
+                      }
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Endereço -->
+          <div class="section" formGroupName="address">
+            <h3 class="section-title">
+              <mat-icon>location_on</mat-icon>
+              Endereço
+            </h3>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-70">
+                <mat-label>Rua</mat-label>
+                <input matInput formControlName="street" placeholder="Nome da rua" />
+                <mat-error *ngIf="clientForm.get('address.street')?.hasError('required')">
+                  Rua é obrigatória
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-30">
+                <mat-label>Número</mat-label>
+                <input matInput type="number" formControlName="number" placeholder="Número" />
+                <mat-error *ngIf="clientForm.get('address.number')?.hasError('required')">
+                  Número é obrigatório
+                </mat-error>
+                <mat-error *ngIf="clientForm.get('address.number')?.hasError('min')">
+                  Número deve ser maior que 0
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Complemento</mat-label>
+                <input matInput formControlName="complement" placeholder="Apartamento, sala, etc." />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Bairro</mat-label>
+                <input matInput formControlName="neighborhood" placeholder="Nome do bairro" />
+                <mat-error *ngIf="clientForm.get('address.neighborhood')?.hasError('required')">
+                  Bairro é obrigatório
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Cidade</mat-label>
+                <input matInput formControlName="city" placeholder="Nome da cidade" />
+                <mat-error *ngIf="clientForm.get('address.city')?.hasError('required')">
+                  Cidade é obrigatória
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button type="button" (click)="onCancel()" class="cancel-btn" [disabled]="loading()">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+      <button 
+        type="submit" 
+        (click)="onSubmit()" 
+        class="submit-btn"
+        [disabled]="clientForm.invalid || loading()">
+        @if (loading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        }
+        <mat-icon>{{ isEditMode() ? 'update' : 'add' }}</mat-icon>
+        {{ isEditMode() ? 'Atualizar' : 'Salvar' }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

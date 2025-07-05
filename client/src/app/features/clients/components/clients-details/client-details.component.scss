@@ -1,0 +1,322 @@
+.client-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.loading-spinner {
+  text-align: center;
+  
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #96afb8;
+    border-top: 4px solid #276678;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+  }
+  
+  p {
+    color: #334a52;
+    font-weight: 500;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.header {
+  background: #f4f1ee;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #96afb8;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #334a52;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.content {
+  display: grid;
+  gap: 24px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  border: 1px solid #96afb8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  h2 {
+    margin: 0 0 20px 0;
+    color: #334a52;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: 2px solid #276678;
+    padding-bottom: 8px;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  label {
+    font-weight: 600;
+    color: #334a52;
+    font-size: 0.9rem;
+  }
+  
+  span {
+    color: #276678;
+    font-size: 1rem;
+  }
+}
+
+.address-info {
+  p {
+    margin: 8px 0;
+    color: #276678;
+    font-size: 1rem;
+  }
+}
+
+.financial-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.financial-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #f4f1ee;
+  border-radius: 6px;
+  border-left: 4px solid #276678;
+  
+  label {
+    font-weight: 600;
+    color: #334a52;
+    font-size: 0.9rem;
+  }
+}
+
+.amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  
+  &.invoiced {
+    color: #276678;
+  }
+  
+  &.paid {
+    color: #28a745;
+  }
+  
+  &.balance {
+    color: #276678;
+    
+    &.negative {
+      color: #dc3545;
+    }
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  
+  th,
+  td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #96afb8;
+  }
+  
+  th {
+    background: #f4f1ee;
+    font-weight: 600;
+    color: #334a52;
+  }
+  
+  tr:hover {
+    background: #f8f9fa;
+  }
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.inactive {
+    background: #dc3545;
+    color: white;
+  }
+  
+  &:not(.inactive) {
+    background: #28a745;
+    color: white;
+  }
+  
+  &.status-pendente {
+    background: #ffc107;
+    color: #212529;
+  }
+  
+  &.status-em_andamento {
+    background: #17a2b8;
+    color: white;
+  }
+  
+  &.status-concluido {
+    background: #28a745;
+    color: white;
+  }
+  
+  &.status-cancelado {
+    background: #dc3545;
+    color: white;
+  }
+}
+
+.no-data {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  padding: 40px 0;
+}
+
+.notes {
+  color: #276678;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.error-message {
+  text-align: center;
+  padding: 60px 20px;
+  
+  h2 {
+    color: #dc3545;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #6c757d;
+    margin-bottom: 24px;
+  }
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  
+  &.btn-primary {
+    background: #276678;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: #1e4f5e;
+    }
+  }
+  
+  &.btn-secondary {
+    background: #96afb8;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: #7a8f96;
+    }
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .client-details-container {
+    padding: 16px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    justify-content: center;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .financial-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .data-table {
+    font-size: 0.9rem;
+    
+    th,
+    td {
+      padding: 8px;
+    }
+  }
+}

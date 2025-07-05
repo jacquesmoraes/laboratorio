@@ -52,25 +52,26 @@
         //    return client;
         //}
 
+        // ... existing code ...
         public async Task<ClientResponseDetailsProjection> GetClientDetailsProjectionAsync ( int clientId )
         {
             var spec = ClientSpecs.ById(clientId);
 
             var client = await _clientRepo.GetEntityWithSpec(spec)
-                ?? throw new NotFoundException("Client not found.");
+        ?? throw new NotFoundException("Client not found.");
 
             // Consistent calculations
             var totalPaid = await _paymentRepository.SumAsync(
-                p => p.ClientId == clientId,
-                p => p.AmountPaid
-            );
+        p => p.ClientId == clientId,
+        p => p.AmountPaid
+    );
 
             var totalInvoiced = await _invoiceRepository.SumAsync(
-                i => i.ClientId == clientId && i.Status != InvoiceStatus.Cancelled,
-                i => i.TotalServiceOrdersAmount
-            );
+        i => i.ClientId == clientId && i.Status != InvoiceStatus.Cancelled,
+        i => i.TotalServiceOrdersAmount
+    );
 
-            // Map and manually set financial fields
+            // Map using AutoMapper
             var projection = _mapper.Map<ClientResponseDetailsProjection>(client);
             projection = projection with
             {
@@ -80,6 +81,7 @@
 
             return projection;
         }
+        // ... existing code ...
 
         public async Task<Client?> UpdateFromDtoAsync ( UpdateClientDto dto )
         {

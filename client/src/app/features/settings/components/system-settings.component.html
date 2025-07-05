@@ -1,0 +1,191 @@
+<div class="settings-container">
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="header-icon">settings</mat-icon>
+        Configurações do Sistema
+      </mat-card-title>
+      <mat-card-subtitle>
+        Gerencie as configurações gerais do laboratório
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Carregando configurações...</p>
+      </div>
+      } @else {
+      <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+        <!-- Informações Básicas -->
+        <div class="section">
+          <h3 class="section-title">
+            <mat-icon>business</mat-icon>
+            Informações do Laboratório
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Nome do Laboratório</mat-label>
+              <input matInput formControlName="labName" placeholder="Digite o nome do laboratório" />
+              <mat-error *ngIf="settingsForm.get('labName')?.hasError('required')">
+                Nome é obrigatório
+              </mat-error>
+              <mat-error *ngIf="settingsForm.get('labName')?.hasError('minlength')">
+                Nome deve ter pelo menos 2 caracteres
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" placeholder="contato@laboratorio.com" />
+              <mat-error *ngIf="settingsForm.get('email')?.hasError('required')">
+                Email é obrigatório
+              </mat-error>
+              <mat-error *ngIf="settingsForm.get('email')?.hasError('email')">
+                Email inválido
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>Telefone</mat-label>
+              <input matInput formControlName="phone" placeholder="(53) 99999-0000" />
+              <mat-error *ngIf="settingsForm.get('phone')?.hasError('required')">
+                Telefone é obrigatório
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>CNPJ</mat-label>
+              <input matInput formControlName="cnpj" placeholder="00.000.000/0001-00" />
+              <mat-error *ngIf="settingsForm.get('cnpj')?.hasError('required')">
+                CNPJ é obrigatório
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Mensagem do Rodapé</mat-label>
+              <textarea matInput formControlName="footerMessage"
+                placeholder="Mensagem que aparece no rodapé dos documentos" rows="3"></textarea>
+              <mat-error *ngIf="settingsForm.get('footerMessage')?.hasError('required')">
+                Mensagem é obrigatória
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Logo -->
+        <div class="section">
+          <h3 class="section-title">
+            <mat-icon>image</mat-icon>
+            Logo do Laboratório
+          </h3>
+
+          @if (settings()?.logoUrl) {
+          <div class="logo-preview">
+            <img [src]="settings()?.logoUrl" alt="Logo do laboratório" class="logo-image" />
+            <p class="logo-info">Logo atual do laboratório</p>
+          </div>
+          }
+
+          <div class="logo-upload">
+            <input type="file" #fileInput (change)="onLogoUpload($event)" accept="image/*" style="display: none;" />
+            <button type="button" mat-stroked-button (click)="fileInput.click()" [disabled]="isUploadingLogo()"
+              class="upload-btn">
+              @if (isUploadingLogo()) {
+              <mat-spinner diameter="16"></mat-spinner>
+              Enviando...
+              } @else {
+              <ng-container>
+                <mat-icon>upload</mat-icon>
+                {{ settings()?.logoUrl ? 'Alterar Logo' : 'Upload Logo' }}
+              </ng-container>
+              }
+            </button>
+            <p class="upload-info">Formatos aceitos: JPG, PNG, SVG (máx. 5MB)</p>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Endereço -->
+        <div class="section" formGroupName="address">
+          <h3 class="section-title">
+            <mat-icon>location_on</mat-icon>
+            Endereço do Laboratório
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-70">
+              <mat-label>Rua</mat-label>
+              <input matInput formControlName="street" placeholder="Nome da rua" />
+              <mat-error *ngIf="settingsForm.get('address.street')?.hasError('required')">
+                Rua é obrigatória
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-30">
+              <mat-label>Número</mat-label>
+              <input matInput type="number" formControlName="number" placeholder="123" />
+              <mat-error *ngIf="settingsForm.get('address.number')?.hasError('required')">
+                Número é obrigatório
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+              <mat-form-field appearance="outline" class="w-50">
+              <mat-label>Complemento</mat-label>
+              <input matInput formControlName="complement" placeholder="Sala 2, Apto 101" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>CEP</mat-label>
+              <input matInput formControlName="cep" placeholder="96000-000" />
+              <mat-error *ngIf="settingsForm.get('address.cep')?.hasError('required')">
+                CEP é obrigatório
+              </mat-error>
+            </mat-form-field>
+
+          
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>Bairro</mat-label>
+              <input matInput formControlName="neighborhood" placeholder="Centro" />
+              <mat-error *ngIf="settingsForm.get('address.neighborhood')?.hasError('required')">
+                Bairro é obrigatório
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>Cidade</mat-label>
+              <input matInput formControlName="city" placeholder="Pelotas" />
+              <mat-error *ngIf="settingsForm.get('address.city')?.hasError('required')">
+                Cidade é obrigatória
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="actions">
+          <button type="submit" [disabled]="settingsForm.invalid || isLoading()" class="save-btn">
+            <mat-icon>save</mat-icon>
+            Salvar Configurações
+          </button>
+        </div>
+      </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

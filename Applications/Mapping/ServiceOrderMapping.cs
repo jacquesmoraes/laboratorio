@@ -39,7 +39,12 @@
 
 
             // Resposta: short para fatura, cliente, etc.
-            CreateMap<ServiceOrder, ServiceOrderShortRecord> ( );
+            // ... existing code ...
+            CreateMap<ServiceOrder, ServiceOrderShortRecord> ( )
+                .ForMember ( dest => dest.OrderNumber, opt => opt.MapFrom ( src => src.OrderNumber ) )
+                .ForMember ( dest => dest.PatientName, opt => opt.MapFrom ( src => src.PatientName ) )
+                .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status.ToString ( ) ) );
+            // ... existing code ...
         }
 
 

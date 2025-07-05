@@ -1,0 +1,94 @@
+<mat-card class="scale-card">
+  <mat-card-header>
+    <mat-card-title>Clientes</mat-card-title>
+    <mat-card-subtitle>Gerencie os clientes do laboratório</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="actions-bar">
+      <div class="search-container">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Buscar clientes</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="Digite o nome, cidade ou telefone..." />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <button (click)="onNew()" class="btn">
+        <mat-icon>add</mat-icon>
+        Novo Cliente
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Carregando clientes...</p>
+      </div>
+    } @else if (filteredClients().length === 0) {
+      <div class="empty-state">
+        <mat-icon>people</mat-icon>
+        <p>Nenhum cliente encontrado</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <mat-table [dataSource]="filteredClients()" class="mat-elevation-z8 custom-table">
+          <ng-container matColumnDef="clientName">
+            <mat-header-cell *matHeaderCellDef>Nome</mat-header-cell>
+            <mat-cell *matCellDef="let client">{{ client.clientName }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="city">
+            <mat-header-cell *matHeaderCellDef>Cidade</mat-header-cell>
+            <mat-cell *matCellDef="let client">{{ client.city || '-' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="billingMode">
+            <mat-header-cell *matHeaderCellDef>Faturamento</mat-header-cell>
+            <mat-cell *matCellDef="let client">
+              <mat-chip-listbox>
+                <mat-chip >
+                  {{ getBillingModeLabel(client.billingMode) }}
+                </mat-chip>
+              </mat-chip-listbox>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="tablePriceName">
+            <mat-header-cell *matHeaderCellDef>Tabela de Preços</mat-header-cell>
+            <mat-cell *matCellDef="let client">{{ client.tablePriceName || '-' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="isInactive">
+            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+            <mat-cell *matCellDef="let client">
+              <mat-chip-listbox>
+                <mat-chip [color]="client.isInactive ? 'warn' : 'accent'" selected>
+                  {{ client.isInactive ? 'Inativo' : 'Ativo' }}
+                </mat-chip>
+              </mat-chip-listbox>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
+            <mat-cell *matCellDef="let client">
+              <button mat-icon-button (click)="onViewDetails(client)" class="action-icon-btn" matTooltip="Ver detalhes">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button (click)="onEdit(client)" class="action-icon-btn" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="onDelete(client)" class="action-icon-btn" matTooltip="Excluir">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        </mat-table>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
