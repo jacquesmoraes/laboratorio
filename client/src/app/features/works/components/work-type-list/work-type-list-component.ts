@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,6 +24,7 @@ import { WorkTypeModalComponent, WorkTypeModalData } from '../work-type-modal/wo
     MatChipsModule,
     MatDialogModule
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './work-type-list-component.html',
   styleUrl: './work-type-list-component.scss'
 })
@@ -31,17 +32,20 @@ export class WorkTypeListComponent implements OnInit {
   private workTypeService = inject(WorkTypeService);
   private dialog = inject(MatDialog);
 
-  workTypes: WorkType[] = [];
-  displayedColumns: string[] = ['id', 'name', 'description', 'workSectionName', 'isActive', 'actions'];
+  workTypes = signal<WorkType[]>([]);
+  displayedColumns: string[] = [ 'name', 'description', 'workSectionName', 'isActive', 'actions'];
 
   ngOnInit(): void {
+    console.log('WorkTypeListComponent: ngOnInit chamado');
     this.loadWorkTypes();
   }
 
   loadWorkTypes(): void {
+    console.log('WorkTypeListComponent: Carregando tipos de trabalho...');
     this.workTypeService.getAll().subscribe({
       next: (data) => {
-        this.workTypes = data;
+        console.log('WorkTypeListComponent: Dados recebidos:', data);
+        this.workTypes.set(data);
       },
       error: (error) => {
         console.error('Erro ao carregar tipos de trabalho:', error);

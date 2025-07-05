@@ -1,0 +1,47 @@
+<mat-card class="scale-card">
+  <mat-card-header>
+    <mat-card-title>Escalas</mat-card-title>
+    <mat-card-subtitle>Gerencie as escalas de cores do laboratório</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="actions-bar">
+      <button (click)="onNew()" class="btn">
+        <mat-icon>add</mat-icon>
+        Nova Escala
+      </button>
+    </div>
+
+    <div class="table-container">
+      <mat-table [dataSource]="scales()" class="mat-elevation-z8 custom-table">
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.id }}</mat-cell>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef>Nome</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button mat-icon-button (click)="onEdit(element)" class="action-icon-btn">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteScale(element.id)" class="action-icon-btn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+      </mat-table>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -64,6 +64,14 @@ namespace Core.FactorySpecifications.ClientsSpecifications
                 return spec;
             }
 
+            public static ClientSpecification ByIdWithTablePriceItems ( int id )
+            {
+                var spec = new ClientSpecification(id);
+                spec.AddInclude ( x => x.TablePrice! );
+                spec.AddInclude ( "TablePrice.Items" );
+                spec.AddInclude ( "TablePrice.Items.WorkType" );
+                return spec;
+            }
 
             public static ClientSpecification ByName ( string name )
             {

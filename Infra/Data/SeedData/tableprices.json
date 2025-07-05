@@ -25,28 +25,7 @@
           "Status": true,
           "Items": [
                { "tablePriceItemId": 7 },
-               { "tablePriceItemId": 8 },
-               { "tablePriceItemId": 9 },
-               { "tablePriceItemId": 10 }
-          ]
-     },
-     {
-          "Name": "Tabela Promoção Junho",
-          "Description": "Tabela promocional válida durante o mês de junho",
-          "Status": false,
-          "Items": [
-               { "tablePriceItemId": 11 },
-               { "tablePriceItemId": 12 }
-          ]
-     },
-     {
-          "Name": "Tabela Exclusiva Dra. Fernanda",
-          "Description": "Condições personalizadas para a Dra. Fernanda",
-          "Status": true,
-          "Items": [
-               { "tablePriceItemId": 13 },
-               { "tablePriceItemId": 14 },
-               { "tablePriceItemId": 15 }
+               { "tablePriceItemId": 8 }
           ]
      }
 ]

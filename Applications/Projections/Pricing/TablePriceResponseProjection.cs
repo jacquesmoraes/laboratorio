@@ -1,4 +1,6 @@
-﻿namespace Applications.Projections.Pricing
+﻿using Applications.Records.Pricing;
+
+namespace Applications.Projections.Pricing
 {
     public record TablePriceResponseProjection
     {
@@ -7,8 +9,7 @@
         public string Description { get; init; } = string.Empty;
         public bool Status { get; init; }
 
-        public List<TablePriceItemShortRecord> Items { get; init; } = [];
+        public List<TablePriceItemRecord> Items { get; init; } = [];
         public List<ClientResponseForTablePriceRecord> Clients { get; init; } = [];
     }
-
 }

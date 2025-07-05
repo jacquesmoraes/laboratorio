@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, tap, catchError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { WorkSection, WorkSectionApiResponse } from '../models/work-section.interface';
-
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +13,18 @@ export class WorkSectionService {
   constructor(private http: HttpClient) { }
 
   getAll(): Observable<WorkSection[]> {
+    console.log('WorkSectionService: Fazendo requisição para:', this.apiUrl);
     return this.http.get<WorkSectionApiResponse[]>(this.apiUrl)
       .pipe(
+        tap(response => console.log('WorkSectionService: Resposta recebida:', response)),
         map(response => response.map(item => ({
           id: item.id,
           name: item.name
-        })))
+        }))),
+        catchError(error => {
+          console.error('WorkSectionService: Erro na requisição:', error);
+          throw error;
+        })
       );
   }
 

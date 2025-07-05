@@ -6,32 +6,37 @@ namespace Core.FactorySpecifications
 {
     public class TablePriceSpecification : BaseSpecification<TablePrice>
     {
-        public TablePriceSpecification (bool includeRelations = false ) 
-        {
-             if (includeRelations)
+         public TablePriceSpecification(bool includeRelations = false)
+    {
+        if (includeRelations)
         {
             AddInclude(x => x.Items);
+            AddInclude("Items.WorkType"); // ✅ necessário para o nome do serviço
             AddInclude(x => x.Clients);
-                
         }
-        }
+    }
 
-        public TablePriceSpecification ( int id, bool includeRelations = false )
-            : base ( x => x.Id == id )
+    public TablePriceSpecification(int id, bool includeRelations = false)
+        : base(x => x.Id == id)
+    {
+        if (includeRelations)
         {
-            if ( includeRelations )
-                AddInclude ( x => x.Items );
-                 AddInclude ( x => x.Clients );
+            AddInclude(x => x.Items);
+            AddInclude("Items.WorkType"); // ✅ aqui também
+            AddInclude(x => x.Clients);
         }
+    }
 
-        public TablePriceSpecification ( Expression<Func<TablePrice, bool>> criteria, bool includeRelations = false )
-            : base ( criteria )
+    public TablePriceSpecification(Expression<Func<TablePrice, bool>> criteria, bool includeRelations = false)
+        : base(criteria)
+    {
+        if (includeRelations)
         {
-            if ( includeRelations )
-                AddInclude ( x => x.Items );
-            AddInclude ( x => x.Clients );
-            
+            AddInclude(x => x.Items);
+            AddInclude("Items.WorkType"); // ✅ aqui também
+            AddInclude(x => x.Clients);
         }
+    }
     }
 
     public static class TablePriceSpecs

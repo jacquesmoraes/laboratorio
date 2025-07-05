@@ -9,11 +9,18 @@ import Swal from 'sweetalert2';
 import { Sector } from '../models/sector.interface';
 import { SectorService } from '../service/sector.service';
 import { SectorModalComponent, SectorModalData } from '../sector-modal/sector-modal.component';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-sector-list',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatDialogModule],
   templateUrl: './sector-list.component.html',
   styleUrls: ['./sector-list.component.scss'],
 })

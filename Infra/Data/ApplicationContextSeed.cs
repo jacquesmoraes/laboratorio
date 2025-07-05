@@ -14,8 +14,7 @@ namespace Infra.Data
                 await SeedSectors ( context, logger );
                 await SeedScales ( context, logger );
                 await SeedShades ( context, logger );
-                await SeedTablePriceItems ( context, logger );
-                await SeedTablePrices ( context, logger );
+                await SeedTablePricesAndItems ( context, logger ); // ✅ combinado e corrigido
                 await SeedSystemSettings ( context, logger );
                 await SeedClients ( context, logger );
 
@@ -27,6 +26,7 @@ namespace Infra.Data
                 throw;
             }
         }
+
 
         // 🔁 Helper para centralizar leitura dos arquivos JSON
         private static string ReadSeedFile ( string fileName )
@@ -112,60 +112,75 @@ namespace Infra.Data
             }
         }
 
-        private static async Task SeedTablePriceItems ( ApplicationContext context, ILogger logger )
-        {
-            if ( !context.TablePriceItems.Any ( ) )
-            {
-                var data = ReadSeedFile("tablepriceitems.json");
-
-                var items = JsonSerializer.Deserialize<List<TablePriceItem>>(data, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if ( items != null )
-                {
-                    await context.TablePriceItems.AddRangeAsync ( items );
-                    await context.SaveChangesAsync ( );
-                    logger.LogInformation ( "TablePriceItems seeded successfully" );
-                }
-            }
-        }
-
-        private static async Task SeedTablePrices ( ApplicationContext context, ILogger logger )
+        private static async Task SeedTablePricesAndItems ( ApplicationContext context, ILogger logger )
         {
             if ( !context.TablePrices.Any ( ) )
             {
-                var data = ReadSeedFile("tableprices.json");
+                var tablesData = ReadSeedFile("tableprices.json");
+                var itemsData = ReadSeedFile("tablepriceitems.json");
 
-                var rawTables = JsonSerializer.Deserialize<List<RawTablePriceDto>>(data, new JsonSerializerOptions
+                var rawTables = JsonSerializer.Deserialize<List<RawTablePriceDto>>(tablesData, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-                if ( rawTables != null )
+                var rawItems = JsonSerializer.Deserialize<List<TablePriceItem>>(itemsData, new JsonSerializerOptions
                 {
-                    foreach ( var raw in rawTables )
-                    {
-                        var table = new TablePrice
-                        {
-                            Name = raw.Name,
-                            Description = raw.Description,
-                            Status = raw.Status,
-                            Items = context.TablePriceItems
-                                .Where(i => raw.Items.Select(x => x.TablePriceItemId).Contains(i.TablePriceItemId))
-                                .ToList()
-                        };
+                    PropertyNameCaseInsensitive = true
+                });
 
-                        await context.TablePrices.AddAsync ( table );
-                    }
+                if ( rawTables == null || rawItems == null )
+                    throw new Exception ( "Failed to deserialize TablePrices or TablePriceItems" );
 
-                    await context.SaveChangesAsync ( );
-                    logger.LogInformation ( "TablePrices seeded successfully with associated items." );
+                // Validação: garantir que os WorkTypes existem
+                var validWorkTypeIds = context.WorkTypes.Select(w => w.Id).ToHashSet();
+                foreach ( var item in rawItems )
+                {
+                    if ( !validWorkTypeIds.Contains ( item.WorkTypeId ) )
+                        throw new Exception ( $"WorkTypeId {item.WorkTypeId} não existe no banco." );
                 }
+
+                // Adiciona as tabelas sem itens ainda
+                var tablePrices = new List<TablePrice>();
+                foreach ( var raw in rawTables )
+                {
+                    var table = new TablePrice
+                    {
+                        Name = raw.Name,
+                        Description = raw.Description,
+                        Status = raw.Status,
+                        Items = new List<TablePriceItem>()
+                    };
+
+                    tablePrices.Add ( table );
+                    await context.TablePrices.AddAsync ( table );
+                }
+
+                await context.SaveChangesAsync ( ); // salva para gerar IDs
+
+                // Agora associa os items às tabelas corretas
+                for ( int i = 0; i < rawTables.Count; i++ )
+                {
+                    var tablePrice = tablePrices[i];
+                    var itemRefs = rawTables[i].Items.Select(x => x.TablePriceItemId).ToHashSet();
+
+                    var itemsForThisTable = rawItems
+                .Where(item => itemRefs.Contains(item.TablePriceItemId))
+                .ToList();
+
+                    foreach ( var item in itemsForThisTable )
+                    {
+                        item.TablePriceId = tablePrice.Id;
+                        tablePrice.Items.Add ( item );
+                    }
+                }
+
+                await context.SaveChangesAsync ( );
+                logger.LogInformation ( "TablePrices and TablePriceItems seeded successfully" );
             }
         }
 
+       
         private static async Task SeedClients ( ApplicationContext context, ILogger logger )
         {
             if ( !context.Clients.Any ( ) )

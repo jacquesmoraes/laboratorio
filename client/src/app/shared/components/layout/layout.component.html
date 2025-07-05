@@ -1,0 +1,14 @@
+<div class="container">
+  <nav>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
+    <a routerLink="/sectors" routerLinkActive="active">Setores</a>
+    <a routerLink="/work-sections" routerLinkActive="active">Seções de Trabalho</a>
+    <a routerLink="/work-types" routerLinkActive="active">Tipos de Trabalho</a>
+    <a routerLink="/scales" routerLinkActive="active">Escalas</a>
+    <a routerLink="/shades" routerLinkActive="active">cores</a>
+  </nav>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>

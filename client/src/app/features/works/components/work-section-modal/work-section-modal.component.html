@@ -1,13 +1,16 @@
 <div class="modal-container">
-  <h2 mat-dialog-title>
-    {{ isEditMode ? 'Editar' : 'Nova' }} Seção de Trabalho
-  </h2>
+  <div class="modal-header">
+    <h2>
+      <mat-icon class="header-icon">{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+      {{ isEditMode ? 'Editar' : 'Nova' }} Seção de Trabalho
+    </h2>
+  </div>
 
   <form [formGroup]="workSectionForm" (ngSubmit)="onSubmit()">
     <mat-dialog-content>
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Nome</mat-label>
-        <input matInput formControlName="name" placeholder="Digite o nome da seção">
+        <input matInput formControlName="name" placeholder="Digite o nome da seção" />
         <mat-error *ngIf="workSectionForm.get('name')?.hasError('required')">
           Nome é obrigatório
         </mat-error>
@@ -18,14 +21,12 @@
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button mat-button type="button" (click)="onCancel()">
+      <button type="button" (click)="onCancel()" class="cancel-btn">
+        <mat-icon>close</mat-icon>
         Cancelar
       </button>
-      <button 
-        mat-raised-button 
-        color="primary" 
-        type="submit" 
-        [disabled]="workSectionForm.invalid">
+      <button type="submit" [disabled]="workSectionForm.invalid" class="submit-btn">
+        <mat-icon>{{ isEditMode ? 'update' : 'add' }}</mat-icon>
         {{ isEditMode ? 'Atualizar' : 'Criar' }}
       </button>
     </mat-dialog-actions>

@@ -69,7 +69,7 @@
             services.AddScoped<IGenericService<Payment>, GenericService<Payment>> ( );
             services.AddScoped<IIdentityService, IdentityService> ( );
             services.AddScoped<IGenericService<ServiceOrder>, GenericService<ServiceOrder>> ( );
-            services.AddScoped<ITablePriceItemService, TablePriceItemService> ( );
+            
             services.AddScoped<ITablePriceService, TablePriceService> ( );
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
             services.AddScoped<UpdateOverdueStatusFilter> ( );

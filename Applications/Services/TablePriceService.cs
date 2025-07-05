@@ -1,50 +1,73 @@
-﻿namespace Applications.Services
+﻿using Applications.Dtos.Pricing;
+using Applications.Records.Pricing;
+using Core.Exceptions;
+using Core.FactorySpecifications.ClientsSpecifications;
+using Core.FactorySpecifications;
+using Core.Interfaces;
+using Core.Models.Clients;
+using Core.Models.Pricing;
+using Core.Models.Works;
+
+namespace Applications.Services
 {
     public class TablePriceService (
         IGenericRepository<TablePrice> repository,
-        IGenericRepository<TablePriceItem> itemRepository
+        IGenericRepository<Client> clientRepo,
+        IGenericRepository<WorkType> workTypeRepo
     ) : GenericService<TablePrice> ( repository ), ITablePriceService
     {
         private readonly IGenericRepository<TablePrice> _repository = repository;
-        private readonly IGenericRepository<TablePriceItem> _itemRepository = itemRepository;
+        private readonly IGenericRepository<Client> _clientRepo = clientRepo;
+        private readonly IGenericRepository<WorkType> _workTypeRepo = workTypeRepo;
 
         public async Task<TablePrice> CreateFromDtoAsync ( CreateTablePriceDto dto )
         {
             if ( string.IsNullOrWhiteSpace ( dto.Name ) )
                 throw new CustomValidationException ( "Table price name is required." );
 
-            if ( dto.Items == null || !dto.Items.Any ( ) )
+            if ( dto.Items is null || !dto.Items.Any ( ) )
                 throw new CustomValidationException ( "The table price must contain at least one item." );
 
+            // ✅ Verificação de duplicatas por tipo de serviço
             var duplicates = dto.Items
-                .GroupBy(i => i.TablePriceItemId)
-                .Where(g => g.Count() > 1)
-                .ToList();
+        .GroupBy(i => i.WorkTypeId)
+        .Where(g => g.Count() > 1)
+        .ToList();
 
             if ( duplicates.Any ( ) )
-                throw new BusinessRuleException ( $"Duplicate items detected with ID(s): {string.Join ( ", ", duplicates.Select ( d => d.Key ) )}" );
+                throw new BusinessRuleException (
+                    $"Duplicate work types detected: {string.Join ( ", ", duplicates.Select ( d => d.Key ) )}" );
 
-            var itemIds = dto.Items.Select(i => i.TablePriceItemId).ToList();
+            var workTypeIds = dto.Items.Select(i => i.WorkTypeId).Distinct().ToList();
+            var spec = WorkTypeSpecs.ByIds(workTypeIds);
+            var existingWorkTypes = await _workTypeRepo.GetAllAsync(spec);
 
-            // Use specification to fetch items by their IDs
-            var spec = TablePriceItemSpecs.ByIds(itemIds);
-            var existingItems = await _itemRepository.GetAllAsync(spec);
+            if ( existingWorkTypes.Count != workTypeIds.Count )
+                throw new NotFoundException ( "One or more work types were not found." );
 
-            if ( existingItems.Count != itemIds.Count )
-                throw new NotFoundException ( "One or more TablePriceItems were not found." );
+            var items = dto.Items.Select(i =>
+    {
+        var workType = existingWorkTypes.First(w => w.Id == i.WorkTypeId);
+        return new TablePriceItem
+        {
+            WorkTypeId = workType.Id,
+            WorkType = workType,
+            Price = i.Price
+        };
+    }).ToList();
 
             var tablePrice = new TablePrice
             {
                 Name = dto.Name,
                 Description = dto.Description,
                 Status = false,
-                Items = existingItems.ToList ( )
+                Items = items
             };
 
             await _repository.CreateAsync ( tablePrice );
-
             return tablePrice;
         }
+
 
         public async Task<TablePrice?> UpdateFromDtoAsync ( UpdateTablePriceDto dto )
         {
@@ -54,45 +77,63 @@
             if ( string.IsNullOrWhiteSpace ( dto.Name ) )
                 throw new CustomValidationException ( "Table price name is required." );
 
-            if ( dto.Items == null || !dto.Items.Any ( ) )
+            if ( dto.Items is null || !dto.Items.Any ( ) )
                 throw new CustomValidationException ( "The table price must contain at least one item." );
 
             var spec = TablePriceSpecs.ByIdWithRelations(dto.Id);
             var existing = await _repository.GetEntityWithSpec(spec)
                 ?? throw new NotFoundException($"Table price with ID {dto.Id} not found.");
 
-            // Validate duplicates
-            var duplicates = dto.Items
-                .GroupBy(i => i.TablePriceItemId)
-                .Where(g => g.Count() > 1)
-                .ToList();
+            var workTypeIds = dto.Items.Select(i => i.WorkTypeId).Distinct().ToList();
+            var workTypeSpec = WorkTypeSpecs.ByIds(workTypeIds);
+            var existingWorkTypes = await _workTypeRepo.GetAllAsync(workTypeSpec);
 
-            if ( duplicates.Any ( ) )
-                throw new BusinessRuleException ( $"Duplicate items detected with ID(s): {string.Join ( ", ", duplicates.Select ( d => d.Key ) )}" );
+            if ( existingWorkTypes.Count != workTypeIds.Count )
+                throw new NotFoundException ( "One or more work types were not found." );
 
-            // Update core properties
-            existing.Name = dto.Name;
-            existing.Description = dto.Description;
-            existing.Status = dto.Status;
-
-            // Reassociate items
             existing.Items.Clear ( );
 
             foreach ( var itemDto in dto.Items )
             {
-                if ( itemDto.TablePriceItemId <= 0 )
-                    throw new CustomValidationException ( $"Invalid item ID in table price: {itemDto.TablePriceItemId}" );
-
-                var item = await _itemRepository.GetEntityWithSpec(TablePriceItemSpecs.ByIdWithRelations(itemDto.TablePriceItemId))
-                    ?? throw new NotFoundException($"Item with ID {itemDto.TablePriceItemId} not found.");
-
-                existing.Items.Add ( item );
+                var workType = existingWorkTypes.First(w => w.Id == itemDto.WorkTypeId);
+                existing.Items.Add ( new TablePriceItem
+                {
+                    WorkTypeId = workType.Id,
+                    WorkType = workType,
+                    Price = itemDto.Price
+                } );
             }
+
+            existing.Name = dto.Name;
+            existing.Description = dto.Description;
+            existing.Status = dto.Status;
 
             var updated = await _repository.UpdateAsync(dto.Id, existing)
                 ?? throw new BusinessRuleException("Failed to update table price.");
 
             return updated;
+        }
+
+        public async Task<TablePriceItemRecord?> GetItemPriceByClientAndWorkTypeAsync ( int clientId, int workTypeId )
+        {
+            var spec = ClientSpecification.ClientSpecs.ByIdWithTablePriceItems(clientId);
+            var client = await _clientRepo.GetEntityWithSpec(spec)
+                ?? throw new NotFoundException($"Cliente {clientId} não encontrado.");
+
+            if ( client.TablePrice is null )
+                throw new BusinessRuleException ( "Cliente não possui tabela de preço associada." );
+
+            var item = client.TablePrice.Items.FirstOrDefault(i => i.WorkTypeId == workTypeId);
+
+            if ( item is null )
+                return null;
+
+            return new TablePriceItemRecord
+            {
+                WorkTypeId = item.WorkTypeId,
+                WorkTypeName = item.WorkType.Name,
+                Price = item.Price
+            };
         }
     }
 }

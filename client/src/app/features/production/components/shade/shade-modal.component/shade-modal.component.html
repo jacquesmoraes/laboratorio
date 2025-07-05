@@ -1,0 +1,51 @@
+<div class="modal-container">
+  <div class="modal-header">
+    <h2>
+      <mat-icon class="header-icon">{{ isEditMode() ? 'edit' : 'add' }}</mat-icon>
+      {{ isEditMode() ? 'Editar' : 'Nova' }} Cor
+    </h2>
+  </div>
+
+  <form [formGroup]="shadeForm" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Cor</mat-label>
+        <input matInput formControlName="color" placeholder="Digite o nome da cor" />
+        <mat-icon matSuffix>palette</mat-icon>
+
+        <mat-error *ngIf="shadeForm.get('color')?.hasError('required')">
+          Cor é obrigatória
+        </mat-error>
+        <mat-error *ngIf="shadeForm.get('color')?.hasError('minlength')">
+          Cor deve ter pelo menos 2 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Escala</mat-label>
+        <mat-select formControlName="scaleId">
+          @for (scale of scales(); track scale.id) {
+            <mat-option [value]="scale.id">
+              {{ scale.name }}
+            </mat-option>
+          }
+        </mat-select>
+
+        <mat-error *ngIf="shadeForm.get('scaleId')?.hasError('required')">
+          Escala é obrigatória
+        </mat-error>
+      </mat-form-field>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button type="button" (click)="onCancel()" class="cancel-btn">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+      <button type="submit" [disabled]="shadeForm.invalid" class="submit-btn">
+        <mat-icon>{{ isEditMode() ? 'update' : 'add' }}</mat-icon>
+        {{ isEditMode() ? 'Atualizar' : 'Criar' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

@@ -209,19 +209,20 @@ namespace Infra.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TablePriceItemId"));
 
-                    b.Property<string>("ItemName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(10,2)");
 
-                    b.Property<int?>("TablePriceId")
+                    b.Property<int>("TablePriceId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WorkTypeId")
                         .HasColumnType("integer");
 
                     b.HasKey("TablePriceItemId");
 
                     b.HasIndex("TablePriceId");
+
+                    b.HasIndex("WorkTypeId");
 
                     b.ToTable("TablePriceItems");
                 });
@@ -636,9 +637,18 @@ namespace Infra.Migrations
                     b.HasOne("Core.Models.Pricing.TablePrice", "TablePrice")
                         .WithMany("Items")
                         .HasForeignKey("TablePriceId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Models.Works.WorkType", "WorkType")
+                        .WithMany()
+                        .HasForeignKey("WorkTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("TablePrice");
+
+                    b.Navigation("WorkType");
                 });
 
             modelBuilder.Entity("Core.Models.Production.Shade", b =>

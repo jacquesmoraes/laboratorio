@@ -1,0 +1,74 @@
+<mat-card class="shade-card">
+  <mat-card-header>
+    <mat-card-title>Cores</mat-card-title>
+    <mat-card-subtitle>Gerencie as cores das escalas do laboratório</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="filterForm">
+      <div class="actions-bar">
+        <button (click)="onNew()" class="btn">
+          <mat-icon>add</mat-icon>
+          Nova Cor
+        </button>
+
+        <div class="filter-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Filtrar por Escala</mat-label>
+            <mat-select formControlName="scaleId" (selectionChange)="onScaleFilterChange()">
+              <mat-option [value]="undefined">Todas as escalas</mat-option>
+              @for (scale of scales(); track scale.id) {
+              <mat-option [value]="scale.id">
+                {{ scale.name }}
+              </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+
+    <div class="table-container">
+      <mat-table [dataSource]="shades()" class="mat-elevation-z8 custom-table">
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.id }}</mat-cell>
+        </ng-container>
+
+        <!-- Color Column -->
+        <ng-container matColumnDef="color">
+          <mat-header-cell *matHeaderCellDef>Cor</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <div class="color-display">
+              <!-- <div class="color-preview" [style.background-color]="element.color"></div> -->
+              <span>{{ element.color || '-' }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Scale Column -->
+        <ng-container matColumnDef="scaleId">
+          <mat-header-cell *matHeaderCellDef>Escala</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ getScaleName(element.scaleId) }}</mat-cell>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button mat-icon-button color="primary" (click)="onEdit(element)" class="action-icon-btn">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteShade(element.id)" class="action-icon-btn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+    </div>
+  </mat-card-content>
+</mat-card>

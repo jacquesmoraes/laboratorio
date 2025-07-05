@@ -1,4 +1,4 @@
-<mat-card>
+<mat-card class="scale-card">
   <mat-card-header>
     <mat-card-title>Tipos de Trabalho</mat-card-title>
     <mat-card-subtitle>Gerencie os tipos de trabalho do laboratório</mat-card-subtitle>
@@ -6,45 +6,48 @@
 
   <mat-card-content>
     <div class="actions-bar">
-      <button mat-raised-button color="primary" (click)="onNew()">
+      <button (click)="onNew()" class="btn">
         <mat-icon>add</mat-icon>
         Novo Tipo
       </button>
     </div>
 
     <div class="table-container">
-      <mat-table [dataSource]="workTypes" class="mat-elevation-z8">
+      <mat-table [dataSource]="workTypes()" class="mat-elevation-z8 custom-table">
+        
         <!-- ID Column -->
         <ng-container matColumnDef="id">
           <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{ element.id }}</mat-cell>
+          <mat-cell *matCellDef="let element">{{element.id}}</mat-cell>
         </ng-container>
 
         <!-- Name Column -->
         <ng-container matColumnDef="name">
           <mat-header-cell *matHeaderCellDef>Nome</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
+          <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
         </ng-container>
 
         <!-- Description Column -->
         <ng-container matColumnDef="description">
           <mat-header-cell *matHeaderCellDef>Descrição</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{ element.description || '-' }}</mat-cell>
+          <mat-cell *matCellDef="let element">{{element.description}}</mat-cell>
         </ng-container>
 
-        <!-- Work Section Column -->
+        <!-- Work Section Name Column -->
         <ng-container matColumnDef="workSectionName">
           <mat-header-cell *matHeaderCellDef>Seção</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{ element.workSectionName }}</mat-cell>
+          <mat-cell *matCellDef="let element">{{element.workSectionName}}</mat-cell>
         </ng-container>
 
-        <!-- Active Column -->
+        <!-- Is Active Column -->
         <ng-container matColumnDef="isActive">
           <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
           <mat-cell *matCellDef="let element">
-            <mat-chip [color]="element.isActive ? 'accent' : 'warn'" selected>
-              {{ element.isActive ? 'Ativo' : 'Inativo' }}
-            </mat-chip>
+            <mat-chip-listbox>
+              <mat-chip [color]="element.isActive ? 'accent' : 'warn'" selected>
+                {{element.isActive ? 'Ativo' : 'Inativo'}}
+              </mat-chip>
+            </mat-chip-listbox>
           </mat-cell>
         </ng-container>
 
@@ -52,10 +55,10 @@
         <ng-container matColumnDef="actions">
           <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
           <mat-cell *matCellDef="let element">
-            <button mat-icon-button color="primary" (click)="onEdit(element)">
+            <button mat-icon-button color="primary" (click)="onEdit(element)" class="action-icon-btn" matTooltip="Editar">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="deleteWorkType(element.id)">
+            <button mat-icon-button color="warn" (click)="deleteWorkType(element.id)" class="action-icon-btn" matTooltip="Excluir">
               <mat-icon>delete</mat-icon>
             </button>
           </mat-cell>
@@ -63,6 +66,7 @@
 
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
       </mat-table>
     </div>
   </mat-card-content>

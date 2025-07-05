@@ -1,11 +1,13 @@
 ﻿namespace Applications.Records.Pricing
 {
-    public record TablePriceItemsResponseRecord
+    public record TablePriceItemResponseRecord
     {
-        public int Id { get; init; }                  // ← pode mudar para TablePriceItemId por clareza
-        public string ItemName { get; init; } = string.Empty;
+        public int Id { get; init; }
+        public int WorkTypeId { get; init; }
+        public string WorkTypeName { get; init; } = string.Empty;
         public decimal Price { get; init; }
-        public string? TablePriceName { get; init; } // ← precisa do Include e do MapFrom
-    }
 
+        public int TablePriceId { get; init; }
+        public string TablePriceName { get; init; } = string.Empty;
+    }
 }

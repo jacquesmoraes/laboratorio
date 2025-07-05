@@ -1,13 +1,15 @@
 <div class="modal-container">
-  <h2 mat-dialog-title>
-    {{ isEditMode ? 'Editar' : 'Novo' }} Tipo de Trabalho
-  </h2>
+  <div class="modal-header">
+    <h2>
+      {{ isEditMode ? 'Editar' : 'Novo' }} Tipo de Trabalho
+    </h2>
+  </div>
 
   <form [formGroup]="workTypeForm" (ngSubmit)="onSubmit()">
     <mat-dialog-content>
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Nome</mat-label>
-        <input matInput formControlName="name" placeholder="Digite o nome do tipo de trabalho">
+        <input matInput formControlName="name" placeholder="Digite o nome do tipo de trabalho" />
         <mat-error *ngIf="workTypeForm.get('name')?.hasError('required')">
           Nome é obrigatório
         </mat-error>
@@ -41,14 +43,12 @@
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button mat-button type="button" (click)="onCancel()">
+      <button type="button" (click)="onCancel()" class="cancel-btn">
+        <mat-icon>close</mat-icon>
         Cancelar
       </button>
-      <button 
-        mat-raised-button 
-        color="primary" 
-        type="submit" 
-        [disabled]="workTypeForm.invalid">
+      <button type="submit" [disabled]="workTypeForm.invalid" class="submit-btn">
+        <mat-icon>{{ isEditMode ? 'update' : 'add' }}</mat-icon>
         {{ isEditMode ? 'Atualizar' : 'Criar' }}
       </button>
     </mat-dialog-actions>

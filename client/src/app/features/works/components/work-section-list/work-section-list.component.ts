@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,6 +22,7 @@ import { WorkSectionModalComponent, WorkSectionModalData } from '../work-section
     MatCardModule,
     MatDialogModule
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './work-section-list.component.html',
   styleUrls: ['./work-section-list.component.scss']
 })
@@ -29,17 +30,20 @@ export class WorkSectionListComponent implements OnInit {
   private workSectionService = inject(WorkSectionService);
   private dialog = inject(MatDialog);
 
-  workSections: WorkSection[] = [];
-  displayedColumns: string[] = ['id', 'name', 'actions'];
+  workSections = signal<WorkSection[]>([]);
+  displayedColumns: string[] = [ 'name', 'actions'];
 
   ngOnInit(): void {
+    console.log('WorkSectionListComponent: ngOnInit chamado');
     this.loadWorkSections();
   }
 
   loadWorkSections(): void {
+    console.log('WorkSectionListComponent: Carregando seções de trabalho...');
     this.workSectionService.getAll().subscribe({
       next: (data) => {
-        this.workSections = data;
+        console.log('WorkSectionListComponent: Dados recebidos:', data);
+        this.workSections.set(data);
       },
       error: (error) => {
         console.error('Erro ao carregar seções de trabalho:', error);

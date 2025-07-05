@@ -1,36 +1,154 @@
-.actions-bar {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: flex-end;
+.scale-card {
+  background: var(--white);
+  border-left: 5px solid var(--primary);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
+
+.scale-card mat-card-header {
+  background-color: var(--primary);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+}
+
+.scale-card mat-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.scale-card mat-card-subtitle {
+  font-size: 0.9rem;
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+
+
 
 .table-container {
-  overflow-x: auto;
+  margin-top: 1rem;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-}
-
-mat-card {
-  margin: 1rem;
-}
-
-mat-table {
+.custom-table {
   width: 100%;
+  background: var(--white);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.custom-table mat-header-row {
+  background-color: var(--dark);
+}
+
+.custom-table mat-header-cell {
+  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.75rem;
+}
+
+.custom-table mat-row {
+  transition: background-color 0.3s ease;
+}
+
+.custom-table mat-row:hover {
+  background-color: rgba(39, 102, 120, 0.05);
+}
+
+.custom-table mat-cell {
+  padding: 0.75rem;
+  color: var(--text-dark);
+  font-size: 0.9rem;
 }
 
 .mat-column-id {
   width: 60px;
-}
-
-.mat-column-isActive {
-  width: 100px;
+  font-weight: 600;
+  color: var(--primary);
+  text-align: center;
 }
 
 .mat-column-actions {
-  width: 120px;
+  width: 100px;
+  text-align: center;
+}
+
+.actions-bar {
+  margin-bottom: 1rem;
+}
+
+.actions-bar button.btn {
+  background-color: var(--accent);
+  color: var(--white);
+  margin-top: 5px;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: large;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.actions-bar button.btn:hover {
+  background-color: var(--secondary);
+}
+
+.actions-bar button.btn mat-icon {
+  vertical-align: middle;
+  color: inherit;
+}
+
+.action-icon-btn {
+  margin: 0 0.2rem;
+  color: var(--accent);
+  transition: transform 0.2s ease;
+}
+
+.action-icon-btn:hover {
+  color: var(--secondary);
+  transform: scale(1.1);
+}
+/* ===== CHIPS/BADGES DE STATUS ===== */
+
+/* Chip Ativo */
+::ng-deep .mat-mdc-chip.mat-accent {
+  background: linear-gradient(135deg, var(--success) 20%, #1e7e34 100%) !important;
+  color: var(--white) !important;
+  font-weight: 600 !important;
+  border: 2px solid var(--success) !important;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.8) !important;
+}
+
+/* Chip Inativo */
+::ng-deep .mat-mdc-chip.mat-warn {
+  background: linear-gradient(135deg, var(--danger) 0%, #c82333 100%) !important;
+  color: var(--white) !important;
+  font-weight: 600 !important;
+  border: 2px solid var(--danger) !important;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.8) !important;
+}
+
+/* Hover nos chips */
+::ng-deep .mat-mdc-chip.mat-accent:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.8) !important;
+}
+
+::ng-deep .mat-mdc-chip.mat-warn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.8) !important;
+}
+
+/* Container dos chips */
+::ng-deep .mat-mdc-chip-listbox {
+  display: flex !important;
+  gap: 0.5rem !important;
 }
