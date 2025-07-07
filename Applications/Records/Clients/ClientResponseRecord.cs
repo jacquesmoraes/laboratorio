@@ -9,5 +9,6 @@
         public bool IsInactive { get; init; }
         public int BillingMode { get; init; }
         public string? TablePriceName { get; init; }
+         public int? TablePriceId { get; init; }
     }
 }

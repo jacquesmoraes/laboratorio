@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -10,9 +10,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import Swal from 'sweetalert2';
 
-import { Client, BillingMode, BillingModeLabels } from '../../models/client.interface';
+import { Client, BillingMode, BillingModeLabels, Pagination, QueryParams } from '../../models/client.interface';
 import { ErrorService } from '../../../../core/services/error.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ClientService } from '../../services/clients.services';
@@ -31,6 +33,7 @@ import { ClientService } from '../../services/clients.services';
     MatProgressSpinnerModule,
     MatChipsModule,
     MatTooltipModule,
+    MatPaginatorModule,
     ReactiveFormsModule
   ],
   templateUrl: './client-list.component.html',
@@ -46,16 +49,16 @@ export class ClientListComponent implements OnInit {
   loading = signal(false);
   searchControl = new FormControl('');
   
-  displayedColumns = ['clientName', 'city', 'billingMode', 'tablePriceName', 'isInactive', 'actions'];
-  
-  filteredClients = computed(() => {
-    const searchTerm = this.searchControl.value?.toLowerCase() || '';
-    return this.clients().filter(client => 
-      client.clientName.toLowerCase().includes(searchTerm) ||
-      (client.city && client.city.toLowerCase().includes(searchTerm)) ||
-      (client.clientPhoneNumber && client.clientPhoneNumber.includes(searchTerm))
-    );
+  // Pagination
+  pagination = signal<Pagination<Client> | null>(null);
+  currentParams = signal<QueryParams>({
+    pageNumber: 1,
+    pageSize: 10,
+    sort: 'clientName',
+    search: ''
   });
+  
+  displayedColumns = ['clientName', 'city', 'billingMode', 'isInactive', 'actions'];
 
   billingModeLabels = BillingModeLabels;
 
@@ -66,10 +69,11 @@ export class ClientListComponent implements OnInit {
 
   private loadClients() {
     this.loading.set(true);
-    this.clientService.getClients()
+    this.clientService.getPaginatedClients(this.currentParams())
       .subscribe({
-        next: (clients) => {
-          this.clients.set(clients);
+        next: (pagination) => {
+          this.pagination.set(pagination);
+          this.clients.set(pagination.data);
           this.loading.set(false);
         },
         error: (error) => {
@@ -83,9 +87,32 @@ export class ClientListComponent implements OnInit {
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged()
-    ).subscribe(() => {
-      // The computed signal will automatically update the filtered results
+    ).subscribe(search => {
+      this.currentParams.update(params => ({ ...params, search: search || '', pageNumber: 1 }));
+      this.loadClients();
     });
+  }
+
+  onPageChange(event: PageEvent) {
+    this.currentParams.update(params => ({
+      ...params,
+      pageNumber: event.pageIndex + 1,
+      pageSize: event.pageSize
+    }));
+    this.loadClients();
+  }
+
+  clearFilters() {
+    this.searchControl.setValue('');
+    
+    this.currentParams.set({
+      pageNumber: 1,
+      pageSize: 10,
+      sort: 'clientName',
+      search: ''
+    });
+    
+    this.loadClients();
   }
 
   onNew() {
@@ -97,8 +124,37 @@ export class ClientListComponent implements OnInit {
   }
 
   onDelete(client: Client) {
-    // TODO: Implement delete confirmation
-    console.log('Delete client:', client);
+    Swal.fire({
+      title: 'Tem certeza?',
+      text: `Deseja excluir o cliente "${client.clientName}"? Esta ação não pode ser desfeita!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.loading.set(true);
+        this.clientService.deleteClient(client.clientId)
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Cliente excluído com sucesso',
+                timer: 1000,
+                showConfirmButton: false
+              });
+              this.loadClients();
+            },
+            error: (error) => {
+              this.errorService.showError('Erro ao excluir cliente', error);
+              this.loading.set(false);
+            }
+          });
+      }
+    });
   }
 
   onViewDetails(client: Client) {

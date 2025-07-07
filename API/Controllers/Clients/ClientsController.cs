@@ -9,9 +9,7 @@
         private readonly IMapper _mapper = mapper;
 
 
-
-
-        [HttpGet]
+         [HttpGet]
         public async Task<IActionResult> GetAll ( )
         {
             var spec = ClientSpecs.All();
@@ -23,6 +21,17 @@
             return Ok ( response );
 
         }
+
+        
+        [HttpGet ( "paginated" )]
+        public async Task<ActionResult<Pagination<ClientResponseRecord>>> GetPaginated ( [FromQuery] QueryParams parameters )
+        {
+            var result = await _clientService.GetPaginatedAsync(parameters);
+            return Ok ( result );
+        }
+
+
+
 
         [HttpGet ( "{id}" )]
         public async Task<IActionResult> GetById ( int id )

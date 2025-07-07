@@ -1,4 +1,6 @@
-﻿namespace Applications.Services
+﻿using Core.FactorySpecifications.ClientsSpecifications;
+
+namespace Applications.Services
 {
     public class ClientService (
         IGenericRepository<Client> clientRepository,
@@ -37,22 +39,32 @@
             return await base.CreateAsync ( entity );
         }
 
-        //public async Task<Client?> GetClientIfEligibleForPerClientPayment ( int clientId )
-        //{
-        //    if ( clientId <= 0 )
-        //        throw new CustomValidationException ( "Invalid client ID." );
+      
 
-        //    var spec = ClientSpecs.ById(clientId);
-        //    var client = await _clientRepo.GetEntityWithSpec(spec)
-        //        ?? throw new NotFoundException($"Client with ID {clientId} not found.");
+         public async Task<Pagination<ClientResponseRecord>> GetPaginatedAsync ( QueryParams parameters )
+        {
+            var spec = new ClientSpecification(parameters);
 
-        //    if ( client.BillingMode != BillingMode.perMonth )
-        //        throw new BusinessRuleException ( "Only clients with monthly billing are eligible for per-client payments." );
+            // Create count spec without paging
+            var countParams = new QueryParams
+            {
+                Search = parameters.Search
+            };
+            var countSpec = new ClientSpecification(countParams);
 
-        //    return client;
-        //}
+            var totalItems = await _clientRepo.CountAsync(countSpec);
+            var clients = await _clientRepo.GetAllAsync(spec);
 
-        // ... existing code ...
+            var records = _mapper.Map<IReadOnlyList<ClientResponseRecord>>(clients);
+
+            return new Pagination<ClientResponseRecord> (
+                parameters.PageNumber,
+                parameters.PageSize,
+                totalItems,
+                records
+            );
+        }
+
         public async Task<ClientResponseDetailsProjection> GetClientDetailsProjectionAsync ( int clientId )
         {
             var spec = ClientSpecs.ById(clientId);
@@ -93,16 +105,15 @@
 
             var spec = ClientSpecs.ById(dto.ClientId);
             var existing = await _clientRepo.GetEntityWithSpec(spec)
-                ?? throw new NotFoundException($"Client with ID {dto.ClientId} not found.");
+        ?? throw new NotFoundException($"Client with ID {dto.ClientId} not found.");
 
-            if ( dto.BillingMode != existing.BillingMode )
+            if ( dto.BillingMode != existing.BillingMode &&
+                existing.ServiceOrders.Any ( o => o.Status != OrderStatus.Finished ) )
             {
-                // Check for open service orders
-                if ( existing.ServiceOrders.Any ( o => o.Status != OrderStatus.Finished ) )
-                    throw new BusinessRuleException ( "Cannot change billing mode while there are open service orders." );
+                throw new BusinessRuleException ( "Cannot change billing mode while there are open service orders." );
             }
 
-            // Update direct fields
+            // Atualiza campos principais
             existing.ClientName = dto.ClientName;
             existing.ClientEmail = dto.ClientEmail;
             existing.ClientPhoneNumber = dto.ClientPhoneNumber;
@@ -110,17 +121,25 @@
             existing.BillingMode = dto.BillingMode;
             existing.TablePriceId = dto.TablePriceId;
 
-            // Update address fields manually
+            // Novos campos
+            existing.Cnpj = dto.Cnpj;
+            existing.Cro = dto.Cro;
+            existing.BirthDate = dto.BirthDate;
+            existing.Notes = dto.Notes;
+
+            // Endereço
             existing.Address.Street = dto.Address.Street;
             existing.Address.Number = dto.Address.Number;
             existing.Address.Complement = dto.Address.Complement;
+            existing.Address.Cep = dto.Address.Cep;
             existing.Address.Neighborhood = dto.Address.Neighborhood;
             existing.Address.City = dto.Address.City;
 
             var updated = await _clientRepo.UpdateAsync(dto.ClientId, existing)
-                ?? throw new BusinessRuleException("Failed to update client.");
+        ?? throw new BusinessRuleException("Failed to update client.");
 
             return updated;
+
         }
     }
 }

@@ -1,0 +1,130 @@
+<div class="service-order-details-container">
+  <ng-container *ngIf="loading(); else loaded">
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Carregando detalhes da ordem...</p>
+    </div>
+  </ng-container>
+
+  <ng-template #loaded>
+    <ng-container *ngIf="serviceOrder(); else notFound">
+
+      <mat-card class="header-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>assignment</mat-icon>
+            Ordem de Serviço #{{ serviceOrder()?.orderNumber }}
+          </mat-card-title>
+          <mat-card-subtitle>
+            {{ serviceOrder()?.patientName }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-actions>
+          <button class="btn" (click)="editOrder()">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+          <button class="btn btn-danger" (click)="deleteOrder()">
+            <mat-icon>delete</mat-icon>
+            Excluir
+          </button>
+          <button class="btn btn-secondary" (click)="router.navigate(['service-orders'])">
+            <mat-icon>arrow_back</mat-icon>
+            Voltar
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <div class="details-grid">
+        <!-- Informações Gerais -->
+        <mat-card>
+          <mat-card-title>Informações Gerais</mat-card-title>
+          <mat-list>
+            <mat-list-item>Número: {{ serviceOrder()?.orderNumber }}</mat-list-item>
+            <mat-list-item>Paciente: {{ serviceOrder()?.patientName }}</mat-list-item>
+            <mat-list-item>
+              Status:
+              <mat-chip 
+                [ngStyle]="{'background-color': getStatusColor(serviceOrder()?.status!)}"
+                class="status-chip">
+                {{ getStatusLabel(serviceOrder()?.status) }}
+
+              </mat-chip>
+            </mat-list-item>
+            <mat-list-item>Entrada: {{ serviceOrder()?.dateIn | date:'dd/MM/yyyy HH:mm' }}</mat-list-item>
+            <mat-list-item *ngIf="serviceOrder()?.dateOut">Saída: {{ serviceOrder()?.dateOut | date:'dd/MM/yyyy HH:mm' }}</mat-list-item>
+            <mat-list-item *ngIf="serviceOrder()?.dateOutFinal">Finalização: {{ serviceOrder()?.dateOutFinal | date:'dd/MM/yyyy HH:mm' }}</mat-list-item>
+            <mat-list-item>
+              Total: <span class="total-value">{{ formatCurrency(serviceOrder()?.orderTotal || 0) }}</span>
+            </mat-list-item>
+          </mat-list>
+        </mat-card>
+
+        <!-- Cliente -->
+        <mat-card>
+          <mat-card-title>Cliente</mat-card-title>
+          <mat-list>
+            <mat-list-item>Nome: {{ serviceOrder()?.client?.clientName }}</mat-list-item>
+            <mat-list-item *ngIf="serviceOrder()?.client?.phoneNumber">Telefone: {{ serviceOrder()?.client?.phoneNumber }}</mat-list-item>
+            <mat-list-item>
+              Endereço:
+              {{ serviceOrder()?.client?.address?.street || '' }}, {{ serviceOrder()?.client?.address?.number || '' }}
+              <span *ngIf="serviceOrder()?.client?.address?.complement">- {{ serviceOrder()?.client?.address?.complement }}</span>
+              <br>
+              {{ serviceOrder()?.client?.address?.neighborhood }} - {{ serviceOrder()?.client?.address?.city }}
+              <br>
+              CEP: {{ serviceOrder()?.client?.address?.cep }}
+            </mat-list-item>
+          </mat-list>
+        </mat-card>
+
+        <!-- Trabalhos -->
+        <mat-card>
+          <mat-card-title>Trabalhos ({{ serviceOrder()?.works?.length }})</mat-card-title>
+          <mat-accordion>
+            <mat-expansion-panel *ngFor="let work of serviceOrder()?.works">
+              <mat-expansion-panel-header>
+                <mat-panel-title>{{ work.workTypeName }}</mat-panel-title>
+                <mat-panel-description>
+                  Qtd: {{ work.quantity }} | {{ formatCurrency(work.priceTotal) }}
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <div class="work-details">
+                <p>Quantidade: {{ work.quantity }}</p>
+                <p>Preço Unitário: {{ formatCurrency(work.priceUnit) }}</p>
+                <p>Preço Total: {{ formatCurrency(work.priceTotal) }}</p>
+                <p *ngIf="work.shadeColor">Cor: {{ work.shadeColor }}</p>
+                <p *ngIf="work.scaleName">Escala: {{ work.scaleName }}</p>
+                <p *ngIf="work.notes">Observações: {{ work.notes }}</p>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </mat-card>
+
+        <!-- Estágios -->
+        <mat-card>
+          <mat-card-title>Estágios de Produção</mat-card-title>
+          <mat-list>
+            <mat-list-item *ngFor="let stage of serviceOrder()?.stages">
+              <mat-icon matListItemIcon>place</mat-icon>
+              <div>{{ stage.sectorName }}</div>
+              <div>Entrada: {{ stage.dateIn | date:'dd/MM/yyyy HH:mm' }}</div>
+              <div *ngIf="stage.dateOut">Saída: {{ stage.dateOut | date:'dd/MM/yyyy HH:mm' }}</div>
+            </mat-list-item>
+          </mat-list>
+        </mat-card>
+      </div>
+    </ng-container>
+
+    <ng-template #notFound>
+      <div class="empty-state">
+        <mat-icon class="empty-icon">assignment</mat-icon>
+        <h2>Ordem não encontrada</h2>
+        <p>A ordem de serviço solicitada não foi encontrada.</p>
+        <button class="btn" (click)="router.navigate(['service-orders'])">
+          Voltar para a lista
+        </button>
+      </div>
+    </ng-template>
+  </ng-template>
+</div>

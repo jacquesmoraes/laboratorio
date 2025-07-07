@@ -1,10 +1,16 @@
-﻿namespace API.Controllers.ServiceOrders
+﻿using Applications.Services;
+
+namespace API.Controllers.ServiceOrders
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ServiceOrdersController(IMapper mapper, IServiceOrderService serviceOrderService) : BaseApiController
+    public class ServiceOrdersController(IMapper mapper,
+        IServiceOrderService serviceOrderService,
+        ITablePriceService tablePriceService
+        ) : BaseApiController
     {
         private readonly IServiceOrderService _serviceOrderService = serviceOrderService;
+        private readonly ITablePriceService _tablePriceService = tablePriceService;
         private readonly IMapper _mapper = mapper;
 
         [HttpPost]
@@ -72,6 +78,22 @@
             {
                 return BadRequest(new { error = ex.Message });
             }
+        }
+
+
+        
+        /// <summary>
+        /// Returns the price of a specific work type for a given client.
+        /// </summary>
+        [HttpGet ( "client/{clientId}/worktype/{workTypeId}" )]
+        public async Task<IActionResult> GetPriceByClientAndWorkType ( int clientId, int workTypeId )
+        {
+            var result = await _tablePriceService.GetItemPriceByClientAndWorkTypeAsync(clientId, workTypeId);
+
+            if ( result is null )
+                return NotFound ( $"Nenhum preço encontrado para o serviço ID {workTypeId} no cliente ID {clientId}" );
+
+            return Ok ( result );
         }
 
         [HttpGet("alert/tryin")]

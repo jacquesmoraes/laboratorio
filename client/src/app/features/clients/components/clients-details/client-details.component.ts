@@ -3,11 +3,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ClientService } from '../../services/clients.services';
 import { ClientDetails, BillingModeLabels } from '../../models/client.interface';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-client-details',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,
+    MatIconModule
+  ],
   templateUrl: './client-details.component.html',
   styleUrl:'./client-details.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -45,7 +48,14 @@ private loadClient(id: number) {
     }
   });
 }
+// ... existing code ...
 
+hasAddress(): boolean {
+  const address = this.client()?.address;
+  return !!(address?.street || address?.city || address?.neighborhood);
+}
+
+// ... existing code ...
   getBillingModeLabel(mode?: number): string {
     if (mode === undefined) return 'Não informado';
     return BillingModeLabels[mode as keyof typeof BillingModeLabels] || 'Desconhecido';

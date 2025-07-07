@@ -320,3 +320,38 @@
     }
   }
 }
+
+
+
+.address-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.address-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  mat-icon {
+    color: var(--accent);
+    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+  
+  .address-text {
+    color: var(--dark);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+}
+
+.no-data {
+  color: var(--accent);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+

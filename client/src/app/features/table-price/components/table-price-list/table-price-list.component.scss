@@ -1,0 +1,183 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  .title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.error-card {
+  margin-bottom: 1rem;
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--secondary);
+  }
+}
+
+.cards-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+}
+
+.table-price-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border-left: 5px solid var(--primary);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  mat-card-header {
+    margin-bottom: 1rem;
+
+    mat-card-title {
+      color: var(--primary);
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    mat-card-subtitle {
+      color: var(--primary);
+    }
+  }
+
+  .info-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+
+    mat-chip {
+      font-weight: 500;
+
+      &.mat-accent {
+        background-color: var(--accent);
+        color: var(--white);
+      }
+
+      &.mat-warn {
+        background-color: var(--secondary);
+        color: var(--white);
+      }
+    }
+  }
+
+  mat-card-actions {
+    padding: 0.5rem;
+
+    button {
+      margin-left: 0.5rem;
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  .empty-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--accent);
+    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.btn {
+  background-color: var(--accent);
+  color: var(--white);
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: large;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: var(--secondary);
+}
+
+.action-icon-btn {
+  margin-left: 0.5rem;
+  color: var(--accent);
+
+  &:hover {
+    color: var(--secondary);
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-chips {
+    justify-content: center;
+  }
+}
+
+// Animações
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.space-y-6 > * {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Estilos para preços
+.price-value {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: var(--dark);
+}

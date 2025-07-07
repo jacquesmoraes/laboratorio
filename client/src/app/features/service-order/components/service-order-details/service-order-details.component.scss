@@ -1,0 +1,238 @@
+.service-order-details-container {
+  padding: 24px;
+  background-color: #f4f1ee;
+  min-height: 100vh;
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    gap: 16px;
+
+    p {
+      color: #334a52;
+      font-size: 16px;
+    }
+  }
+
+  .details-content {
+    .header-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+
+      .card-title {
+        color: #276678;
+        font-size: 24px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .title-icon {
+          color: #276678;
+        }
+      }
+
+      .card-subtitle {
+        color: #334a52;
+        font-size: 16px;
+        margin-top: 8px;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+
+        .action-btn {
+          border-radius: 8px;
+          font-weight: 500;
+
+          &[color="primary"] {
+            background-color: #276678 !important;
+            color: #f4f1ee !important;
+
+            &:hover {
+              background-color: #334a52 !important;
+            }
+          }
+
+          &[color="warn"] {
+            background-color: #dc3545 !important;
+            color: white !important;
+
+            &:hover {
+              background-color: #c82333 !important;
+            }
+          }
+
+          mat-icon {
+            margin-right: 8px;
+          }
+        }
+      }
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+
+      .info-card,
+      .works-card,
+      .stages-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        .section-title {
+          color: #276678;
+          font-size: 18px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          mat-icon {
+            color: #276678;
+          }
+        }
+
+        .status-chip {
+          font-weight: 500;
+          font-size: 12px;
+          padding: 4px 8px;
+          border-radius: 12px;
+          min-height: 24px;
+        }
+
+        .total-value {
+          font-weight: 600;
+          color: #276678;
+          font-size: 16px;
+        }
+
+        .work-panel {
+          margin-bottom: 8px;
+          border-radius: 8px;
+
+          ::ng-deep .mat-expansion-panel-header {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+          }
+
+          .work-details {
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 8px;
+
+            p {
+              margin: 8px 0;
+              color: #334a52;
+
+              strong {
+                color: #276678;
+              }
+            }
+          }
+        }
+
+        .stage-item {
+          border-left: 4px solid #276678;
+          margin-bottom: 8px;
+          border-radius: 4px;
+
+          .stage-icon {
+            color: #276678;
+          }
+
+          ::ng-deep .mat-mdc-list-item-title {
+            color: #276678;
+            font-weight: 600;
+          }
+
+          ::ng-deep .mat-mdc-list-item-line {
+            color: #334a52;
+            font-size: 14px;
+          }
+        }
+      }
+
+      .works-card,
+      .stages-card {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    text-align: center;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    .empty-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #96afb8;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      color: #334a52;
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: #96afb8;
+      margin-bottom: 24px;
+    }
+
+    button {
+      background-color: #276678 !important;
+      color: #f4f1ee !important;
+      border-radius: 8px;
+      font-weight: 500;
+
+      &:hover {
+        background-color: #334a52 !important;
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .service-order-details-container {
+    padding: 16px;
+
+    .details-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .header-card {
+      .card-actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        .action-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// T

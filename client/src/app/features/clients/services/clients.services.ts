@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Client, CreateClientDto, UpdateClientDto, ClientDetails } from '../models/client.interface';
+import { Client, CreateClientDto, UpdateClientDto, ClientDetails, Pagination, QueryParams } from '../models/client.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -34,5 +34,15 @@ export class ClientService {
   // Delete a client
   deleteClient(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+ getPaginatedClients(params: QueryParams): Observable<Pagination<Client>> {
+    const queryParams = new HttpParams()
+      .set('pageNumber', params.pageNumber.toString())
+      .set('pageSize', params.pageSize.toString())
+      .set('sort', params.sort || 'clientName')
+      .set('search', params.search || '');
+    
+    return this.http.get<Pagination<Client>>(`${this.apiUrl}/paginated`, { params: queryParams });
   }
 }

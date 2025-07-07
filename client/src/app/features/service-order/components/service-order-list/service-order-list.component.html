@@ -1,0 +1,132 @@
+<div class="service-order-list-container">
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title class="card-title">
+        <mat-icon class="title-icon">assignment</mat-icon>
+        Ordens de Serviço
+      </mat-card-title>
+      <mat-card-actions>
+        <button class="btn-primary" (click)="navigateToNew()">
+          <mat-icon>add</mat-icon>
+          Nova Ordem
+        </button>
+        <button class="btn-secondary" [disabled]="!hasSelection()">
+          <mat-icon>receipt</mat-icon>
+          Gerar Fatura
+        </button>
+      </mat-card-actions>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Filtros -->
+      <div class="filters-section">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Buscar</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="Buscar por paciente..." />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onStatusChange()">
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let status of orderStatuses" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Ordenar por</mat-label>
+          <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()">
+            <mat-option value="DateIn">Data de Entrada</mat-option>
+            <mat-option value="PatientName">Nome do Paciente</mat-option>
+            <mat-option value="OrderNumber">Número da Ordem</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button class="btn-primary" (click)="loadServiceOrders()">
+          <mat-icon>filter_list</mat-icon>
+          Filtrar
+        </button>
+      </div>
+
+      <!-- Tabela -->
+      <div class="table-container">
+        <table mat-table [dataSource]="serviceOrders()" class="service-order-table">
+
+          <!-- Seleção -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-icon>check_box_outline_blank</mat-icon>
+            </th>
+            <td mat-cell *matCellDef="let order">
+              <mat-checkbox [checked]="selectedOrderIds().includes(order.serviceOrderId)"
+                (change)="toggleSelection(order.serviceOrderId)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="orderNumber">
+            <th mat-header-cell *matHeaderCellDef>Número</th>
+            <td mat-cell *matCellDef="let order">{{ order.orderNumber }}</td>
+          </ng-container>
+          <ng-container matColumnDef="clientName">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let order">
+              <a [routerLink]="['/clients', order.clientId]" class="client-link" (click)="$event.stopPropagation()">
+                {{ order.clientName }}
+              </a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="patientName">
+            <th mat-header-cell *matHeaderCellDef>Paciente</th>
+            <td mat-cell *matCellDef="let order">{{ order.patientName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dateIn">
+            <th mat-header-cell *matHeaderCellDef>Data Entrada</th>
+            <td mat-cell *matCellDef="let order">{{ order.dateIn | date: 'dd/MM/yyyy' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let order">
+              <mat-chip [class]="getStatusColorClass(order.status)" class="status-chip">
+                {{ getStatusLabel(order.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="currentSectorName">
+            <th mat-header-cell *matHeaderCellDef>Setor Atual</th>
+            <td mat-cell *matCellDef="let order">{{ order.currentSectorName || '-' }}</td>
+          </ng-container>
+
+
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let order">
+              <button mat-icon-button class="action-btn" (click)="viewDetails(order.serviceOrderId)"
+                matTooltip="Ver detalhes">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" (click)="editOrder(order.serviceOrderId)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-header-row"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+        </table>
+
+        <mat-paginator [length]="totalItems()" [pageSize]="currentParams().pageSize"
+          [pageIndex]="currentParams().pageNumber - 1" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

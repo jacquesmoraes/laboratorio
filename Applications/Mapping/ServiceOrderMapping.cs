@@ -24,12 +24,16 @@
 
             CreateMap<ServiceOrder, ServiceOrderDetailsProjection> ( )
     .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status.ToString ( ) ) )
+     .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Client))
     .ForMember ( dest => dest.CurrentSectorName, opt => opt.MapFrom<CurrentSectorNameResolver> ( ) );
 
             CreateMap<ServiceOrder, ServiceOrderListProjection> ( )
                 .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status.ToString ( ) ) )
-                .ForMember ( dest => dest.CurrentSectorName, opt => opt.MapFrom<CurrentSectorNameResolver> ( ) );
-
+                 .ForMember ( dest => dest.ClientId, opt => opt.MapFrom ( src => src.ClientId ) )
+                .ForMember ( dest => dest.CurrentSectorName, opt => opt.MapFrom<CurrentSectorNameResolver> ( ) )
+            .ForMember ( dest => dest.ClientName, opt => opt.MapFrom ( src => src.Client.ClientName ) ); // Adicione esta linha
+         
+            
             CreateMap<ServiceOrder, ServiceOrderAlertRecord> ( )
                 .ForMember ( dest => dest.ClientName, opt => opt.MapFrom ( src => src.Client.ClientName ) )
                 .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status.ToString ( ) ) )

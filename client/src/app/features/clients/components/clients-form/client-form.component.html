@@ -156,16 +156,21 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="w-50">
+                <mat-label>CEP</mat-label>
+                <input matInput formControlName="cep" placeholder="00000-000" />
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-50">
                 <mat-label>Bairro</mat-label>
                 <input matInput formControlName="neighborhood" placeholder="Nome do bairro" />
                 <mat-error *ngIf="clientForm.get('address.neighborhood')?.hasError('required')">
                   Bairro é obrigatório
                 </mat-error>
               </mat-form-field>
-            </div>
 
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="w-100">
+              <mat-form-field appearance="outline" class="w-50">
                 <mat-label>Cidade</mat-label>
                 <input matInput formControlName="city" placeholder="Nome da cidade" />
                 <mat-error *ngIf="clientForm.get('address.city')?.hasError('required')">
@@ -173,6 +178,8 @@
                 </mat-error>
               </mat-form-field>
             </div>
+
+
           </div>
         </form>
       }

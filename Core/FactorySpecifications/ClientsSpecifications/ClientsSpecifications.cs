@@ -1,4 +1,5 @@
 ﻿using Core.Models.Clients;
+using Core.Params;
 using Core.Specifications;
 using System.Linq.Expressions;
 
@@ -16,6 +17,82 @@ namespace Core.FactorySpecifications.ClientsSpecifications
 
         public ClientSpecification ( string? name )
             : base ( x => name == null || x.ClientName.Contains ( name ) ) { }
+
+        public ClientSpecification ( QueryParams p )
+          : base ( c =>
+              string.IsNullOrEmpty ( p.Search ) ||
+                 c.ClientName.ToLower ( ).Contains ( p.Search.ToLower ( ) ) ||
+          ( c.ClientEmail != null && c.ClientEmail.ToLower ( ).Contains ( p.Search.ToLower ( ) ) ) ||
+          ( c.ClientPhoneNumber != null && c.ClientPhoneNumber.Contains ( p.Search ) ) ||
+          ( c.ClientCpf != null && c.ClientCpf.Contains ( p.Search ) ) ||
+          ( c.Address.City != null && c.Address.City.ToLower ( ).Contains ( p.Search.ToLower ( ) ) ) )
+        {
+            AddInclude ( x => x.TablePrice! );
+            AddInclude ( x => x.Address );
+            AddInclude ( x => x.ServiceOrders ); // Para calcular IsInactive
+
+            // Aplicar ordenação customizada para Client
+            ApplyClientSorting ( p.Sort );
+
+            // Aplicar paginação
+            ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
+        }
+
+        private void ApplyClientSorting ( string? sort )
+        {
+            if ( string.IsNullOrWhiteSpace ( sort ) )
+            {
+                // Ordenação padrão por nome do cliente
+                AddOrderBy ( x => x.ClientName );
+                return;
+            }
+
+            var descending = sort.EndsWith("Desc", StringComparison.OrdinalIgnoreCase);
+            var propertyName = descending
+                ? sort[..^4] // remove "Desc"
+                : sort;
+
+            // Mapear propriedades válidas para Client
+            switch ( propertyName.ToLower ( ) )
+            {
+                case "clientname":
+                    if ( descending )
+                        AddOrderByDescending ( x => x.ClientName );
+                    else
+                        AddOrderBy ( x => x.ClientName );
+                    break;
+                case "clientemail":
+                    if ( descending )
+                        AddOrderByDescending ( x => x.ClientEmail ?? string.Empty );
+                    else
+                        AddOrderBy ( x => x.ClientEmail ?? string.Empty );
+                    break;
+                case "clientphone":
+                case "clientphonenumber":
+                    if ( descending )
+                        AddOrderByDescending ( x => x.ClientPhoneNumber ?? string.Empty );
+                    else
+                        AddOrderBy ( x => x.ClientPhoneNumber ?? string.Empty );
+                    break;
+                case "city":
+                    if ( descending )
+                        AddOrderByDescending ( x => x.Address.City ?? string.Empty );
+                    else
+                        AddOrderBy ( x => x.Address.City ?? string.Empty );
+                    break;
+                case "billingmode":
+                    if ( descending )
+                        AddOrderByDescending ( x => x.BillingMode );
+                    else
+                        AddOrderBy ( x => x.BillingMode );
+                    break;
+
+                default:
+                    // Fallback para ordenação por nome
+                    AddOrderBy ( x => x.ClientName );
+                    break;
+            }
+        }
 
         public static class ClientSpecs
         {

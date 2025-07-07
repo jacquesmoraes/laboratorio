@@ -1,0 +1,182 @@
+<div class="container">
+  <div class="header">
+    <button 
+      mat-icon-button 
+      (click)="goBack()"
+      class="action-icon-btn"
+      aria-label="Voltar">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="title">Detalhes da Tabela de Preço</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (error()) {
+    <mat-card class="error-card card">
+      <mat-card-content>
+        <mat-icon color="warn">error</mat-icon>
+        {{ error() }}
+      </mat-card-content>
+    </mat-card>
+  } @else if (tablePrice()) {
+    <div class="content">
+      <!-- Basic Information -->
+      <mat-card class="info-card card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>price_check</mat-icon>
+            {{ tablePrice()!.name }}
+          </mat-card-title>
+          <mat-card-subtitle>{{ tablePrice()!.description }}</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="status-info">
+            <mat-chip 
+              [color]="tablePrice()!.status ? 'accent' : 'warn'"
+              selected>
+              <mat-icon>{{ tablePrice()!.status ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ tablePrice()!.status ? 'Ativa' : 'Inativa' }}
+            </mat-chip>
+            <mat-chip>
+              <mat-icon>list</mat-icon>
+              {{ tablePrice()!.items.length }} itens
+            </mat-chip>
+            <mat-chip>
+              <mat-icon>people</mat-icon>
+              {{ tablePrice()!.clients.length }} clientes
+            </mat-chip>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions align="end">
+          <button 
+            (click)="onEdit()"
+            class="btn">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+          <button 
+            (click)="deleteTablePrice()"
+            class="btn">
+            <mat-icon>delete</mat-icon>
+            Excluir
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Items Table -->
+      <mat-card class="table-card card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>list</mat-icon>
+            Itens da Tabela
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          @if (hasItems()) {
+            <table mat-table [dataSource]="tablePrice()!.items" class="items-table">
+              <!-- Work Type Column -->
+              <ng-container matColumnDef="workTypeName">
+                <th mat-header-cell *matHeaderCellDef>Tipo de Trabalho</th>
+                <td mat-cell *matCellDef="let item">{{ item.workTypeName }}</td>
+              </ng-container>
+
+              <!-- Price Column -->
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef class="price-header">Preço</th>
+                <td mat-cell *matCellDef="let item" class="price-cell price-value">
+                  R$ {{ item.price.toFixed(2) }}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="itemsColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: itemsColumns;"></tr>
+            </table>
+          } @else {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">list</mat-icon>
+              <p>Nenhum item cadastrado nesta tabela.</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Clients Table -->
+      @if (hasClients()) {
+        <mat-card class="table-card card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>people</mat-icon>
+              Clientes Vinculados
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <table mat-table [dataSource]="tablePrice()!.clients" class="clients-table">
+              <!-- Client Name Column -->
+              <ng-container matColumnDef="clientName">
+                <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                <td mat-cell *matCellDef="let client">{{ client.clientName }}</td>
+              </ng-container>
+
+            
+
+              <!-- Table Price Name Column -->
+              <ng-container matColumnDef="tablePriceName">
+                <th mat-header-cell *matHeaderCellDef>Tabela de Preço</th>
+                <td mat-cell *matCellDef="let client">{{ client.tablePriceName }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="clientsColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: clientsColumns;"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Summary -->
+      <mat-card class="summary-card card">
+        <mat-card-content>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <mat-icon class="summary-icon">list</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total de Itens</span>
+                <span class="summary-value">{{ tablePrice()!.items.length }}</span>
+              </div>
+            </div>
+            
+            <mat-divider vertical></mat-divider>
+            
+            <div class="summary-item">
+              <mat-icon class="summary-icon">people</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Total de Clientes</span>
+                <span class="summary-value">{{ tablePrice()!.clients.length }}</span>
+              </div>
+            </div>
+            
+            <mat-divider vertical></mat-divider>
+            
+            <div class="summary-item">
+              <mat-icon class="summary-icon" [class]="tablePrice()!.status ? 'status-active' : 'status-inactive'">
+                {{ tablePrice()!.status ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Status</span>
+                <span class="summary-value" [class]="tablePrice()!.status ? 'status-active' : 'status-inactive'">
+                  {{ tablePrice()!.status ? 'Ativa' : 'Inativa' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

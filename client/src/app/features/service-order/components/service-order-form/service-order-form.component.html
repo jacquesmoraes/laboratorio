@@ -1,0 +1,189 @@
+<div class="service-order-form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="title-icon">assignment</mat-icon>
+        {{ isEditMode() ? 'Editar' : 'Nova' }} Ordem de Serviço
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isEditMode() ? 'Atualize os dados da ordem de serviço' : 'Preencha os dados para criar uma nova ordem de serviço' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="serviceOrderForm" (ngSubmit)="onSubmit()" class="form-content">
+
+        <!-- Informações Básicas -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>info</mat-icon>
+            Informações Básicas
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Cliente</mat-label>
+              <mat-select formControlName="clientId" [disabled]="loading()">
+                <mat-option value="">Selecione um cliente</mat-option>
+                <mat-option *ngFor="let client of clients()" [value]="client.clientId">
+                  {{ client.clientName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="serviceOrderForm.get('clientId')?.hasError('required')">
+                Cliente é obrigatório
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Nome do Paciente</mat-label>
+              <input matInput formControlName="patientName" placeholder="Digite o nome do paciente">
+              <mat-error *ngIf="getErrorMessage('patientName')">
+                {{ getErrorMessage('patientName') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Data de Entrada</mat-label>
+              <input matInput [matDatepicker]="datePicker" formControlName="dateIn">
+              <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+              <mat-datepicker #datePicker></mat-datepicker>
+              <mat-error *ngIf="getErrorMessage('dateIn')">
+                {{ getErrorMessage('dateIn') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Primeiro Setor</mat-label>
+              <mat-select formControlName="firstSectorId" [disabled]="loading()">
+                <mat-option value="">Selecione o setor</mat-option>
+                <mat-option *ngFor="let sector of sectors()" [value]="sector.sectorId">
+                  {{ sector.sectorName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="getErrorMessage('firstSectorId')">
+                {{ getErrorMessage('firstSectorId') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Trabalhos -->
+        <div class="form-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <mat-icon>work</mat-icon>
+              Trabalhos
+            </h3>
+            <button type="button" mat-mini-fab color="primary" (click)="addWork()"
+              [disabled]="loading() || !serviceOrderForm.get('clientId')?.value" class="add-work-btn">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <div class="works-container" formArrayName="works">
+            <div *ngFor="let workGroup of worksArray.controls; let i = index; trackBy: trackByIndex" class="work-item"
+              [formGroupName]="i">
+
+              <mat-card class="work-card">
+                <mat-card-header>
+                  <mat-card-title class="work-title">
+                    Trabalho {{ i + 1 }}
+                  </mat-card-title>
+                  <button type="button" mat-icon-button color="warn" (click)="removeWork(i)" [disabled]="loading()"
+                    class="remove-work-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </mat-card-header>
+
+                <mat-card-content>
+                  <div class="work-form-row">
+                    <mat-form-field appearance="outline" class="work-field">
+                      <mat-label>Tipo de Trabalho</mat-label>
+                      <mat-select formControlName="workTypeId" [disabled]="loading()">
+                        <mat-option value="">Selecione o tipo</mat-option>
+                        <mat-option *ngFor="let workType of workTypes()" [value]="workType.workTypeId">
+                          {{ workType.workTypeName }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="getWorkErrorMessage(i, 'workTypeId')">
+                        {{ getWorkErrorMessage(i, 'workTypeId') }}
+                      </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="work-field">
+                      <mat-label>Quantidade</mat-label>
+                      <input matInput type="number" formControlName="quantity" min="1">
+                      <mat-error *ngIf="getWorkErrorMessage(i, 'quantity')">
+                        {{ getWorkErrorMessage(i, 'quantity') }}
+                      </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="work-field">
+                      <mat-label>Preço Unitário</mat-label>
+                      <input matInput type="number" formControlName="priceUnit" min="0" step="0.01">
+                      <mat-error *ngIf="getWorkErrorMessage(i, 'priceUnit')">
+                        {{ getWorkErrorMessage(i, 'priceUnit') }}
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="work-form-row">
+                    <mat-form-field appearance="outline" class="work-field">
+                      <mat-label>Escala</mat-label>
+                      <mat-select formControlName="scaleId" [disabled]="loading()">
+                        <mat-option value="">Nenhuma escala</mat-option>
+                        <mat-option *ngFor="let scale of scales()" [value]="scale.scaleId">
+                          {{ scale.scaleName }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="work-field">
+                      <mat-label>Cor</mat-label>
+                      <mat-select formControlName="shadeId" [disabled]="loading()">
+                        <mat-option value="">Nenhuma cor</mat-option>
+                        <mat-option *ngFor="let shade of shadesByWorkIndex()[i] || shades()" [value]="shade.shadeId">
+
+
+                          {{ shade.shadeColor }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+
+                  </div>
+
+                  <mat-form-field appearance="outline" class="work-notes-field">
+                    <mat-label>Observações</mat-label>
+                    <textarea matInput formControlName="notes" rows="2"
+                      placeholder="Observações sobre o trabalho"></textarea>
+                  </mat-form-field>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <div *ngIf="worksArray.length === 0" class="no-works-message">
+              <mat-icon>info</mat-icon>
+              <p>Nenhum trabalho adicionado. Clique no botão + para adicionar um trabalho.</p>
+            </div>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="form-actions">
+      <button type="button" mat-button (click)="cancel()" [disabled]="loading()">
+        <mat-icon>cancel</mat-icon>
+        Cancelar
+      </button>
+
+      <button type="submit" mat-raised-button color="primary" (click)="onSubmit()"
+        [disabled]="serviceOrderForm.invalid || loading()" class="submit-btn">
+        <mat-icon *ngIf="!loading()">{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
+        {{ isEditMode() ? 'Atualizar' : 'Criar' }} Ordem de Serviço
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

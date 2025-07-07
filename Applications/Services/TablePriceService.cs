@@ -1,12 +1,4 @@
-﻿using Applications.Dtos.Pricing;
-using Applications.Records.Pricing;
-using Core.Exceptions;
-using Core.FactorySpecifications.ClientsSpecifications;
-using Core.FactorySpecifications;
-using Core.Interfaces;
-using Core.Models.Clients;
-using Core.Models.Pricing;
-using Core.Models.Works;
+﻿using Core.FactorySpecifications.ClientsSpecifications;
 
 namespace Applications.Services
 {

@@ -20,6 +20,7 @@ export interface ClientAddress {
   street: string;
   number: number;
   complement: string;
+  cep: string;
   neighborhood: string;
   city: string;
 }
@@ -43,6 +44,10 @@ export interface UpdateClientDto {
   clientEmail?: string;
   clientPhoneNumber?: string;
   clientCpf?: string;
+  cro?: string;
+  cnpj?: string;
+  birthDate?: string;
+  notes?: string;
   billingMode: BillingMode;
   tablePriceId: number;
   address: ClientAddress;
@@ -63,6 +68,21 @@ export interface ServiceOrderShort {
   patientName: string;
   status: string;
   orderTotal: number;
+}
+
+export interface QueryParams {
+  pageNumber: number;
+  pageSize: number;
+  sort?: string;
+  search?: string;
+}
+
+export interface Pagination<T> {
+  pageNumber: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  data: T[];
 }
 
 export interface ClientPayment {

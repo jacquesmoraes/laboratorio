@@ -6,6 +6,9 @@
         //Task<Client?> GetClientIfEligibleForPerClientPayment ( int clientId );
         Task<Client?> UpdateFromDtoAsync ( UpdateClientDto dto );
         Task<ClientResponseDetailsProjection> GetClientDetailsProjectionAsync ( int id );
+        Task<Pagination<ClientResponseRecord>> GetPaginatedAsync(QueryParams parameters);
+
     }
+
 
 }

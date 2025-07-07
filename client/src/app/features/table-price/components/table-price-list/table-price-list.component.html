@@ -1,0 +1,84 @@
+<div class="container">
+  <div class="header">
+    <h1 class="title">Tabelas de Preço</h1>
+    <button 
+      (click)="onNew()"
+      class="btn">
+      <mat-icon>add</mat-icon>
+      Nova Tabela
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (error()) {
+    <mat-card class="error-card card">
+      <mat-card-content>
+        <mat-icon color="warn">error</mat-icon>
+        {{ error() }}
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <div class="cards-grid">
+      @for (tablePrice of tablePrices(); track tablePrice.id) {
+        <mat-card class="table-price-card card">
+          <mat-card-header>
+            <mat-card-title>{{ tablePrice.name }}</mat-card-title>
+            <mat-card-subtitle>{{ tablePrice.description }}</mat-card-subtitle>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="info-chips">
+              <mat-chip 
+                [color]="tablePrice.status ? 'accent' : 'warn'"
+                selected>
+                {{ tablePrice.status ? 'Ativa' : 'Inativa' }}
+              </mat-chip>
+              <mat-chip>{{ tablePrice.items.length }} itens</mat-chip>
+              <mat-chip>{{ tablePrice.clients.length }} clientes</mat-chip>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions align="end">
+            <button 
+              mat-icon-button 
+              aria-label="Visualizar"
+              (click)="onView(tablePrice.id)"
+              class="action-icon-btn">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button 
+              mat-icon-button 
+              aria-label="Editar"
+              (click)="onEdit(tablePrice.id)"
+              class="action-icon-btn">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button 
+              mat-icon-button 
+              aria-label="Excluir"
+              (click)="deleteTablePrice(tablePrice.id)"
+              class="action-icon-btn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+
+    @if (isEmpty()) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">price_check</mat-icon>
+        <p>Nenhuma tabela de preço encontrada</p>
+        <button 
+          (click)="onNew()"
+          class="btn">
+          <mat-icon>add</mat-icon>
+          Criar primeira tabela
+        </button>
+      </div>
+    }
+  }
+</div>
