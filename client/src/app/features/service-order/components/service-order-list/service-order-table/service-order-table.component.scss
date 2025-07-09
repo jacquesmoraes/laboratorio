@@ -1,0 +1,129 @@
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.service-order-table {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 16px; // Aumentar fonte geral da tabela
+  
+  // Ou aumentar fonte específica das células
+  td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 16px; // Fonte das células
+  }
+  
+  // Fonte do cabeçalho
+  th {
+    font-size: 16px;
+    font-weight: 600;
+  }
+}
+
+.table-header-row {
+  background-color: #276678;
+  color: white;
+  
+  th {
+    color: white;
+    font-weight: 600;
+    padding: 16px 8px;
+    border-bottom: 2px solid #334a52;
+  }
+}
+
+.table-row {
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+  
+  td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e9ecef;
+  }
+}
+
+.client-link {
+  color: #276678;
+  text-decoration: none;
+  font-weight: 500;
+  
+  &:hover {
+    color: #334a52;
+    text-decoration: underline;
+  }
+}
+
+.status-chip {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  
+  &.status-production {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+  
+  &.status-tryin {
+    background-color: #fff3e0;
+    color: #f57c00;
+  }
+  
+  &.status-finished {
+    background-color: #e8f5e8;
+    color: #388e3c;
+  }
+  
+  &.status-default {
+    background-color: #f5f5f5;
+    color: #666;
+  }
+}
+
+.action-btn {
+  margin: 0 2px;
+  color: #276678;
+  
+  &:hover:not(:disabled) {
+    background-color: rgba(39, 102, 120, 0.1);
+  }
+  
+  &:disabled {
+    color: #ccc;
+  }
+}
+
+.text-muted {
+  color: #6c757d;
+  font-style: italic;
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .service-order-table {
+    font-size: 14px;
+  }
+  
+  .table-header-row th,
+  .table-row td {
+    padding: 8px 4px;
+  }
+  
+  .action-btn {
+    margin: 0 1px;
+  }
+}
+
+// Paginador
+mat-paginator {
+  background: white;
+  border-top: 1px solid #e9ecef;
+}

@@ -212,6 +212,7 @@
             var countSpec = new ServiceOrderSpecification(o =>
                 (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
                 (!p.Status.HasValue || o.Status == p.Status) &&
+                (!p.ExcludeFinished || o.Status != OrderStatus.Finished) &&
                 (string.IsNullOrEmpty(p.PatientName) || o.PatientName.ToLower().Contains(p.PatientName.ToLower())) &&
                 (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
                 (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value)

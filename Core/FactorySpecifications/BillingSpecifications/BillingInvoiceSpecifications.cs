@@ -65,7 +65,10 @@ namespace Core.FactorySpecifications.BillingSpecifications
         (!p.ClientId.HasValue || i.ClientId == p.ClientId) &&
         (!p.Status.HasValue || i.Status == p.Status) &&
         (!p.StartDate.HasValue || i.CreatedAt >= p.StartDate.Value) &&
-        (!p.EndDate.HasValue || i.CreatedAt <= p.EndDate.Value);
+        (!p.EndDate.HasValue || i.CreatedAt <= p.EndDate.Value) &&
+        (string.IsNullOrEmpty(p.Search) || 
+         i.InvoiceNumber.ToLower().Contains(p.Search.ToLower()) ||
+         i.Client.ClientName.ToLower().Contains(p.Search.ToLower()));
 
                 var spec = new BillingInvoiceSpecification(criteria);
 
@@ -88,7 +91,10 @@ namespace Core.FactorySpecifications.BillingSpecifications
         (!p.ClientId.HasValue || i.ClientId == p.ClientId) &&
         (!p.Status.HasValue || i.Status == p.Status) &&
         (!p.StartDate.HasValue || i.CreatedAt >= p.StartDate.Value) &&
-        (!p.EndDate.HasValue || i.CreatedAt <= p.EndDate.Value);
+        (!p.EndDate.HasValue || i.CreatedAt <= p.EndDate.Value) &&
+        (string.IsNullOrEmpty(p.Search) || 
+         i.InvoiceNumber.ToLower().Contains(p.Search.ToLower()) ||
+         i.Client.ClientName.ToLower().Contains(p.Search.ToLower()));
 
                 return new BillingInvoiceSpecification ( criteria );
             }

@@ -1,0 +1,186 @@
+<div class="container mx-auto p-6">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <button 
+          (click)="goBack()"
+          class="btn btn-secondary back-btn"
+        >
+          ←
+        </button>
+        <div class="header-info">
+          <h1 class="title">
+            Fatura {{ invoice()?.invoiceNumber }}
+          </h1>
+          <p class="subtitle">
+            Criada em {{ formatDate(invoice()?.createdAt) }}
+          </p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button 
+          (click)="printInvoice()"
+          class="btn btn-primary"
+        >
+          Imprimir
+        </button>
+        <button 
+          (click)="cancelInvoice()"
+          class="btn btn-danger"
+        >
+          Cancelar Fatura
+        </button>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+      </div>
+    }
+
+    @if (!loading() && invoice()) {
+      <div class="content">
+        <!-- Informações da Fatura -->
+        <div class="card">
+          <h2 class="card-title">Informações da Fatura</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="info-label">Número da Fatura</label>
+              <p class="info-value">{{ invoice()?.invoiceNumber }}</p>
+            </div>
+            <div class="info-item">
+              <label class="info-label">Data de Criação</label>
+              <p class="info-value">{{ formatDate(invoice()?.createdAt) }}</p>
+            </div>
+            @if (invoice()?.description) {
+              <div class="info-item full-width">
+                <label class="info-label">Descrição</label>
+                <p class="info-value">{{ invoice()?.description }}</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Informações do Cliente -->
+        <div class="card">
+          <h2 class="card-title">Cliente</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="info-label">Nome</label>
+              <p class="info-value">{{ invoice()?.client?.clientName }}</p>
+            </div>
+            @if (invoice()?.client?.phoneNumber) {
+              <div class="info-item">
+                <label class="info-label">Telefone</label>
+                <p class="info-value">{{ invoice()?.client?.phoneNumber }}</p>
+              </div>
+            }
+            <div class="info-item full-width">
+              <label class="info-label">Endereço</label>
+              <p class="info-value">
+                {{ invoice()?.client?.address?.street }}, {{ invoice()?.client?.address?.number }}
+                @if (invoice()?.client?.address?.complement) {
+                  - {{ invoice()?.client?.address?.complement }}
+                }
+              </p>
+              <p class="info-value">
+                  {{ invoice()?.client?.address?.neighborhood }} - {{ invoice()?.client?.address?.city }}
+              </p>
+              <p class="info-value">CEP: {{ invoice()?.client?.address?.cep }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ordens de Serviço -->
+        <div class="card">
+          <h2 class="card-title">Ordens de Serviço</h2>
+          <div class="service-orders">
+            @for (order of invoice()?.serviceOrders; track order.orderCode) {
+              <div class="service-order">
+                <div class="order-header">
+                  <div class="order-info">
+                    <h3 class="order-title">
+                      {{ order.orderCode }} - {{ order.patientName }}
+                    </h3>
+                    <p class="order-dates">
+                      Data de entrada: {{ formatDate(order.dateIn) }}
+                      @if (order.finishedAt) {
+                        | Finalizada: {{ formatDate(order.finishedAt) }}
+                      }
+                    </p>
+                  </div>
+                  <div class="order-total">
+                    <p class="total-amount">
+                      {{ formatCurrency(order.subtotal) }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Trabalhos -->
+                @if (order.works.length > 0) {
+                  <div class="works-table">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Trabalho</th>
+                          <th>Qtd</th>
+                          <th>Preço Unit.</th>
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (work of order.works; track work.workTypeName) {
+                          <tr>
+                            <td>{{ work.workTypeName }}</td>
+                            <td>{{ work.quantity }}</td>
+                            <td>{{ formatCurrency(work.priceUnit) }}</td>
+                            <td class="work-total">{{ formatCurrency(work.priceTotal) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="card">
+          <h2 class="card-title">Resumo Financeiro</h2>
+          <div class="financial-summary">
+            <div class="summary-item">
+              <span class="summary-label">Total das Ordens de Serviço:</span>
+              <span class="summary-value">{{ formatCurrency(invoice()?.totalServiceOrdersAmount || 0) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Crédito Anterior:</span>
+              <span class="summary-value">{{ formatCurrency(invoice()?.previousCredit || 0) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Débito Anterior:</span>
+              <span class="summary-value">{{ formatCurrency(invoice()?.previousDebit || 0) }}</span>
+            </div>
+            <div class="summary-item total">
+              <span class="summary-label">Valor Total da Fatura:</span>
+              <span class="summary-value">{{ formatCurrency(invoice()?.totalInvoiceAmount || 0) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (!loading() && !invoice()) {
+      <div class="empty-state">
+        <div class="empty-icon">❌</div>
+        <h3 class="empty-title">Fatura não encontrada</h3>
+        <p class="empty-description">
+          A fatura solicitada não foi encontrada ou pode ter sido removida.
+        </p>
+      </div>
+    }
+  </div>
+</div>

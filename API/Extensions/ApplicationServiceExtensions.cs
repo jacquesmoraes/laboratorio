@@ -9,8 +9,6 @@
 
             services.AddEndpointsApiExplorer ( );
 
-
-
             services.Configure<ApiBehaviorOptions> ( options =>
             {
                 options.InvalidModelStateResponseFactory = context =>

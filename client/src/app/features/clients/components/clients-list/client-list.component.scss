@@ -105,7 +105,7 @@
 
 .action-icon-btn {
   margin: 0 0.2rem;
-  color: var(--accent);
+  color: var(--primary);
   transition: transform 0.2s ease;
   
   &:hover {
@@ -245,10 +245,10 @@
 
 /* Chip Inativo */
 ::ng-deep .mat-mdc-chip.mat-warn {
-  background: linear-gradient(135deg, var(--danger) 0%, #c82333 100%) !important;
+  background: linear-gradient(135deg, var(--danger1) 0%, #c82333 100%) !important;
   color: var(--white) !important;
   font-weight: 600 !important;
-  border: 2px solid var(--danger) !important;
+  border: 2px solid var(--danger1) !important;
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.8) !important;
 }
 

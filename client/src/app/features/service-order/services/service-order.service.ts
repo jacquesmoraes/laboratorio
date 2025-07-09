@@ -26,12 +26,12 @@ export class ServiceOrdersService {
       .set('pageNumber', params.pageNumber.toString())
       .set('pageSize', params.pageSize.toString())
       .set('sort', params.sort || 'dateIn')
-      .set('patientName', params.search || '') // Aqui está correto
+      .set('search', params.search || '' )     
       .set('clientId', params.clientId?.toString() || '')
+       .set('excludeFinished', params.excludeFinished?.toString() || 'false')
+       .set('excludeInvoiced', params.excludeInvoiced?.toString() || 'false')
       .set('status', params.status?.toString() || '');
-    
-    console.log('Sending request with params:', queryParams.toString());
-    
+   
     return this.http.get<Pagination<ServiceOrder>>(this.apiUrl, { params: queryParams });
   }
 

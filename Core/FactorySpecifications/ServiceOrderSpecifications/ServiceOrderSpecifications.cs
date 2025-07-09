@@ -84,11 +84,17 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
             public static ServiceOrderSpecification Paged ( ServiceOrderParams p )
             {
                 Expression<Func<ServiceOrder, bool>> criteria = o =>
-                    (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
-                    (!p.Status.HasValue || o.Status == p.Status) &&
-                    (string.IsNullOrEmpty(p.PatientName) || o.PatientName.ToLower().Contains(p.PatientName.ToLower())) &&
-                    (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
-                    (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value);
+                (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
+                (!p.Status.HasValue || o.Status == p.Status) &&
+                (!p.ExcludeFinished || o.Status != OrderStatus.Finished) &&
+                (string.IsNullOrEmpty(p.Search) ||
+                o.PatientName.ToLower().Contains(p.Search.ToLower()) ||
+                o.Client.ClientName.ToLower().Contains(p.Search.ToLower())) &&
+                (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
+                (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value)&&
+                (!p.ExcludeInvoiced || o.BillingInvoiceId == null);
+                 
+
 
                 var spec = new ServiceOrderSpecification(criteria);
 
@@ -107,7 +113,9 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
                 Expression<Func<ServiceOrder, bool>> criteria = o =>
         (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
         (!p.Status.HasValue || o.Status == p.Status) &&
+        (!p.ExcludeFinished || o.Status != OrderStatus.Finished) &&
         (string.IsNullOrEmpty(p.PatientName) || o.PatientName.ToLower().Contains(p.PatientName.ToLower())) &&
+         (string.IsNullOrEmpty(p.ClientName) || o.Client.ClientName.ToLower().Contains(p.ClientName.ToLower())) &&
         (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
         (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value);
 

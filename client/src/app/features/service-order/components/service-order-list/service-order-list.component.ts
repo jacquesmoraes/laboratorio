@@ -7,211 +7,149 @@ import {
   OnDestroy,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import {  ServiceOrderParams } from '../../models/service-order.interface';
+import { ServiceOrderListService } from './services/service-order-list.service';
+import { ServiceOrderFiltersComponent } from './service-order-filters/service-order-filters.component';
 
-import {
-  ServiceOrder,
-  ServiceOrderParams,
-  OrderStatus,
-  OrderStatusLabels,
-} from '../../models/service-order.interface';
-import { ServiceOrdersService } from '../../services/service-order.service';
+import { FilterChangeEvent } from './service-order-filters/service-order-filters.component';
+import { PageEvent } from '@angular/material/paginator';
+import { SERVICE_ORDER_LIST_CONFIG } from './models/service-order-list.config';
+import { ServiceOrderTableComponent, TableActionEvent } from './service-order-table/service-order-table.component';
 
 @Component({
   selector: 'app-service-order-list',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
+    MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatCheckboxModule,
-    MatCardModule,
-    MatChipsModule,
-    RouterModule,
-    MatTooltipModule,
+    ServiceOrderFiltersComponent,
+    ServiceOrderTableComponent,
   ],
   templateUrl: './service-order-list.component.html',
   styleUrls: ['./service-order-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServiceOrderListComponent implements OnInit, OnDestroy {
-  private readonly serviceOrdersService = inject(ServiceOrdersService);
+  private readonly serviceOrderListService = inject(ServiceOrderListService);
   private readonly router = inject(Router);
-  private readonly destroy$ = new Subject<void>();
 
-  serviceOrders = signal<ServiceOrder[]>([]);
-  selectedOrderIds = signal<number[]>([]);
-  pagination = signal<any>(null);
-  loading = signal(false);
+  // Estado do componente
+  readonly serviceOrders = this.serviceOrderListService.serviceOrders;
+  readonly selectedOrderIds = this.serviceOrderListService.selectedOrderIds;
+  readonly pagination = this.serviceOrderListService.pagination;
+  readonly loading = this.serviceOrderListService.loading;
+  readonly sectors = this.serviceOrderListService.sectors;
+  readonly currentParams = this.serviceOrderListService.currentParams;
 
-  searchControl = new FormControl('');
-  selectedStatus: OrderStatus | '' = '';
-  sortBy = 'DateIn';
+  // Computed values
+  readonly totalPages = this.serviceOrderListService.totalPages;
+  readonly totalItems = this.serviceOrderListService.totalItems;
+  readonly hasSelection = this.serviceOrderListService.hasSelection;
 
-  pageSize = signal(10);
-  currentPage = signal(1);
+  // Configurações
+  readonly pageSizeOptions = SERVICE_ORDER_LIST_CONFIG.pageSizeOptions;
 
-  private readonly initialParams: ServiceOrderParams = {
-    pageNumber: 1,
-    pageSize: 10,
-    sort: 'DateIn',
-    search: '',
-  };
-
-  currentParams = signal<ServiceOrderParams>({ ...this.initialParams });
-
-  readonly displayedColumns = [
-    'select',
-    'orderNumber',
-    'clientName',
-    'patientName',
-    'dateIn',
-    'status',
-    'currentSectorName',
-    'actions',
-  ];
-
-  readonly statusMap: Record<string, OrderStatus> = {
-  Production: OrderStatus.Production,
-  TryIn: OrderStatus.TryIn,
-  Finished: OrderStatus.Finished,
-};
-
-  readonly orderStatuses = [
-    { value: OrderStatus.Production, label: OrderStatusLabels[OrderStatus.Production] },
-    { value: OrderStatus.TryIn, label: OrderStatusLabels[OrderStatus.TryIn] },
-    { value: OrderStatus.Finished, label: OrderStatusLabels[OrderStatus.Finished] },
-  ];
-
-  readonly statusClasses: Record<number, string> = {
-    [OrderStatus.Production]: 'status-production',
-    [OrderStatus.TryIn]: 'status-tryin',
-    [OrderStatus.Finished]: 'status-finished',
-  };
-
-  totalPages = computed(() => this.pagination()?.totalPages || 1);
-  totalItems = computed(() => this.pagination()?.totalItems || 0);
-  hasSelection = computed(() => this.selectedOrderIds().length > 0);
+  // Computed para paginação
+  readonly pageSize = computed(() => this.currentParams().pageSize);
+  readonly pageIndex = computed(() => this.currentParams().pageNumber - 1);
 
   ngOnInit() {
     this.loadServiceOrders();
-    this.setupSearch();
   }
 
   ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.serviceOrderListService.destroy();
   }
 
-  private setupSearch() {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((search) => {
-        this.currentParams.update((params) => ({
-          ...params,
-          search: search || '',
-          pageNumber: 1,
-        }));
-        this.loadServiceOrders();
-      });
-  }
-
+  // Carregamento de dados
   loadServiceOrders() {
-    this.loading.set(true);
-    this.serviceOrdersService.getServiceOrders(this.currentParams()).subscribe({
-      next: (res) => {
-        this.pagination.set(res);
-        this.serviceOrders.set(res.data);
-        this.selectedOrderIds.set([]);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Error loading service orders:', err);
-        this.loading.set(false);
-      },
-    });
+    this.serviceOrderListService.loadServiceOrders().subscribe();
   }
 
-  toggleSelection(id: number) {
-    const current = this.selectedOrderIds();
-    if (current.includes(id)) {
-      this.selectedOrderIds.set(current.filter((x) => x !== id));
-    } else {
-      this.selectedOrderIds.set([...current, id]);
-    }
-  }
+  // Eventos de filtros
+  onFilterChange(event: FilterChangeEvent) {
+    const newParams: Partial<ServiceOrderParams> = {
+      search: event.search,
+      status: event.status || undefined,
+      sort: event.sortBy,
+      excludeFinished: !event.showFinishedOrders,
+      pageNumber: 1, // Reset para primeira página
+    };
 
-  onStatusChange() {
-    this.currentParams.update((params) => ({
-      ...params,
-      status: this.selectedStatus ? Number(this.selectedStatus) : undefined,
-      pageNumber: 1,
-    }));
+    this.serviceOrderListService.updateParams(newParams);
     this.loadServiceOrders();
   }
 
-  onSortChange() {
-    this.currentParams.update((params) => ({
-      ...params,
-      sort: this.sortBy,
-    }));
-    this.loadServiceOrders();
+  // Eventos da tabela
+  onSelectionChange(orderId: number) {
+    this.serviceOrderListService.toggleSelection(orderId);
   }
 
   onPageChange(event: PageEvent) {
-    this.currentParams.update((params) => ({
-      ...params,
+    const newParams: Partial<ServiceOrderParams> = {
       pageNumber: event.pageIndex + 1,
       pageSize: event.pageSize,
-    }));
+    };
+
+    this.serviceOrderListService.updateParams(newParams);
     this.loadServiceOrders();
   }
 
+  onAction(event: TableActionEvent) {
+    switch (event.type) {
+      case 'view':
+        this.viewDetails(event.orderId);
+        break;
+      case 'edit':
+        this.editOrder(event.orderId);
+        break;
+      case 'sendToTryIn':
+        this.sendToTryIn(event.orderId);
+        break;
+      case 'moveToStage':
+        this.moveToStage(event.orderId);
+        break;
+      case 'reopen':
+        this.reopenOrder(event.orderId);
+        break;
+    }
+  }
+
+  // Navegação
   navigateToNew() {
-    this.router.navigate(['service-orders/new']);
+    this.router.navigate(['/service-orders/new']);
   }
 
   viewDetails(id: number) {
-    this.router.navigate(['service-orders', id]);
+    this.router.navigate(['/service-orders', id]);
   }
 
   editOrder(id: number) {
-    this.router.navigate(['service-orders', id, 'edit']);
+    this.router.navigate(['/service-orders', id, 'edit']);
   }
 
- getStatusColorClass(status: string): string {
-  const statusNum = this.statusMap[status] ?? -1;
-  return this.statusClasses[statusNum] ?? 'status-default';
-}
+  // Ações de OS
+  sendToTryIn(orderId: number) {
+    this.serviceOrderListService.sendToTryIn(orderId).subscribe();
+  }
 
+  moveToStage(orderId: number) {
+    this.serviceOrderListService.moveToStage(orderId).subscribe();
+  }
 
+  reopenOrder(orderId: number) {
+    this.serviceOrderListService.reopenOrder(orderId).subscribe();
+  }
 
-  getStatusLabel(status: string): string {
-  const statusNum = this.statusMap[status];
-  return statusNum ? OrderStatusLabels[statusNum] : status;
-}
-
+  finishSelectedOrders() {
+    this.serviceOrderListService.finishSelectedOrders().subscribe();
+  }
 }

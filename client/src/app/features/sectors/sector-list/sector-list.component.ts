@@ -10,6 +10,7 @@ import { Sector } from '../models/sector.interface';
 import { SectorService } from '../service/sector.service';
 import { SectorModalComponent, SectorModalData } from '../sector-modal/sector-modal.component';
 import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-sector-list',
@@ -19,6 +20,7 @@ import { MatCardModule } from '@angular/material/card';
     MatTableModule,
     MatButtonModule,
     MatIconModule,
+    MatTooltipModule,
     MatCardModule,
     MatDialogModule],
   templateUrl: './sector-list.component.html',

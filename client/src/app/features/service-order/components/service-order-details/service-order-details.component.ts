@@ -9,28 +9,28 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { ServiceOrderDetails, OrderStatus, OrderStatusLabels } from '../../models/service-order.interface';
 import { ServiceOrdersService } from '../../services/service-order.service';
 import Swal from 'sweetalert2';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-service-order-details',
   standalone: true,
   imports: [
-   CommonModule,
-  MatCardModule,
-  MatButtonModule,
-  MatIconModule,
-  MatChipsModule,
-  MatDividerModule,
-  MatListModule,
-  MatExpansionModule,
-  MatDialogModule,
-  MatProgressSpinnerModule,
-  SweetAlert2Module
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatDividerModule,
+    MatListModule,
+    MatExpansionModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    SweetAlert2Module
   ],
   templateUrl: './service-order-details.component.html',
   styleUrls: ['./service-order-details.component.scss'],
@@ -100,19 +100,19 @@ export class ServiceOrderDetailsComponent implements OnInit {
     });
   }
 
-  getStatusColor(status: OrderStatus): string {
+  getStatusColorClass(status: OrderStatus): string {
     switch (status) {
-      case OrderStatus.Production: return 'var(--accent)';
-      case OrderStatus.TryIn: return 'var(--secondary)';
-      case OrderStatus.Finished: return 'var(--primary)';
-      default: return 'var(--dark)';
+      case OrderStatus.Production: return 'status-production';
+      case OrderStatus.TryIn: return 'status-tryin';
+      case OrderStatus.Finished: return 'status-finished';
+      default: return 'status-default';
     }
   }
 
   getStatusLabel(status: OrderStatus | undefined): string {
-  if (status === undefined) return '';
-  return OrderStatusLabels[status];
-}
+    if (status === undefined) return '';
+    return OrderStatusLabels[status];
+  }
 
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('pt-BR', {

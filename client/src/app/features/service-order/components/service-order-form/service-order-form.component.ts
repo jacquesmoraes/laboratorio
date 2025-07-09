@@ -279,39 +279,109 @@ export class ServiceOrderFormComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.serviceOrderForm.invalid) {
-      this.markFormGroupTouched();
-      return;
-    }
-
-    this.loading.set(true);
-
-    const formValue = this.serviceOrderForm.value;
-    const serviceOrderData: CreateServiceOrderDto = {
-      clientId: formValue.clientId,
-      dateIn: (formValue.dateIn as Date).toISOString(),
-      patientName: formValue.patientName,
-      firstSectorId: formValue.firstSectorId,
-      works: formValue.works
-    };
-
-    const request = this.isEditMode()
-      ? this.serviceOrdersService.updateServiceOrder(this.serviceOrderId()!, serviceOrderData)
-      : this.serviceOrdersService.createServiceOrder(serviceOrderData);
-
-    request.subscribe({
-      next: result => {
-        this.loading.set(false);
-        this.snackBar.open(
-          `Ordem de serviço ${this.isEditMode() ? 'atualizada' : 'criada'} com sucesso!`,
-          'Fechar',
-          { duration: 3000, panelClass: ['success-snackbar'] }
-        );
-        this.router.navigate(['service-orders', result.serviceOrderId]);
-      },
-      error: () => this.showError('Erro ao salvar ordem de serviço')
-    });
+  console.log('=== INÍCIO DO SUBMIT ===');
+  console.log('onSubmit() foi chamado');
+  console.log('Form válido:', this.serviceOrderForm.valid);
+  console.log('Form inválido:', this.serviceOrderForm.invalid);
+  console.log('Loading state:', this.loading());
+  console.log('Edit mode:', this.isEditMode());
+  
+  // Log detalhado do estado do formulário
+  console.log('=== ESTADO DO FORMULÁRIO ===');
+  console.log('Form completo:', this.serviceOrderForm);
+  console.log('Form value:', this.serviceOrderForm.value);
+  console.log('Form errors:', this.serviceOrderForm.errors);
+  
+  // Log dos controles individuais
+  console.log('=== CONTROLES INDIVIDUAIS ===');
+  console.log('clientId:', this.serviceOrderForm.get('clientId')?.value);
+  console.log('clientId válido:', this.serviceOrderForm.get('clientId')?.valid);
+  console.log('clientId errors:', this.serviceOrderForm.get('clientId')?.errors);
+  
+  console.log('dateIn:', this.serviceOrderForm.get('dateIn')?.value);
+  console.log('dateIn válido:', this.serviceOrderForm.get('dateIn')?.valid);
+  console.log('dateIn errors:', this.serviceOrderForm.get('dateIn')?.errors);
+  
+  console.log('patientName:', this.serviceOrderForm.get('patientName')?.value);
+  console.log('patientName válido:', this.serviceOrderForm.get('patientName')?.valid);
+  console.log('patientName errors:', this.serviceOrderForm.get('patientName')?.errors);
+  
+  console.log('firstSectorId:', this.serviceOrderForm.get('firstSectorId')?.value);
+  console.log('firstSectorId válido:', this.serviceOrderForm.get('firstSectorId')?.valid);
+  console.log('firstSectorId errors:', this.serviceOrderForm.get('firstSectorId')?.errors);
+  
+  // Log dos trabalhos
+  console.log('=== TRABALHOS ===');
+  console.log('Número de trabalhos:', this.worksArray.length);
+  console.log('Works array:', this.worksArray.value);
+  
+  this.worksArray.controls.forEach((workGroup, index) => {
+    console.log(`Trabalho ${index + 1}:`, workGroup.value);
+    console.log(`Trabalho ${index + 1} válido:`, workGroup.valid);
+    console.log(`Trabalho ${index + 1} errors:`, workGroup.errors);
+  });
+  
+  if (this.serviceOrderForm.invalid) {
+    console.log('=== FORMULÁRIO INVÁLIDO ===');
+    console.log('Marcando todos os campos como touched');
+    this.markFormGroupTouched();
+    return;
   }
+
+  console.log('=== FORMULÁRIO VÁLIDO - INICIANDO ENVIO ===');
+  this.loading.set(true);
+
+  const formValue = this.serviceOrderForm.value;
+  console.log('=== DADOS DO FORMULÁRIO ===');
+  console.log('Form value completo:', formValue);
+  console.log('Data original:', formValue.dateIn);
+  console.log('Tipo da data:', typeof formValue.dateIn);
+  
+  const serviceOrderData: CreateServiceOrderDto = {
+    clientId: formValue.clientId,
+    dateIn: (formValue.dateIn as Date).toISOString(),
+    patientName: formValue.patientName,
+    firstSectorId: formValue.firstSectorId,
+    works: formValue.works
+  };
+
+  console.log('=== DADOS PARA ENVIAR ===');
+  console.log('serviceOrderData:', serviceOrderData);
+  console.log('Data convertida:', serviceOrderData.dateIn);
+  console.log('Tipo da data convertida:', typeof serviceOrderData.dateIn);
+
+  const request = this.isEditMode()
+    ? this.serviceOrdersService.updateServiceOrder(this.serviceOrderId()!, serviceOrderData)
+    : this.serviceOrdersService.createServiceOrder(serviceOrderData);
+
+  console.log('=== INICIANDO REQUISIÇÃO ===');
+  console.log('URL da requisição:', this.isEditMode() ? 'UPDATE' : 'CREATE');
+  console.log('Service Order ID (se edit):', this.serviceOrderId());
+
+  request.subscribe({
+    next: result => {
+      console.log('=== SUCESSO ===');
+      console.log('Resultado recebido:', result);
+      this.loading.set(false);
+      this.snackBar.open(
+        `Ordem de serviço ${this.isEditMode() ? 'atualizada' : 'criada'} com sucesso!`,
+        'Fechar',
+        { duration: 3000, panelClass: ['success-snackbar'] }
+      );
+      this.router.navigate(['service-orders', result.serviceOrderId]);
+    },
+    error: (error) => {
+      console.log('=== ERRO ===');
+      console.error('Erro completo:', error);
+      console.error('Status do erro:', error.status);
+      console.error('Mensagem do erro:', error.message);
+      console.error('Response do erro:', error.error);
+      this.showError('Erro ao salvar ordem de serviço');
+    }
+  });
+  
+  console.log('=== FIM DO SUBMIT ===');
+}
 
   markFormGroupTouched() {
     Object.values(this.serviceOrderForm.controls).forEach(control => {

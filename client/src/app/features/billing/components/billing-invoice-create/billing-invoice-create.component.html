@@ -1,0 +1,134 @@
+<div class="container mx-auto p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="header">
+      <button 
+        (click)="goBack()"
+        class="btn btn-secondary back-btn"
+        title="Voltar"
+        aria-label="Voltar"
+      >
+        ←
+      </button>
+      <h1 class="title">Nova Fatura</h1>
+    </div>
+
+    <div class="card">
+      <form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()">
+        <div class="form-content">
+          
+          <!-- Cliente -->
+          <div class="form-group">
+            <label class="form-label" for="clientId">
+              Cliente *
+            </label>
+            <select 
+              formControlName="clientId"
+              id="clientId"
+              class="form-select"
+            >
+              <option value="">Selecione um cliente</option>
+              @for (client of clients(); track client.clientId) {
+                <option [value]="client.clientId">{{ client.clientName }}</option>
+              }
+            </select>
+            @if (invoiceForm.get('clientId')?.invalid && invoiceForm.get('clientId')?.touched) {
+              <p class="error-message">Cliente é obrigatório</p>
+            }
+          </div>
+
+          <!-- Descrição -->
+          <div class="form-group">
+            <label class="form-label" for="description">
+              Descrição
+            </label>
+            <textarea 
+              formControlName="description"
+              id="description"
+              rows="4"
+              placeholder="Descrição da fatura (opcional)"
+              class="form-textarea"
+            ></textarea>
+          </div>
+
+          <!-- Ordens de Serviço -->
+          <div class="form-group">
+            <label class="form-label">
+              Ordens de Serviço *
+            </label>
+            <div class="service-orders-container">
+              @if (serviceOrders().length > 0) {
+                <div class="service-orders-list">
+                  @for (order of serviceOrders(); track order.serviceOrderId) {
+                    <div class="service-order-item">
+                      <div class="order-checkbox">
+                        <input 
+                          type="checkbox" 
+                          [value]="order.serviceOrderId"
+                          (change)="onServiceOrderToggle(order.serviceOrderId, $event)"
+                          [checked]="selectedServiceOrders().includes(order.serviceOrderId)"
+                          class="checkbox"
+                          [id]="'order-' + order.serviceOrderId"
+                        >
+                      </div>
+                      <label class="order-info" [for]="'order-' + order.serviceOrderId">
+                        <div class="order-header">
+                          <span class="order-number">{{ order.orderNumber }}</span>
+                          <span class="order-patient">- {{ order.patientName }}</span>
+                        </div>
+                        <div class="order-details">
+                          <span class="order-date">{{ formatDate(order.dateIn) }}</span>
+                          <span class="order-total">{{ formatCurrency(order.orderTotal) }}</span>
+                        </div>
+                      </label>
+                    </div>
+                  }
+                </div>
+
+                <!-- Total Selecionado -->
+                @if (selectedServiceOrders().length > 0) {
+                  <div class="selected-total">
+                    <span class="total-label">Total Selecionado:</span>
+                    <span class="total-value">{{ formatCurrency(getSelectedTotal()) }}</span>
+                  </div>
+                }
+              } @else {
+                <div class="empty-orders">
+                  <p class="empty-text">
+                    Nenhuma ordem de serviço disponível para este cliente
+                  </p>
+                </div>
+              }
+            </div>
+            @if (selectedServiceOrders().length === 0 && invoiceForm.get('clientId')?.value) {
+              <p class="error-message">Selecione pelo menos uma ordem de serviço</p>
+            }
+          </div>
+
+          <!-- Botões -->
+          <div class="form-actions">
+            <button 
+              type="button"
+              (click)="goBack()"
+              class="btn btn-secondary"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit"
+              [disabled]="invoiceForm.invalid || selectedServiceOrders().length === 0 || loading()"
+              class="btn btn-primary"
+            >
+              @if (loading()) {
+                <div class="loading-spinner"></div>
+                <span>Criando...</span>
+              } @else {
+                Criar Fatura
+              }
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

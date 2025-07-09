@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { WorkSection } from '../../models/work-section.interface';
 import { WorkSectionService } from '../../services/works-section.service';
 import { WorkSectionModalComponent, WorkSectionModalData } from '../work-section-modal/work-section-modal.component';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-work-section-list',
@@ -18,6 +19,7 @@ import { WorkSectionModalComponent, WorkSectionModalData } from '../work-section
     CommonModule,
     MatTableModule,
     MatButtonModule,
+    MatTooltip,
     MatIconModule,
     MatCardModule,
     MatDialogModule

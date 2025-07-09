@@ -35,6 +35,12 @@
                 return BadRequest ( ex.Message );
             }
         }
+        [HttpGet]
+        public async Task<IActionResult> GetAll ( [FromQuery] InvoiceParams invoiceParams )
+        {
+            var result = await _billingService.GetPaginatedInvoicesAsync(invoiceParams);
+            return Ok ( result );
+        }
 
         [HttpGet ( "{id}" )]
         public async Task<IActionResult> GetById ( int id )

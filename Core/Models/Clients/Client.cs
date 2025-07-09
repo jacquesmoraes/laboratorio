@@ -31,6 +31,6 @@ namespace Core.Models.Clients
          public List<BillingInvoice> BillingInvoices { get; set; } = [];
         public bool IsInactive =>
             ServiceOrders.OrderByDescending ( o => o.DateIn )
-                         .FirstOrDefault ( )?.DateIn < DateTime.Now.AddDays ( -60 );
+                         .FirstOrDefault ( )?.DateIn < DateTime.Now.AddDays ( -90 );
     }
 }

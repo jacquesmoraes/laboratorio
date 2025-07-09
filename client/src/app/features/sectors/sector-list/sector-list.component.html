@@ -23,10 +23,10 @@
         <ng-container matColumnDef="actions">
           <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
           <mat-cell *matCellDef="let sector">
-            <button mat-icon-button color="primary" (click)="onEdit(sector)" class="action-icon-btn">
+            <button mat-icon-button color="primary" (click)="onEdit(sector)" class="action-icon-btn" matTooltip="editar">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="onDelete(sector)" class="action-icon-btn">
+            <button mat-icon-button color="warn" (click)="onDelete(sector)" matTooltip="deletar" class="action-icon-btn">
               <mat-icon>delete</mat-icon>
             </button>
           </mat-cell>

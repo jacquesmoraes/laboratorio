@@ -1,0 +1,150 @@
+<div class="container mx-auto p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold title">Faturas</h1>
+    <button 
+      (click)="navigateToCreate()"
+      class="btn btn-primary"
+    >
+      Nova Fatura
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-container">
+    <div class="filters-grid">
+      <div class="filter-item">
+        <label class="filter-label">Buscar</label>
+        <input 
+          type="text" 
+          [ngModel]="filters().search"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Número da fatura, cliente..."
+          class="filter-input"
+        />
+      </div>
+      <div class="filter-item">
+        <label class="filter-label">Data Início</label>
+        <input 
+          type="date" 
+          [(ngModel)]="filters().startDate"
+          (change)="loadInvoices()"
+          class="filter-input"
+        >
+      </div>
+      <div class="filter-item">
+        <label class="filter-label">Data Fim</label>
+        <input 
+          type="date" 
+          [(ngModel)]="filters().endDate"
+          (change)="loadInvoices()"
+          class="filter-input"
+        >
+      </div>
+      <div class="filter-item">
+        <button 
+          (click)="clearFilters()"
+          class="btn btn-secondary w-full"
+        >
+          Limpar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+    </div>
+  }
+
+  <!-- Lista de Faturas -->
+  @if (!loading() && invoices().length > 0) {
+    <div class="table-container">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Cliente</th>
+              <th>Data</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (invoice of invoices(); track invoice.billingInvoiceId) {
+              <tr class="table-row">
+                <td class="invoice-number">{{ invoice.invoiceNumber }}</td>
+                <td class="client-name">{{ invoice.client.clientName }}</td>
+                <td class="invoice-date">{{ formatDate(invoice.createdAt) }}</td>
+                <td>
+                  <span [class]="'status-badge ' + getStatusClass(invoice.status)">
+                    {{ invoice.status }}
+                  </span>
+                </td>
+                <td class="invoice-total">{{ formatCurrency(invoice.totalInvoiceAmount) }}</td>
+                <td class="actions">
+                  <div class="action-buttons">
+                    <button 
+                      (click)="viewInvoice(invoice.billingInvoiceId)"
+                      class="btn btn-primary btn-sm"
+                    >
+                      Ver
+                    </button>
+                    <button 
+                      (click)="cancelInvoice(invoice.billingInvoiceId)"
+                      class="btn btn-danger btn-sm"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Paginação -->
+    @if (pagination()) {
+      <div class="pagination-container">
+        <div class="pagination-info">
+          Página {{ pagination()?.pageNumber }} de {{ pagination()?.totalPages }}
+        </div>
+        <div class="pagination-controls">
+          <button 
+            (click)="onPageChange((pagination()?.pageNumber ?? 1) - 1)"
+            [disabled]="(pagination()?.pageNumber ?? 1) <= 1"
+            class="btn btn-secondary btn-sm"
+          >
+            Anterior
+          </button>
+          <span class="pagination-text">
+            {{ pagination()?.pageNumber ?? 1 }} / {{ pagination()?.totalPages ?? 1 }}
+          </span>
+          <button 
+            (click)="onPageChange((pagination()?.pageNumber ?? 1) + 1)"
+            [disabled]="(pagination()?.pageNumber ?? 1) >= (pagination()?.totalPages ?? 1)"
+            class="btn btn-secondary btn-sm"
+          >
+            Próxima
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Estado vazio -->
+  @if (!loading() && invoices().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📄</div>
+      <h3 class="empty-title">Nenhuma fatura encontrada</h3>
+      <p class="empty-description">
+        Comece criando sua primeira fatura ou ajuste os filtros de busca.
+      </p>
+    </div>
+  }
+</div>

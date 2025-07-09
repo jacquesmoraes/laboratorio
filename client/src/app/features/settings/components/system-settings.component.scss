@@ -126,22 +126,24 @@
 }
 
 .upload-btn {
-  background: var(--accent) !important;
-  color: var(--white) !important;
-  border: none !important;
-  padding: 0.75rem 1.5rem !important;
-  border-radius: 25px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .upload-btn:hover {
-  background: var(--secondary) !important;
-  transform: translateY(-2px) !important;
+   background-color: var(--white);
+    color: var(--text-dark);
+    border-color: var(--accent);
+  
 }
 
 .upload-info {

@@ -91,7 +91,7 @@ namespace API.Controllers.ServiceOrders
             var result = await _tablePriceService.GetItemPriceByClientAndWorkTypeAsync(clientId, workTypeId);
 
             if ( result is null )
-                return NotFound ( $"Nenhum preço encontrado para o serviço ID {workTypeId} no cliente ID {clientId}" );
+                return NotFound ( $"No price found for service ID {workTypeId} in client ID {clientId}" );
 
             return Ok ( result );
         }

@@ -76,7 +76,7 @@
               <mat-icon>work</mat-icon>
               Trabalhos
             </h3>
-            <button type="button" mat-mini-fab color="primary" (click)="addWork()"
+            <button type="button"  (click)="addWork()"
               [disabled]="loading() || !serviceOrderForm.get('clientId')?.value" class="add-work-btn">
               <mat-icon>add</mat-icon>
             </button>
@@ -145,14 +145,10 @@
                       <mat-select formControlName="shadeId" [disabled]="loading()">
                         <mat-option value="">Nenhuma cor</mat-option>
                         <mat-option *ngFor="let shade of shadesByWorkIndex()[i] || shades()" [value]="shade.shadeId">
-
-
                           {{ shade.shadeColor }}
                         </mat-option>
                       </mat-select>
                     </mat-form-field>
-
-
                   </div>
 
                   <mat-form-field appearance="outline" class="work-notes-field">
@@ -170,20 +166,21 @@
             </div>
           </div>
         </div>
+
+        <!-- Botões dentro do formulário -->
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" (click)="cancel()" [disabled]="loading()">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+
+          <button type="submit" class="submit-btn" [disabled]="serviceOrderForm.invalid || loading()">
+            <mat-icon *ngIf="!loading()">{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
+            <mat-spinner *ngIf="loading()" diameter="20"></mat-spinner>
+            {{ isEditMode() ? 'Atualizar' : 'Criar' }} Ordem
+          </button>
+        </div>
       </form>
     </mat-card-content>
-
-    <mat-card-actions class="form-actions">
-      <button type="button" mat-button (click)="cancel()" [disabled]="loading()">
-        <mat-icon>cancel</mat-icon>
-        Cancelar
-      </button>
-
-      <button type="submit" mat-raised-button color="primary" (click)="onSubmit()"
-        [disabled]="serviceOrderForm.invalid || loading()" class="submit-btn">
-        <mat-icon *ngIf="!loading()">{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
-        {{ isEditMode() ? 'Atualizar' : 'Criar' }} Ordem de Serviço
-      </button>
-    </mat-card-actions>
   </mat-card>
 </div>

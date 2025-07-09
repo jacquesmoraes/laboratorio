@@ -1,0 +1,68 @@
+<mat-card class="alerts-card">
+  <mat-card-header>
+    <mat-card-title class="card-title">
+      <mat-icon class="title-icon warning">warning</mat-icon>
+      Alertas de Prova
+    </mat-card-title>
+    <mat-card-subtitle>
+      Ordens há mais de {{ daysThreshold() }} dias em prova
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (loading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="30"></mat-spinner>
+        <span>Carregando alertas...</span>
+      </div>
+    } @else if (error()) {
+      <div class="error-message">
+        <mat-icon color="warn">error</mat-icon>
+        {{ error() }}
+      </div>
+    } @else if (alerts().length === 0) {
+      <div class="no-alerts">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <p>Nenhum alerta de prova pendente</p>
+      </div>
+    } @else {
+      <div class="alerts-list">
+        @for (alert of alerts(); track alert.serviceOrderId) {
+          <div class="alert-item" (click)="viewOrder(alert.serviceOrderId)">
+            <div class="alert-header">
+              <span class="order-number">#{{ alert.orderNumber }}</span>
+              <mat-chip class="days-chip" color="warn">
+                {{ alert.daysOut }} dias fora
+              </mat-chip>
+            </div>
+            <div class="alert-details">
+              <p class="patient-name">{{ alert.patientName }}</p>
+              <p class="client-name">{{ alert.clientName }}</p>
+              <p class="sector-name">{{ alert.currentSectorName }}</p>
+            </div>
+            <div class="alert-date">
+              <small>Enviado para prova em: {{ alert.lastTryInDate | date:'dd/MM/yyyy ' }}</small>
+            </div>
+          </div>
+        }
+      </div>
+      
+      <div class="card-actions">
+        <button 
+          mat-button 
+          color="primary" 
+          (click)="viewAllOrders()"
+          [disabled]="alerts().length === 0">
+          <mat-icon>list</mat-icon>
+          Ver Todas as Ordens
+        </button>
+        <button 
+          mat-button 
+          (click)="refreshAlerts()">
+          <mat-icon>refresh</mat-icon>
+          Atualizar
+        </button>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

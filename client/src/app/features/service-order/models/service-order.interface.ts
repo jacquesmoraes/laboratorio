@@ -1,4 +1,5 @@
 export interface ServiceOrder {
+  billingInvoiceId: any;
   serviceOrderId: number;
   orderNumber: string;
   dateIn: string;
@@ -8,6 +9,7 @@ export interface ServiceOrder {
   clientId: number;
   orderTotal: number;
   currentSectorName?: string;
+  lastMovementDate?: string;
 }
 
 export interface ServiceOrderDetails extends ServiceOrder {
@@ -101,9 +103,11 @@ export interface ServiceOrderParams {
   pageSize: number;
   sort?: string;
   search?: string;
+  excludeFinished?: boolean;
   clientId?: number;
   status?: OrderStatus;
-  patientName?: string;
+  excludeInvoiced?: boolean;
+  
 }
 
 export interface Pagination<T> {
