@@ -1,0 +1,319 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: var(--background);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.details-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+// Header
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.title {
+  color: var(--primary);
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+// Botões
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, #1e4a5a 100%);
+    color: var(--white);
+    box-shadow: 0 4px 15px rgba(39, 102, 120, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #1e4a5a 0%, var(--primary) 100%);
+      box-shadow: 0 8px 25px rgba(39, 102, 120, 0.4);
+    }
+  }
+
+  &.btn-secondary {
+    background: linear-gradient(135deg, var(--accent) 0%, #7a9ba3 100%);
+    color: var(--white);
+    box-shadow: 0 4px 15px rgba(150, 175, 184, 0.3);
+
+    &:hover {
+      background: linear-gradient(135deg, #7a9ba3 0%, var(--accent) 100%);
+      box-shadow: 0 8px 25px rgba(150, 175, 184, 0.4);
+    }
+  }
+}
+
+// Loading
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  min-height: 300px;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Card de Detalhes
+.details-card {
+  background: linear-gradient(135deg, var(--white) 0%, #fafafa 100%);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  border: 1px solid rgba(150, 175, 184, 0.1);
+  margin-bottom: 2rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: rgba(39, 102, 120, 0.05);
+  border-radius: 0.75rem;
+  border-left: 4px solid var(--primary);
+
+  &.client-name {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  &.amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: linear-gradient(135deg, rgba(39, 102, 120, 0.1) 0%, rgba(39, 102, 120, 0.05) 100%);
+    border-left: 4px solid var(--primary);
+  }
+
+  &.invoice {
+    color: var(--accent);
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+  }
+
+  &.description {
+    font-weight: 500;
+    line-height: 1.5;
+    background: rgba(150, 175, 184, 0.1);
+    border-left: 4px solid var(--accent);
+  }
+}
+
+// Informações Adicionais
+.additional-info {
+  border-top: 2px solid var(--border-color);
+  padding-top: 2rem;
+}
+
+.info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.info-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0;
+}
+
+.info-meta {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  background: rgba(150, 175, 184, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+// Not Found
+.not-found {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--white);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.not-found-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0 0 1rem 0;
+}
+
+.not-found-message {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .details-card {
+    padding: 1.5rem;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .info-header {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .details-card {
+    padding: 1rem;
+  }
+
+  .detail-value {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .detail-value.amount {
+    font-size: 1.25rem;
+  }
+}
+
+// Variáveis CSS
+:root {
+  --primary: #276678;
+  --accent: #96afb8;
+  --secondary: #a288a9;
+  --dark: #334a52;
+  --white: #f4f1ee;
+  --background: #f8f9fa;
+  --border-color: #e2e8f0;
+  --text-muted: #6b7280;
+}

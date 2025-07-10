@@ -1,0 +1,83 @@
+<div class="container">
+  <div class="details-wrapper">
+    <div class="header">
+      <h1 class="title">Detalhes do Pagamento</h1>
+      <button 
+        (click)="goBack()"
+        class="btn btn-secondary">
+        Voltar
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+      </div>
+    } @else if (payment()) {
+      <div class="details-card">
+        <div class="details-grid">
+          <div class="details-section">
+            <div class="detail-item">
+              <label class="detail-label">ID do Pagamento</label>
+              <p class="detail-value">{{ payment()!.id }}</p>
+            </div>
+            
+            <div class="detail-item">
+              <label class="detail-label">Cliente</label>
+              <p class="detail-value client-name">{{ payment()!.clientName }}</p>
+            </div>
+            
+            <div class="detail-item">
+              <label class="detail-label">Valor Pago</label>
+              <p class="detail-value amount">{{ formatCurrency(payment()!.amountPaid) }}</p>
+            </div>
+          </div>
+          
+          <div class="details-section">
+            <div class="detail-item">
+              <label class="detail-label">Data do Pagamento</label>
+              <p class="detail-value">{{ formatDate(payment()!.paymentDate) }}</p>
+            </div>
+            
+            <div class="detail-item">
+              <label class="detail-label">Fatura</label>
+              <p class="detail-value invoice">
+                {{ payment()!.invoiceNumber || 'Não associado' }}
+              </p>
+            </div>
+            
+            @if (payment()!.description) {
+              <div class="detail-item">
+                <label class="detail-label">Descrição</label>
+                <p class="detail-value description">{{ payment()!.description }}</p>
+              </div>
+            }
+          </div>
+        </div>
+        
+        <div class="additional-info">
+          <div class="info-header">
+            <h3 class="info-title">Informações Adicionais</h3>
+            <div class="info-meta">
+              ID do Cliente: {{ payment()!.clientId }}
+              @if (payment()!.billingInvoiceId) {
+                | Fatura ID: {{ payment()!.billingInvoiceId }}
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="not-found">
+        <div class="not-found-icon">⚠️</div>
+        <h2 class="not-found-title">Pagamento não encontrado</h2>
+        <p class="not-found-message">O pagamento solicitado não foi encontrado no sistema.</p>
+        <button 
+          (click)="goBack()"
+          class="btn btn-primary">
+          Voltar à Lista
+        </button>
+      </div>
+    }
+  </div>
+</div>

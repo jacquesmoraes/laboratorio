@@ -16,7 +16,7 @@ export const routes: Routes = [
       { path: 'table-price', loadChildren: () => import('./features/table-price/table-price.routes').then(m => m.TABLE_PRICE_ROUTES) },
       { path: 'service-orders', loadChildren: () => import('./features/service-order/service-order.routes').then(m => m.SERVICE_ORDERS_ROUTES) },
       { path: 'billing', loadChildren: () => import('./features/billing/billing.routes').then(m => m.BILLING_ROUTES) },
-
+       { path: 'payments', loadChildren: () => import('./features/payments/payment.routes').then(m => m.PAYMENT_ROUTES) },
 
 
     ]

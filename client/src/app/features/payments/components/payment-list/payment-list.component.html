@@ -1,0 +1,114 @@
+<div class="container">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="title">Pagamentos</h1>
+    <button 
+      (click)="navigateToCreate()"
+      class="btn btn-primary">
+      Novo Pagamento
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-container">
+    <div class="filters-grid">
+      <div class="filter-item">
+        <label class="filter-label">Buscar</label>
+        <input 
+          type="text" 
+          [ngModel]="searchFilter()"
+          (ngModelChange)="setSearchFilter($event)"
+          (input)="onFilterChange()"
+          placeholder="Descrição do pagamento"
+          class="filter-input">
+      </div>
+      <div class="filter-item">
+        <label class="filter-label">Data Início</label>
+        <input 
+          type="date" 
+          [ngModel]="startDateFilter()"
+          (ngModelChange)="setStartDateFilter($event)"
+          (change)="onFilterChange()"
+          class="filter-input">
+      </div>
+      <div class="filter-item">
+        <label class="filter-label">Data Fim</label>
+        <input 
+          type="date" 
+          [ngModel]="endDateFilter()"
+          (ngModelChange)="setEndDateFilter($event)"
+          (change)="onFilterChange()"
+          class="filter-input">
+      </div>
+      <div class="filter-item">
+        <button 
+          (click)="clearFilters()"
+          class="btn btn-secondary w-full">
+          Limpar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Pagamentos -->
+  <div class="table-container">
+    @if (loading()) {
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Data</th>
+              <th>Valor</th>
+              <th>Descrição</th>
+              <th>Fatura</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payment of payments(); track payment.id) {
+              <tr (click)="viewPayment(payment.id)">
+                <td class="client-name">{{ payment.clientName }}</td>
+                <td class="payment-date">{{ formatDate(payment.paymentDate) }}</td>
+                <td class="payment-amount">R$ {{ formatCurrency(payment.amountPaid) }}</td>
+                <td class="payment-description">{{ payment.description || '-' }}</td>
+                <td class="invoice-number">{{ payment.invoiceNumber || '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginação -->
+      @if (pagination()) {
+        <div class="pagination-container">
+          <div class="pagination-info">
+            Mostrando 
+            <span class="font-medium">{{ (pagination()!.pageNumber - 1) * pagination()!.pageSize + 1 }}</span>
+            a 
+            <span class="font-medium">{{ Math.min(pagination()!.pageNumber * pagination()!.pageSize, pagination()!.totalItems) }}</span>
+            de 
+            <span class="font-medium">{{ pagination()!.totalItems }}</span>
+            resultados
+          </div>
+          <nav class="pagination-nav">
+            <button 
+              (click)="previousPage()"
+              [disabled]="pagination()!.pageNumber <= 1"
+              class="pagination-button pagination-prev">
+              Anterior
+            </button>
+            <button 
+              (click)="nextPage()"
+              [disabled]="pagination()!.pageNumber >= pagination()!.totalPages"
+              class="pagination-button pagination-next">
+              Próxima
+            </button>
+          </nav>
+        </div>
+      }
+    }
+  </div>
+</div>

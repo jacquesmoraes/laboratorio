@@ -16,8 +16,11 @@ namespace Core.FactorySpecifications.PaymentSpecifications
 
         public static class PaymentSpecs
         {
-            public static PaymentSpecification ById ( int id, bool includeClient = false )
-                => new ( p => p.Id == id, includeClient );
+            public static PaymentSpecification ById ( int id, bool includeClient = true )
+                => new ( p => p.Id == id, includeClient )
+                {                  
+                    Includes = { x => x.Client, x => x.BillingInvoice! }
+                };
 
             public static PaymentSpecification ByClientId ( int clientId, bool includeClient = false )
                 => new ( p => p.ClientId == clientId, includeClient );
