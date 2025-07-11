@@ -18,7 +18,7 @@ namespace Core.FactorySpecifications.PaymentSpecifications
         {
             public static PaymentSpecification ById ( int id, bool includeClient = true )
                 => new ( p => p.Id == id, includeClient )
-                {                  
+                {
                     Includes = { x => x.Client, x => x.BillingInvoice! }
                 };
 
@@ -41,7 +41,15 @@ namespace Core.FactorySpecifications.PaymentSpecifications
                 spec.AddInclude ( x => x.Client );
                 spec.AddInclude ( x => x.BillingInvoice! );
 
-                spec.ApplySorting ( p.Sort );
+                if ( !string.IsNullOrEmpty ( p.Sort ) )
+                {
+                    spec.ApplySorting ( p.Sort );
+                }
+                else
+                {
+                    spec.ApplySorting ( "-PaymentDate" );
+                }
+
                 spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
 
                 return spec;

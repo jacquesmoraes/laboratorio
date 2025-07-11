@@ -1,0 +1,231 @@
+// client/src/app/features/client-area/components/payments/client-area-payments.component.scss
+// Adicione estes estilos ao final do arquivo SCSS existente
+
+.month-summary {
+  background: var(--light-gray);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0;
+    color: var(--dark);
+    font-size: 1.1rem;
+    font-weight: 600;
+
+    strong {
+      color: var(--primary);
+    }
+  }
+}
+
+.tabs-header {
+  display: flex;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--dark);
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  border-radius: 6px 6px 0 0;
+  font-weight: 500;
+
+  &:hover {
+    background-color: var(--light-gray);
+    color: var(--primary);
+  }
+
+  &.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background-color: var(--light-gray);
+  }
+}
+
+.payments-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+
+  th, td {
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  th {
+    background: var(--light-gray);
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  tr {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--light-gray);
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: white;
+  display: inline-block;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.completed {
+    background: #27ae60;
+  }
+
+  &.pending {
+    background: #e67e22;
+  }
+
+  &.failed {
+    background: #e74c3c;
+  }
+
+  &.cancelled {
+    background: #95a5a6;
+  }
+}
+
+.btn {
+  background-color: var(--primary);
+  color: white;
+  padding: 4px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  transition: background-color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--secondary);
+  }
+
+  &:disabled {
+    background-color: var(--accent);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &.btn-sm {
+    padding: 2px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+.view-all-link {
+  margin-top: 20px;
+  text-align: center;
+
+  a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--secondary);
+      text-decoration: underline;
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--accent);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: var(--dark);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--dark);
+  background: var(--light-gray);
+  border-radius: 8px;
+  margin: 20px 0;
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .tabs-header {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tab-button {
+    border-radius: 6px;
+    border-bottom: none;
+    margin-bottom: 4px;
+
+    &.active {
+      background-color: var(--primary);
+      color: white;
+      border-bottom-color: transparent;
+    }
+  }
+
+  .payments-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

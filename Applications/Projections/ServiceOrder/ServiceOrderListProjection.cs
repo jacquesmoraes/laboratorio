@@ -11,5 +11,6 @@
          public string ClientName { get; init; } = string.Empty;
          public int ClientId { get; init; }
         public string? CurrentSectorName { get; set; }
+        public decimal TotalAmount { get; init; }
     }
 }

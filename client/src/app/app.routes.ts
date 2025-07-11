@@ -21,6 +21,10 @@ export const routes: Routes = [
 
     ]
   },
+   {
+    path: 'client-area',
+    loadChildren: () => import('./features/client-area/client-area.routes').then(m => m.CLIENT_AREA_ROUTES)
+  },
   {
     path: '**',
     redirectTo: '/'

@@ -115,8 +115,10 @@
                 throw new UnprocessableEntityException ( "Paid invoices cannot be cancelled." );
 
             foreach ( var order in invoice.ServiceOrders )
+            { 
                 order.BillingInvoiceId = null;
-
+                order.BillingInvoice = null;
+            }
             invoice.Status = InvoiceStatus.Cancelled;
 
             await _uow.SaveChangesAsync ( );

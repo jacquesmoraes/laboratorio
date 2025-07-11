@@ -1,0 +1,89 @@
+<!-- client/src/app/features/client-area/components/invoices/client-area-invoices.component.html -->
+<header *ngIf="showHeader()">
+  <h1>Minhas Faturas</h1>
+</header>
+
+<div class="container">
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <p>Carregando faturas...</p>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!isLoading() && invoices().length > 0" class="table-container">
+    <table class="invoices-table">
+      <thead>
+        <tr>
+          <th>Nº Fatura</th>
+          <th>Data Emissão</th>
+          <th>Descrição</th>
+          <th>Status</th>
+          <th>Valor Total</th>
+          <th>Valor Pago</th>
+          <th>Saldo</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let invoice of invoices()">
+          <td>{{ invoice.invoiceNumber }}</td>
+          <td>{{ formatDate(invoice.createdAt) }}</td>
+          <td>{{ invoice.description || ('Fatura ' + invoice.invoiceNumber) }}</td>
+          <td>{{ invoice.status }}</td>
+          <td>{{ formatCurrency(invoice.totalInvoiceAmount) }}</td>
+          <td>{{ formatCurrency(invoice.totalPaid) }}</td>
+          <td>{{ formatCurrency(invoice.balance) }}</td>
+          <td>
+            <button 
+              class="btn btn-primary btn-sm"
+              (click)="downloadInvoice(invoice)">
+              Baixar PDF
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading() && invoices().length === 0" class="empty-state">
+    <p>Nenhuma fatura encontrada.</p>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="showPagination() && totalPages() > 1" class="pagination">
+    <button 
+      class="pagination-btn" 
+      [disabled]="currentPage() === 1"
+      (click)="onPageChange(currentPage() - 1)">
+      ← Anterior
+    </button>
+
+    <button 
+      *ngFor="let page of [].constructor(totalPages())"
+      class="page-btn"
+      [class.active]="page + 1 === currentPage()"
+      (click)="onPageChange(page + 1)">
+      {{ page + 1 }}
+    </button>
+
+    <button 
+      class="pagination-btn" 
+      [disabled]="currentPage() === totalPages()"
+      (click)="onPageChange(currentPage() + 1)">
+      Próxima →
+    </button>
+  </div>
+
+  <div *ngIf="showPagination()" class="pagination-info">
+    <p>
+      Página {{ currentPage() }} de {{ totalPages() }} —
+      {{ totalInvoices() }} faturas no total
+    </p>
+  </div>
+
+  <!-- View All Link -->
+  <div *ngIf="showViewAllLink() && !isLoading()" class="view-all-link">
+    <a routerLink="/client-area/invoices">Ver todas as faturas</a>
+  </div>
+</div>
