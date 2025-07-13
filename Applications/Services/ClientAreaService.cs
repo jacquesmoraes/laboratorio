@@ -17,35 +17,36 @@
             _paymentRepo = paymentRepo;
         }
 
-        public async Task<ClientDashboardRecord> GetClientBasicDashboardAsync ( int clientId )
-        {
-            var client = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(clientId))
-                ?? throw new NotFoundException("Client not found.");
+        public async Task<ClientDashboardRecord> GetClientBasicDashboardAsync(int clientId)
+{
+    var client = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(clientId))
+        ?? throw new NotFoundException("Client not found.");
 
-            var totalInvoiced = await _invoiceRepo.SumAsync(
-                i => i.ClientId == clientId,
-                i => i.TotalServiceOrdersAmount);
+    // Calcula apenas faturas não canceladas
+    var totalInvoiced = await _invoiceRepo.SumAsync(
+        i => i.ClientId == clientId && i.Status != InvoiceStatus.Cancelled,
+        i => i.TotalServiceOrdersAmount);
 
-            var totalPaid = await _paymentRepo.SumAsync(
-                p => p.ClientId == clientId,
-                p => p.AmountPaid);
+    var totalPaid = await _paymentRepo.SumAsync(
+        p => p.ClientId == clientId,
+        p => p.AmountPaid);
 
-            var balance = totalPaid - totalInvoiced;
+    var balance = totalPaid - totalInvoiced;
 
-            return new ClientDashboardRecord
-            {
-                ClientId = client.ClientId,
-                ClientName = client.ClientName,
-                Street = client.Address.Street,
-                Number = client.Address.Number,
-                Complement = client.Address.Complement,
-                Neighborhood = client.Address.Neighborhood,
-                City = client.Address.City,
-                PhoneNumber = client.ClientPhoneNumber,
-                TotalInvoiced = totalInvoiced,
-                TotalPaid = totalPaid,
-                Balance = balance
-            };
-        }
+    return new ClientDashboardRecord
+    {
+        ClientId = client.ClientId,
+        ClientName = client.ClientName,
+        Street = client.Address.Street,
+        Number = client.Address.Number,
+        Complement = client.Address.Complement,
+        Neighborhood = client.Address.Neighborhood,
+        City = client.Address.City,
+        PhoneNumber = client.ClientPhoneNumber,
+        TotalInvoiced = totalInvoiced,
+        TotalPaid = totalPaid,
+        Balance = balance
+    };
+}
     }
 }

@@ -115,11 +115,34 @@
                 throw new UnprocessableEntityException ( "Paid invoices cannot be cancelled." );
 
             foreach ( var order in invoice.ServiceOrders )
-            { 
                 order.BillingInvoiceId = null;
-                order.BillingInvoice = null;
-            }
+
             invoice.Status = InvoiceStatus.Cancelled;
+
+            // Recalcula o saldo herdado de todas as faturas seguintes
+            var allInvoices = (await _invoiceRepo.GetAllAsync(
+        BillingInvoiceSpecs.AllByClient(invoice.ClientId)))
+        .Where(i => i.Status != InvoiceStatus.Cancelled)
+        .OrderBy(i => i.CreatedAt)
+        .ToList();
+
+            foreach ( var (inv, idx) in allInvoices.Select ( ( inv, idx ) => (inv, idx) ) )
+            {
+                if ( idx == 0 )
+                {
+                    inv.PreviousCredit = 0;
+                    inv.PreviousDebit = 0;
+                }
+                else
+                {
+                    var prev = allInvoices[idx - 1];
+                    var payments = await _paymentRepo.GetAllAsync(PaymentSpecs.ByInvoiceId(prev.BillingInvoiceId));
+                    var totalPaid = payments.Sum(p => p.AmountPaid);
+                    var balanceDifference = totalPaid - prev.TotalInvoiceAmount;
+                    inv.PreviousCredit = balanceDifference > 0 ? balanceDifference : 0;
+                    inv.PreviousDebit = balanceDifference < 0 ? Math.Abs ( balanceDifference ) : 0;
+                }
+            }
 
             await _uow.SaveChangesAsync ( );
             await tx.CommitAsync ( );
