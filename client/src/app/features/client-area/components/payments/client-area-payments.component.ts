@@ -1,156 +1,137 @@
-// client/src/app/features/client-area/components/payments/client-area-payments.component.ts
-import { Component, OnInit, signal, inject, ChangeDetectionStrategy, input, computed } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 
 import { ClientAreaService } from '../../services/client-area.service';
-import { ClientPayment } from '../../models/client-area.interface';
-
-type PaymentMonth = {
-  monthKey: string;
-  monthLabel: string;
-  payments: ClientPayment[];
-  total: number;
-};
+import { DataTableComponent } from '../shared/data-table.component';
+import { ClientPayment, PaymentParams, PaginatedResponse, TableColumn } from '../../models/client-area.interface';
 
 @Component({
   selector: 'app-client-area-payments',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './client-area-payments.component.html',
-  styleUrls: ['./client-area-payments.component.scss'],
+  imports: [CommonModule, DataTableComponent],
+  template: `
+    <div class="payments-page">
+      <div class="page-header">
+        <h2>Pagamentos</h2>
+        <p>Histórico de seus pagamentos</p>
+      </div>
+
+      <app-data-table
+        [columns]="columns()"
+        [data]="payments()"
+        [paginationInfo]="paginationInfo()"
+        [showFilters]="true"
+        [showPagination]="true"
+        [showStatusFilter]="false"
+        [showDateFilters]="true"
+        (pageChange)="onPageChange($event)"
+        (searchChange)="onSearchChange($event)"
+        (startDateChange)="onStartDateChange($event)"
+        (endDateChange)="onEndDateChange($event)"
+        (sortChange)="onSortChange($event)"
+      />
+    </div>
+  `,
+  styles: [`
+    .payments-page {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .page-header {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-header h2 {
+      margin: 0 0 0.5rem 0;
+      color: #276678;
+    }
+
+    .page-header p {
+      margin: 0;
+      color: #6c757d;
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClientAreaPaymentsComponent implements OnInit {
+export class ClientAreaPaymentsComponent {
   private readonly clientAreaService = inject(ClientAreaService);
 
-  // Inputs para reutilização
-  limit = input<number>();
-  showPagination = input<boolean>(true);
-  showHeader = input<boolean>(true);
-  showViewAllLink = input<boolean>(true);
-  showMonthTabs = input<boolean>(true);
+  payments = signal<ClientPayment[]>([]);
+  paginationInfo = signal<any>(null);
+  loading = signal(false);
 
-  paymentMonths = signal<PaymentMonth[]>([]);
-  activeMonthKey = signal<string>('');
-  isLoading = signal(true);
+  columns = signal<TableColumn[]>([
+    { key: 'paymentDate', label: 'Data', sortable: true },
+    { key: 'amountPaid', label: 'Valor', sortable: true },
+    { key: 'description', label: 'Descrição', sortable: false },
+    { key: 'invoiceNumber', label: 'Fatura', sortable: true }
+  ]);
 
-  ngOnInit() {
+  private currentParams = signal<PaymentParams>({
+    pageNumber: 1,
+    pageSize: 10
+  });
+
+  constructor() {
     this.loadPayments();
   }
 
   private loadPayments() {
-    this.isLoading.set(true);
-
-    this.clientAreaService.getPayments({ 
-      pageNumber: 1, 
-      pageSize: this.limit() || 100 
-    }).subscribe({
-      next: (response) => {
-        const months = this.groupPaymentsByMonth(response.data);
-        this.paymentMonths.set(months);
-
-        if (months.length > 0) {
-          this.activeMonthKey.set(months[0].monthKey);
-        }
-
-        this.isLoading.set(false);
+    this.loading.set(true);
+    
+    this.clientAreaService.getPayments(this.currentParams()).subscribe({
+      next: (response: PaginatedResponse<ClientPayment>) => {
+        this.payments.set(response.data);
+        this.paginationInfo.set({
+          pageNumber: response.pageNumber,
+          pageSize: response.pageSize,
+          totalPages: response.totalPages,
+          totalItems: response.totalItems
+        });
+        this.loading.set(false);
       },
       error: (err) => {
         console.error('Erro ao carregar pagamentos', err);
-        this.isLoading.set(false);
+        this.loading.set(false);
       }
     });
   }
 
-  private groupPaymentsByMonth(payments: ClientPayment[]): PaymentMonth[] {
-    const monthsMap = new Map<string, PaymentMonth>();
-
-    // Agrupa pagamentos existentes por mês
-    payments.forEach(payment => {
-      const date = new Date(payment.paymentDate);
-      const key = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-      const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-      if (!monthsMap.has(key)) {
-        monthsMap.set(key, { monthKey: key, monthLabel: label, payments: [], total: 0 });
-      }
-
-      const month = monthsMap.get(key)!;
-      month.payments.push(payment);
-      month.total += payment.amountPaid;
-    });
-
-    // Preenche meses vazios do ano atual (últimos 6 meses)
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
-    for (let i = 5; i >= 0; i--) {
-      const monthIndex = currentMonth - i;
-      const year = monthIndex < 0 ? currentYear - 1 : currentYear;
-      const month = monthIndex < 0 ? monthIndex + 12 : monthIndex;
-      
-      const key = `${year}-${(month + 1).toString().padStart(2, '0')}`;
-      const date = new Date(year, month, 1);
-      const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-      if (!monthsMap.has(key)) {
-        monthsMap.set(key, { monthKey: key, monthLabel: label, payments: [], total: 0 });
-      }
-    }
-
-    return Array.from(monthsMap.values()).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
+  onPageChange(page: number) {
+    this.currentParams.update(params => ({ ...params, pageNumber: page }));
+    this.loadPayments();
   }
 
-  setActiveMonth(monthKey: string) {
-    this.activeMonthKey.set(monthKey);
+  onSearchChange(search: string) {
+    this.currentParams.update(params => ({ ...params, search, pageNumber: 1 }));
+    this.loadPayments();
   }
 
-  getActiveMonthPayments(): ClientPayment[] {
-    const month = this.paymentMonths().find(m => m.monthKey === this.activeMonthKey());
-    return month?.payments || [];
+  onStartDateChange(date: string) {
+    this.currentParams.update(params => ({ 
+      ...params, 
+      startDate: date || undefined, 
+      pageNumber: 1 
+    }));
+    this.loadPayments();
   }
 
-  getActiveMonthTotal(): number {
-    const month = this.paymentMonths().find(m => m.monthKey === this.activeMonthKey());
-    return month?.total || 0;
+  onEndDateChange(date: string) {
+    this.currentParams.update(params => ({ 
+      ...params, 
+      endDate: date || undefined, 
+      pageNumber: 1 
+    }));
+    this.loadPayments();
   }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  onSortChange(sort: {column: string, direction: string}) {
+    // Implementar sorting se necessário
+    console.log('Sort:', sort);
   }
-
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('pt-BR');
-  }
-
- // client/src/app/features/client-area/components/payments/client-area-payments.component.ts
-getStatusClass(status: string | null | undefined): string {
-  if (!status) return 'pending';
-  
-  switch (status.toLowerCase()) {
-    case 'completed':
-    case 'concluído':
-    case 'paid':
-    case 'pago':
-      return 'completed';
-    case 'pending':
-    case 'pendente':
-      return 'pending';
-    case 'failed':
-    case 'falhou':
-      return 'failed';
-    case 'cancelled':
-    case 'cancelado':
-      return 'cancelled';
-    default:
-      return 'pending';
-  }
-}
-
-  activeMonthLabel = computed(() => {
-  const month = this.paymentMonths().find(m => m.monthKey === this.activeMonthKey());
-  return month?.monthLabel || '';
-});
 }

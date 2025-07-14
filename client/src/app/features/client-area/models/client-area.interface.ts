@@ -1,36 +1,42 @@
 export interface ClientDashboardData {
   clientId: number;
   clientName: string;
-  street: string;
-  number: string;
+  street?: string;
+  number?: number; 
   complement?: string;
-  neighborhood: string;
-  city: string;
-  phoneNumber: string;
+  neighborhood?: string;
+  city?: string;
+  phoneNumber?: string;
   totalInvoiced: number;
   totalPaid: number;
   balance: number;
 }
 
 export interface ClientPayment {
-  paymentId: number;
+  id: number; 
   paymentDate: string;
   amountPaid: number;
-  paymentMethod: string;
-  description: string;
-  status: string;
+  description?: string;
+  clientId: number;
+  clientName: string;
+  billingInvoiceId?: number;
+  invoiceNumber?: string;
 }
 
 export interface ClientInvoice {
   billingInvoiceId: number;
   invoiceNumber: string;
   createdAt: string;
-  description: string;
-  totalInvoiceAmount: number;
+  description?: string;
+  totalServiceOrdersAmount: number; 
   totalPaid: number;
-  balance: number;
+  outstandingBalance: number; 
   status: string;
-  pdfDownloadUrl: string;
+  pdfDownloadUrl?: string;
+  client?: any;
+  serviceOrders?: any[];
+  previousCredit?: number; 
+  previousDebit?: number; 
 }
 
 export interface ServiceOrder {
@@ -38,9 +44,19 @@ export interface ServiceOrder {
   orderNumber: string;
   patientName: string;
   dateIn: string;
-  status?: string;
-  totalAmount: number;
+  lastMovementDate?: string;
+  status: string;
+  totalAmount: number; 
   currentSectorName?: string;
+  clientName: string; 
+  clientId: number; 
+}
+
+export interface ClientAreaDashboardData {
+  dashboard: ClientDashboardData;
+  recentOrders: ServiceOrder[];
+  recentPayments: ClientPayment[];
+  recentInvoices: ClientInvoice[];
 }
 
 export interface PaginatedResponse<T> {
@@ -72,4 +88,19 @@ export interface OrderParams {
   pageSize?: number;
   status?: string;
   search?: string;
+}
+
+// DataTable Interfaces
+export interface TableColumn {
+  key: string;
+  label: string;
+  sortable?: boolean;
+  width?: string;
+}
+
+export interface PaginationInfo {
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  totalItems: number;
 }
