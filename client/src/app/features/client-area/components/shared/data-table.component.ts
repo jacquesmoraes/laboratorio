@@ -1,7 +1,9 @@
-import { Component, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, input, output, signal, TemplateRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TableColumn, PaginationInfo } from '../../models/client-area.interface';
+import { ActionTemplateContext, PaginationInfo, TableAction, TableColumn } from '../../models/client-area.interface';
+
 
 @Component({
   selector: 'app-data-table',
@@ -23,16 +25,16 @@ import { TableColumn, PaginationInfo } from '../../models/client-area.interface'
           </div>
           
           <div class="filter-controls">
-            @if (showStatusFilter()) {
+             @if (showStatusFilter()) {
               <select 
                 [ngModel]="selectedStatus()"
                 (ngModelChange)="onStatusChange($event)"
                 class="filter-select"
               >
                 <option value="">Todos os status</option>
-                <option value="pending">Pendente</option>
-                <option value="paid">Pago</option>
-                <option value="overdue">Vencido</option>
+                @for (option of statusOptions(); track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
               </select>
             }
 
@@ -117,9 +119,17 @@ import { TableColumn, PaginationInfo } from '../../models/client-area.interface'
                             {{ getItemValue(item, column.key) }}
                           </span>
                         }
+                        
                         @default {
                           {{ getItemValue(item, column.key) }}
                         }
+                        @case ('actions') {
+  @if (actionTemplate()) {
+    <ng-container 
+      *ngTemplateOutlet="actionTemplate()!; context: { $implicit: item, item: item }"
+    />
+  }
+}
                       }
                     </ng-container>
                   </td>
@@ -325,22 +335,25 @@ import { TableColumn, PaginationInfo } from '../../models/client-area.interface'
 export class DataTableComponent {
   // Inputs
   columns = input.required<TableColumn[]>();
-  data = input.required<any[]>();
+  data = input.required<unknown[]>();
+  actionTemplate = input<TemplateRef<ActionTemplateContext> | null>(null);
+statusOptions = input<{value: string, label: string}[]>([]);
   paginationInfo = input<PaginationInfo | null>(null);
-  
+
   // Configurações
   showFilters = input(true);
   showPagination = input(true);
   showStatusFilter = input(false);
   showDateFilters = input(false);
-  
+
   // Outputs
   pageChange = output<number>();
   searchChange = output<string>();
   statusChange = output<string>();
   startDateChange = output<string>();
+  actionClick = output<TableAction>();
   endDateChange = output<string>();
-  sortChange = output<{column: string, direction: string}>();
+  sortChange = output<{ column: string, direction: string }>();
 
   // Signals internos
   searchTerm = signal('');
@@ -383,32 +396,42 @@ export class DataTableComponent {
       this.sortColumn.set(column);
       this.sortDirection.set('asc');
     }
-    
+
     this.sortChange.emit({
       column,
       direction: this.sortDirection()
     });
   }
 
-  getItemKey(item: any): string {
-    return item.id?.toString() || JSON.stringify(item);
+
+
+  getItemKey(item: unknown): string {
+    const typedItem = item as { id?: number | string };
+    return typedItem.id?.toString() || JSON.stringify(item);
   }
 
-  getItemValue(item: any, key: string): any {
-    return item[key];
+  getItemValue(item: unknown, key: string): unknown {
+    const typedItem = item as Record<string, unknown>;
+    return typedItem[key];
+  }
+  onActionClick(action: string, item: unknown) {
+    this.actionClick.emit({ action, item });
   }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', { 
-      style: 'currency', 
-      currency: 'BRL' 
-    }).format(value || 0);
-  }
+ // Change the formatCurrency method (line ~425):
+formatCurrency(value: unknown): string {
+  const numValue = typeof value === 'number' ? value : 0;
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(numValue);
+}
 
-  formatDate(value: string): string {
-    if (!value) return '';
-    return new Date(value).toLocaleDateString('pt-BR');
-  }
+  // Change the formatDate method (line ~430):
+formatDate(value: unknown): string {
+  if (!value || typeof value !== 'string') return '';
+  return new Date(value).toLocaleDateString('pt-BR');
+}
 
   getPageNumbers(): number[] {
     const pagination = this.paginationInfo();

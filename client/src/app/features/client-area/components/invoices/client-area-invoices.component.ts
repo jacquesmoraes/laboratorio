@@ -1,9 +1,9 @@
-import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject, ChangeDetectionStrategy, TemplateRef } from '@angular/core';
+import { CommonModule, NgIf } from '@angular/common';
 
 import { ClientAreaService } from '../../services/client-area.service';
 import { DataTableComponent } from '../shared/data-table.component';
-import { ClientInvoice, InvoiceParams, PaginatedResponse, TableColumn } from '../../models/client-area.interface';
+import { ActionTemplateContext, ClientInvoice, InvoiceParams, PaginatedResponse, TableAction, TableColumn } from '../../models/client-area.interface';
 
 @Component({
   selector: 'app-client-area-invoices',
@@ -22,7 +22,7 @@ import { ClientInvoice, InvoiceParams, PaginatedResponse, TableColumn } from '..
           <p>Carregando faturas...</p>
         </div>
       } @else {
-        <app-data-table
+         <app-data-table
           [columns]="columns()"
           [data]="invoices()"
           [paginationInfo]="paginationInfo()"
@@ -30,14 +30,27 @@ import { ClientInvoice, InvoiceParams, PaginatedResponse, TableColumn } from '..
           [showPagination]="true"
           [showStatusFilter]="true"
           [showDateFilters]="true"
+          [statusOptions]="invoiceStatusOptions()"
           (pageChange)="onPageChange($event)"
           (searchChange)="onSearchChange($event)"
           (statusChange)="onStatusChange($event)"
           (startDateChange)="onStartDateChange($event)"
           (endDateChange)="onEndDateChange($event)"
           (sortChange)="onSortChange($event)"
+          [actionTemplate]="actionTemplate"
+          (actionClick)="onActionClick($event)"
         />
       }
+<ng-template #actionTemplate let-item>
+  <button 
+    (click)="downloadInvoice(item)"
+    [disabled]="downloadingInvoice() === item.billingInvoiceId"
+    class="download-btn"
+    [title]="downloadingInvoice() === item.billingInvoiceId ? 'Baixando...' : 'Baixar fatura'"
+  >
+     Download
+  </button>
+</ng-template>
 
       @if (error()) {
         <div class="error-container">
@@ -121,24 +134,49 @@ import { ClientInvoice, InvoiceParams, PaginatedResponse, TableColumn } from '..
     .retry-btn:hover {
       background: #1e4f5a;
     }
+    .download-btn {
+  background: #276678;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.download-btn:hover:not(:disabled) {
+  background: #1e4f5a;
+}
+
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientAreaInvoicesComponent {
   private readonly clientAreaService = inject(ClientAreaService);
-
+downloadingInvoice = signal<number | null>(null);
   invoices = signal<ClientInvoice[]>([]);
   paginationInfo = signal<any>(null);
   loading = signal(false);
   error = signal<string | null>(null);
-
+invoiceStatusOptions = signal([
+    { value: '1', label: 'Parcialmente Pago' },
+    { value: '2', label: 'Pago' },
+    { value: '3', label: 'Cancelado' },
+    { value: '4', label: 'Fechado' }
+  ]);
   columns = signal<TableColumn[]>([
     { key: 'invoiceNumber', label: 'Número', sortable: true },
     { key: 'createdAt', label: 'Data', sortable: true },
     { key: 'totalServiceOrdersAmount', label: 'Valor Total', sortable: true },
     { key: 'totalPaid', label: 'Pago', sortable: true },
     { key: 'outstandingBalance', label: 'Saldo', sortable: true },
-    { key: 'status', label: 'Status', sortable: true }
+    { key: 'status', label: 'Status', sortable: true },
+    { key: 'actions', label: 'Ações' }
   ]);
 
   private currentParams = signal<InvoiceParams>({
@@ -149,6 +187,12 @@ export class ClientAreaInvoicesComponent {
   constructor() {
     this.loadInvoices();
   }
+actionTemplate = this.createActionTemplate();
+
+private createActionTemplate(): TemplateRef<ActionTemplateContext<ClientInvoice>> {
+  // Template será definido no template do componente
+  return {} as TemplateRef<ActionTemplateContext<ClientInvoice>>;
+}
 
   loadInvoices() {
     this.loading.set(true);
@@ -221,4 +265,33 @@ export class ClientAreaInvoicesComponent {
     // TODO: Implementar sorting no backend
     // Por enquanto, apenas logamos a ação
   }
+
+downloadInvoice(invoice: ClientInvoice) {
+  if (this.downloadingInvoice() === invoice.billingInvoiceId) return;
+  
+  this.downloadingInvoice.set(invoice.billingInvoiceId);
+  
+  this.clientAreaService.downloadInvoice(invoice.billingInvoiceId).subscribe({
+    next: (blob: Blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `fatura-${invoice.invoiceNumber}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      this.downloadingInvoice.set(null);
+    },
+    error: (err) => {
+      console.error('Erro ao baixar fatura:', err);
+      this.downloadingInvoice.set(null);
+    }
+  });
+}
+
+onActionClick(event: TableAction<unknown>) {
+  const typedEvent = event as TableAction<ClientInvoice>;
+  if (typedEvent.action === 'download') {
+    this.downloadInvoice(typedEvent.item);
+  }
+}
 }

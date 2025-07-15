@@ -23,6 +23,7 @@ import { ServiceOrder, OrderParams, PaginatedResponse, TableColumn } from '../..
         [showFilters]="true"
         [showPagination]="true"
         [showStatusFilter]="true"
+         [statusOptions]="orderStatusOptions()"
         [showDateFilters]="false"
         (pageChange)="onPageChange($event)"
         (searchChange)="onSearchChange($event)"
@@ -63,6 +64,12 @@ export class ClientAreaOrdersComponent {
   orders = signal<ServiceOrder[]>([]);
   paginationInfo = signal<any>(null);
   loading = signal(false);
+
+orderStatusOptions = signal([
+    { value: '1', label: 'Produção' },
+    { value: '2', label: 'Try In' },
+    { value: '3', label: 'Finalizado' }
+  ]);
 
   columns = signal<TableColumn[]>([
     { key: 'orderNumber', label: 'Número', sortable: true },

@@ -12,24 +12,29 @@ import { ClientDashboardData } from '../../models/client-area.interface';
   template: `
     <div class="dashboard">
       <!-- Informações do Cliente -->
-      <section class="client-info">
-        <div class="client-card">
-          <h2>{{ dashboardData()?.clientName }}</h2>
-          <div class="client-details">
-            <p>
-              <strong>Endereço:</strong> 
-              {{ dashboardData()?.street }}, {{ dashboardData()?.number }}
-              <span *if="dashboardData()?.complement"> - {{ dashboardData()?.complement }}</span>
-            </p>
-            <p>
-              <strong>Cidade:</strong> {{ dashboardData()?.city }}
-            </p>
-            <p *if="dashboardData()?.phoneNumber">
-              <strong>Telefone:</strong> {{ dashboardData()?.phoneNumber }}
-            </p>
-          </div>
-        </div>
-      </section>
+  <section class="client-info">
+  <div class="client-card">
+    <h2>{{ dashboardData()?.clientName }}</h2>
+    <div class="client-details">
+      <p>
+        <strong>Endereço:</strong> 
+        {{ dashboardData()?.street }}, {{ dashboardData()?.number }}
+        @if (dashboardData()?.complement) {
+          <span> - {{ dashboardData()?.complement }}</span>
+        }
+      </p>
+      <p>
+        <strong>Cidade:</strong> {{ dashboardData()?.city }}
+      </p>
+      @if (dashboardData()?.phoneNumber) {
+        <p>
+          <strong>Telefone:</strong> {{ dashboardData()?.phoneNumber }}
+        </p>
+      }
+    </div>
+  </div>
+</section>
+
 
       <!-- Cards de Resumo -->
       <section class="summary-cards">

@@ -104,3 +104,13 @@ export interface PaginationInfo {
   totalPages: number;
   totalItems: number;
 }
+
+export interface TableAction<T = unknown> {
+  action: string;
+  item: T;
+}
+
+export interface ActionTemplateContext<T = unknown> {
+  $implicit: T;
+  item: T;
+}
