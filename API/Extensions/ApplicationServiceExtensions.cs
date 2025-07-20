@@ -1,4 +1,6 @@
-﻿namespace API.Extensions
+﻿
+
+namespace API.Extensions
 {
     public static class ApplicationServiceExtensions
     {
@@ -72,7 +74,6 @@
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
             services.AddScoped<UpdateOverdueStatusFilter> ( );
             services.AddScoped<IClientService, ClientService> ( );
-            services.AddScoped<IClientAreaService, ClientAreaService> ( );
             services.AddScoped<IShadeService, ShadeService> ( );
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
             services.AddScoped<IPaymentService, PaymentService> ( );
@@ -82,6 +83,10 @@
             services.AddScoped<ISystemSettingsService, SystemSettingsService> ( );
             services.AddScoped<IBillingService, BillingService> ( );
             services.AddAutoMapper ( typeof ( ProductionMappingProfile ).Assembly );
+
+            //client area services
+            services.AddScoped<IClientAreaService, ClientAreaService> ( );
+
             return services;
         }
     }

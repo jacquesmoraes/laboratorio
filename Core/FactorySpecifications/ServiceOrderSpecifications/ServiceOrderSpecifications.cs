@@ -2,10 +2,9 @@
 using Core.Models.Production;
 using Core.Models.ServiceOrders;
 using Core.Models.Works;
-using Core.Specifications;
 using Core.Params;
+using Core.Specifications;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Core.FactorySpecifications.ServiceOrderSpecifications
 {
@@ -93,7 +92,7 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
                 (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
                 (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value)&&
                 (!p.ExcludeInvoiced || o.BillingInvoiceId == null);
-                 
+
 
 
                 var spec = new ServiceOrderSpecification(criteria);

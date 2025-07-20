@@ -1,4 +1,7 @@
-﻿namespace Applications.Services
+﻿using Applications.Projections.ClientArea;
+using static Core.FactorySpecifications.ClientAreaSpecifications.ClientAreaServiceOrderSpecification;
+
+namespace Applications.Services
 {
     public class ServiceOrderService (
         IMapper mapper,
@@ -247,6 +250,30 @@
             return order;
         }
 
+        public async Task<Pagination<ClientAreaServiceOrderProjection>> GetPaginatedForClientAreaAsync ( ServiceOrderParams p )
+        {
+            // 1. Main spec otimizada para client area
+            var spec = ClientAreaServiceOrderSpecs.Paged(p);
+
+            // 2. Count spec otimizada
+            var countSpec = ClientAreaServiceOrderSpecs.PagedForCount(p);
+
+            // 3. Executar queries sequencialmente
+            var totalItems = await _orderRepo.CountWithoutTrackingAsync(countSpec);
+            var serviceOrders = await _orderRepo.GetAllWithoutTrackingAsync(spec);
+
+            // 4. Mapear para projection da área do cliente
+            var projections = _mapper.Map<IReadOnlyList<ClientAreaServiceOrderProjection>>(serviceOrders);
+
+            return new Pagination<ClientAreaServiceOrderProjection> (
+                p.PageNumber,
+                p.PageSize,
+                totalItems,
+                projections
+            );
+        }
+
+
         private async Task<string> GenerateOrderNumberAsync ( int clientId )
         {
             var spec = ServiceOrderSpecs.AllByClient(clientId);
@@ -265,5 +292,7 @@
 
             return $"{nextSequence}-{clientId}";
         }
+
+
     }
 }

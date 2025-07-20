@@ -16,6 +16,10 @@ namespace Core.Interfaces
         Task<int> CountAsync ( ISpecification<T> spec );
         Task<decimal> SumAsync ( Expression<Func<T, bool>> predicate, Expression<Func<T, decimal>> selector );
 
+        Task<IReadOnlyList<T>> GetAllWithoutTrackingAsync ( ISpecification<T> spec );
+        Task<T?> GetEntityWithSpecWithoutTrackingAsync ( ISpecification<T> spec );
+        Task<int> CountWithoutTrackingAsync ( ISpecification<T> spec );
+
 
 
     }

@@ -1,4 +1,7 @@
-﻿namespace Applications.Services
+﻿using Applications.Projections.ClientArea;
+using static Core.FactorySpecifications.ClientAreaSpecifications.ClientAreaBillingInvoiceSpecification;
+
+namespace Applications.Services
 {
     public class BillingService (
         IGenericRepository<BillingInvoice> invoiceRepo,
@@ -96,6 +99,20 @@
             }
 
             return new Pagination<BillingInvoiceResponseProjection> ( p.PageNumber, p.PageSize, totalItems, projections );
+        }
+
+        public async Task<Pagination<ClientAreaInvoiceProjection>> GetPaginatedInvoicesForClientAreaAsync ( InvoiceParams p )
+        {
+            var spec = ClientAreaBillingInvoiceSpecs.Paged(p);
+            var countSpec = ClientAreaBillingInvoiceSpecs.PagedForCount(p);
+
+            var totalItems = await _invoiceRepo.CountWithoutTrackingAsync(countSpec);
+            var invoices = await _invoiceRepo.GetAllWithoutTrackingAsync(spec);
+
+            // Mapear para projeção específica da client area
+            var projections = _mapper.Map<IReadOnlyList<ClientAreaInvoiceProjection>>(invoices);
+
+            return new Pagination<ClientAreaInvoiceProjection> ( p.PageNumber, p.PageSize, totalItems, projections );
         }
 
         public async Task<BillingInvoice> CancelInvoiceAsync ( int id )

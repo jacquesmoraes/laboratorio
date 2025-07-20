@@ -1,15 +1,12 @@
-﻿using Applications.Projections.ServiceOrder;
-using Applications.Records.Payments;
-using Applications.Services;
-using AutoMapper;
+﻿using Applications.Services;
 using Core.Exceptions;
 using Core.Interfaces;
 using Core.Models.Billing;
 using Core.Models.Clients;
 using Core.Models.Payments;
-using Core.Models.ServiceOrders;
 using Core.Specifications;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Linq.Expressions;
 
@@ -20,27 +17,21 @@ public class ClientAreaServiceTests
     private readonly Mock<IGenericRepository<Client>> _clientRepoMock = new();
     private readonly Mock<IGenericRepository<BillingInvoice>> _invoiceRepoMock = new();
     private readonly Mock<IGenericRepository<Payment>> _paymentRepoMock = new();
-    private readonly Mock<IGenericRepository<ServiceOrder>> _orderRepoMock = new();
-    private readonly Mock<IUnitOfWork> _uowMock = new();
-    private readonly IMapper _mapper;
+
+    private readonly Mock<ILogger<ClientAreaService>> _loggerMock = new();
 
     private readonly ClientAreaService _service;
 
     public ClientAreaServiceTests ( )
     {
-        var mapperConfig = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<ServiceOrder, ServiceOrderListProjection>();
-            cfg.CreateMap<Payment, ClientPaymentRecord>();
-        });
 
-        _mapper = mapperConfig.CreateMapper ( );
 
         _service = new ClientAreaService (
             _clientRepoMock.Object,
             _invoiceRepoMock.Object,
-            _paymentRepoMock.Object
-           
+            _paymentRepoMock.Object,
+             _loggerMock.Object
+
              );
     }
 

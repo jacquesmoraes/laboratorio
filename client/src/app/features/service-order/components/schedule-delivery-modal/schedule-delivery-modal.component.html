@@ -1,0 +1,60 @@
+<div class="modal-container">
+  <h2>Agendar Entrega</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="scheduledDate">Data:</label>
+      <input 
+        id="scheduledDate"
+        type="date" 
+        formControlName="scheduledDate" 
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="deliveryType">Tipo de entrega:</label>
+      <select 
+        id="deliveryType"
+        formControlName="deliveryType"
+        class="form-control"
+      >
+        <option *ngFor="let type of deliveryTypes" [value]="type">
+          {{ type }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group" *ngIf="showSector()">
+      <label for="sectorId">Setor destino:</label>
+      <select 
+        id="sectorId"
+        formControlName="sectorId"
+        class="form-control"
+      >
+        <option *ngFor="let sector of sectors" [value]="sector.sectorId">
+          {{ sector.sectorName }}
+        </option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button 
+        mat-button 
+        type="submit" 
+        [disabled]="form.invalid"
+        class="btn-primary"
+      >
+        Agendar
+      </button>
+      <button 
+        mat-button 
+        type="button" 
+        (click)="cancel()"
+        class="btn-secondary"
+      >
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>

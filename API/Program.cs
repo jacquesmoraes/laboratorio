@@ -16,6 +16,8 @@ var app = builder.Build();
 
 app.UseStaticFiles ( );
 app.UseMiddleware<ExceptionMiddleware> ( );
+app.UseMiddleware<PerformanceMiddleware>();
+
 if ( !app.Environment.IsEnvironment ( "Test" ) )
 {
     app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );

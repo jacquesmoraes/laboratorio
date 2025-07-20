@@ -1,4 +1,6 @@
-﻿namespace Applications.Contracts
+﻿using Applications.Projections.ClientArea;
+
+namespace Applications.Contracts
 {
     public interface IBillingService : IGenericService<BillingInvoice>
     {
@@ -6,9 +8,8 @@
 
         Task<BillingInvoice> CancelInvoiceAsync ( int id );
 
-         /// <summary>
-        /// Returns the complete read record for PDF generation or viewing.
-        /// </summary>
+       Task<Pagination<ClientAreaInvoiceProjection>> GetPaginatedInvoicesForClientAreaAsync(InvoiceParams p);
+
         Task<BillingInvoiceRecord?> GetInvoiceRecordByIdAsync ( int id );
         Task<Pagination<BillingInvoiceResponseProjection>> GetPaginatedInvoicesAsync ( InvoiceParams p );
 

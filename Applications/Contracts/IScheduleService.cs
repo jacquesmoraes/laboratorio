@@ -34,6 +34,9 @@
         /// </summary>
         Task UpdateOverdueStatusAsync();
 
+        Task<List<SectorScheduleRecord>> GetScheduleByDateRangeAsync(DateTime start, DateTime end);
+
+
        
     }
 }

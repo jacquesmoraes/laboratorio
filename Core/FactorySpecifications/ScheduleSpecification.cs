@@ -29,6 +29,9 @@ namespace Core.FactorySpecifications
                 return spec;
             }
 
+
+
+
             public static ScheduleSpecification ByCurrentSectorAndDate ( int sectorId, DateTime date )
             {
                 var start = date.Date;
@@ -77,6 +80,25 @@ namespace Core.FactorySpecifications
                 return spec;
             }
 
+            public static ScheduleSpecification ForDateRange ( DateTime startDate, DateTime endDate )
+            {
+                var start = startDate.Date;
+                var end = endDate.Date.AddDays(1);
+
+                var spec = new ScheduleSpecification(s =>
+                s.ScheduledDate != null &&
+                s.ScheduledDate >= start &&
+                s.ScheduledDate < end &&
+                !s.IsDelivered
+                );
+
+                AddIncludes ( spec );
+                spec.AddOrderBy ( s => s.ScheduledDate ?? DateTime.MaxValue );
+
+                return spec;
+            }
+
+
 
             public static ScheduleSpecification ActiveByServiceOrderId ( int serviceOrderId )
             {
@@ -90,7 +112,7 @@ namespace Core.FactorySpecifications
                 spec.AddInclude ( s => s.ServiceOrder );
                 spec.AddInclude ( s => s.ServiceOrder.Client );
                 spec.AddInclude ( s => s.Sector! );
-                spec.AddInclude ( "ServiceOrder.Stages.Sector" ); 
+                spec.AddInclude ( "ServiceOrder.Stages.Sector" );
 
             }
         }

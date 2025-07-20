@@ -81,7 +81,7 @@
                 <td class="invoice-date">{{ formatDate(invoice.createdAt) }}</td>
                 <td>
                   <span [class]="'status-badge ' + getStatusClass(invoice.status)">
-                    {{ invoice.status }}
+                    {{  invoice.status }}
                   </span>
                 </td>
                 <td class="invoice-total">{{ formatCurrency(invoice.totalInvoiceAmount) }}</td>

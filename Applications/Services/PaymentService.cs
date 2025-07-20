@@ -1,4 +1,6 @@
-﻿namespace Applications.Services
+﻿using static Core.FactorySpecifications.ClientAreaSpecifications.ClientAreaPaymentSpecification;
+
+namespace Applications.Services
 {
     public class PaymentService (
         IGenericRepository<Payment> paymentRepo,
@@ -95,6 +97,33 @@
                 Description = p.Description,
                 ClientId = p.ClientId,
                 ClientName = p.Client?.ClientName ?? string.Empty,
+                BillingInvoiceId = p.BillingInvoiceId,
+                InvoiceNumber = p.BillingInvoice?.InvoiceNumber
+            }).ToList();
+
+            return new Pagination<ClientPaymentRecord> ( p.PageNumber, p.PageSize, totalItems, records );
+        }
+
+        public async Task<Pagination<ClientPaymentRecord>> GetPaginatedForClientAreaAsync ( PaymentParams p )
+        {
+            // 1. Main spec otimizado para client area
+            var spec = ClientAreaPaymentSpecs.Paged(p);
+
+            // 2. Count spec otimizado (sem includes)
+            var countSpec = ClientAreaPaymentSpecs.PagedForCount(p);
+
+            // 3. Executar queries sequencialmente (não em paralelo)
+            var totalItems = await _paymentRepo.CountWithoutTrackingAsync(countSpec);
+            var payments = await _paymentRepo.GetAllWithoutTrackingAsync(spec);
+
+            // 4. Mapeamento otimizado
+            var records = payments.Select(p => new ClientPaymentRecord
+            {
+                Id = p.Id,
+                PaymentDate = p.PaymentDate,
+                AmountPaid = p.AmountPaid,
+                Description = p.Description,
+                ClientId = p.ClientId,
                 BillingInvoiceId = p.BillingInvoiceId,
                 InvoiceNumber = p.BillingInvoice?.InvoiceNumber
             }).ToList();

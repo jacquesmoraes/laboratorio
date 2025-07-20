@@ -1,139 +1,177 @@
-﻿namespace API.Controllers.Clients
+﻿using Applications.Projections.ClientArea;
+using System.Diagnostics;
+
+namespace API.Controllers.Clients
 {
-    //[Authorize(Roles = "client")]
     [ApiController]
-    [Route("api/client-area")]
-    public class ClientAreaController(
+    [Route ( "api/client-area" )]
+    public class ClientAreaController (
         IClientAreaService clientAreaService,
         IPaymentService paymentService,
         IBillingService billingService,
-        IServiceOrderService serviceOrderService
+        IServiceOrderService serviceOrderService,
+        ILogger<ClientAreaController> logger,
+        IWebHostEnvironment env
     ) : ControllerBase
     {
         private readonly IClientAreaService _clientAreaService = clientAreaService;
         private readonly IPaymentService _paymentService = paymentService;
         private readonly IBillingService _billingService = billingService;
         private readonly IServiceOrderService _serviceOrderService = serviceOrderService;
-
-        static ClientAreaController()
+        private readonly ILogger<ClientAreaController> _logger = logger;
+        private readonly IWebHostEnvironment _env = env;
+        static ClientAreaController ( )
         {
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
-        /// <summary>
-        /// Returns the client's summary dashboard, including personal data,
-        /// financial totals and invoices with download link.
-        /// </summary>
-        [HttpGet("dashboard")]
-        public async Task<IActionResult> GetDashboard()
+        [HttpGet ( "dashboard" )]
+        public Task<IActionResult> GetDashboard ( )
         {
-            var userClientId = GetUserClientId();
-            var dashboard = await _clientAreaService.GetClientBasicDashboardAsync(userClientId);
-            return Ok(dashboard);
+            var clientId = GetUserClientId();
+            return ExecuteWithLogging (
+                "Dashboard",
+                clientId,
+                ( ) => _clientAreaService.GetClientBasicDashboardAsync ( clientId )
+            );
         }
 
-        [HttpGet("payments")]
-        public async Task<ActionResult<Pagination<ClientPaymentRecord>>> GetPayments([FromQuery] PaymentParams parameters)
-        {
-            var userClientId = GetUserClientId();
-            parameters.ClientId = userClientId;
 
-            var result = await _paymentService.GetPaginatedAsync(parameters);
-            return Ok(result);
+        [HttpGet ( "payments" )]
+        public Task<IActionResult> GetPayments ( [FromQuery] PaymentParams parameters )
+        {
+            var clientId = GetUserClientId();
+            parameters.ClientId = clientId;
+
+            return ExecuteWithLogging (
+                "Payments",
+                clientId,
+                ( ) => _paymentService.GetPaginatedForClientAreaAsync ( parameters )
+            );
         }
 
-        [HttpGet("orders")]
-        public async Task<ActionResult<Pagination<ServiceOrderListProjection>>> GetClientOrders([FromQuery] ServiceOrderParams parameters)
-        {
-            var userClientId = GetUserClientId();
-            parameters.ClientId = userClientId;
 
-            var result = await _serviceOrderService.GetPaginatedAsync(parameters);
-            return Ok(result);
+        [HttpGet ( "orders" )]
+        public Task<IActionResult> GetClientOrders ( [FromQuery] ServiceOrderParams parameters )
+        {
+            var clientId = GetUserClientId();
+            parameters.ClientId = clientId;
+
+            return ExecuteWithLogging (
+                "Orders",
+                clientId,
+                ( ) => _serviceOrderService.GetPaginatedForClientAreaAsync ( parameters )
+            );
         }
 
-        [HttpGet("invoices")]
-        public async Task<ActionResult<Pagination<BillingInvoiceResponseProjection>>> GetInvoices([FromQuery] InvoiceParams query)
-        {
-            var userClientId = GetUserClientId();
-            query.ClientId = userClientId;
 
-            var result = await _billingService.GetPaginatedInvoicesAsync(query);
-            return Ok(result);
+
+
+
+        [HttpGet ( "invoices" )]
+        public Task<IActionResult> GetInvoices ( [FromQuery] InvoiceParams query )
+        {
+            var clientId = GetUserClientId();
+            query.ClientId = clientId;
+
+            return ExecuteWithLogging (
+                "Invoices",
+                clientId,
+                ( ) => _billingService.GetPaginatedInvoicesForClientAreaAsync ( query )
+            );
         }
 
-        /// <summary>
-        /// Downloads the invoice PDF for the logged-in client.
-        /// </summary>
-        [HttpGet("invoices/{id}/download")]
-        public async Task<IActionResult> DownloadInvoicePdf(
+
+
+
+        [HttpGet ( "invoices/{id}/download" )]
+        public async Task<IActionResult> DownloadInvoicePdf (
             [FromServices] IBillingService billingService,
             [FromServices] ISystemSettingsService settingsService,
             [FromServices] IMapper mapper,
             [FromServices] IWebHostEnvironment env,
-            int id)
+            int id )
         {
+            var stopwatch = Stopwatch.StartNew();
+            var clientId = GetUserClientId();
+
             try
             {
-                var userClientId = GetUserClientId();
+                _logger.LogInformation ( "PDF download started for invoice {InvoiceId} by client {ClientId}", id, clientId );
 
-                // Fetch invoice
                 var invoice = await billingService.GetInvoiceRecordByIdAsync(id);
-                if (invoice == null)
-                    return NotFound("Invoice not found.");
-
-                // Validate invoice ownership
-                if (invoice.ClientId != userClientId)
+                if ( invoice == null )
                 {
-                    return Forbid("You can only download your own invoices.");
+                    _logger.LogWarning ( "Invoice {InvoiceId} not found for client {ClientId}", id, clientId );
+                    return NotFound ( "Invoice not found." );
                 }
 
-                // Fetch system settings
+                if ( invoice.ClientId != clientId )
+                {
+                    _logger.LogWarning ( "Client {ClientId} attempted to access invoice {InvoiceId} belonging to client {OwnerId}", clientId, id, invoice.ClientId );
+                    return Forbid ( );
+                }
+
                 var settingsEntity = await settingsService.GetAsync();
                 var settings = mapper.Map<SystemSettingsRecord>(settingsEntity);
 
-                // Resolve absolute logo path
                 var logoPath = string.IsNullOrEmpty(settings.LogoUrl)
                     ? null
                     : Path.Combine(env.WebRootPath, "uploads", "logos", Path.GetFileName(settings.LogoUrl));
 
-                // Generate PDF
-                var document = new BillingInvoicePdfDocument(invoice, settings, logoPath);
-                var pdfBytes = document.GeneratePdf();
+                var pdf = new BillingInvoicePdfDocument(invoice, settings, logoPath).GeneratePdf();
 
-                // Return PDF inline
-                Response.Headers["Content-Disposition"] = $"inline; filename=invoice-{invoice.InvoiceNumber}.pdf";
-                return File(pdfBytes, "application/pdf");
+                stopwatch.Stop ( );
+                _logger.LogInformation ( "PDF download completed for invoice {InvoiceId} by client {ClientId} in {ElapsedMs}ms", id, clientId, stopwatch.ElapsedMilliseconds );
+
+                Response.Headers ["Content-Disposition"] = $"inline; filename=invoice-{invoice.InvoiceNumber}.pdf";
+                return File ( pdf, "application/pdf" );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
-                return StatusCode(500, $"Error generating PDF: {ex.Message}");
+                stopwatch.Stop ( );
+                _logger.LogError ( ex, "PDF download failed for invoice {InvoiceId} by client {ClientId} after {ElapsedMs}ms", id, clientId, stopwatch.ElapsedMilliseconds );
+                return StatusCode ( 500, "An error occurred while generating the PDF." );
             }
         }
 
-        /// <summary>
-        /// Helper method to extract clientId from the logged-in user's claims.
-        /// </summary>
-        /// 
-        private int GetUserClientId()
-{
-    var userClientIdClaim = User.FindFirst("clientId")?.Value;
-    if (string.IsNullOrEmpty(userClientIdClaim) || !int.TryParse(userClientIdClaim, out var userClientId))
-    {
-        // Hardcoded for testing
-        userClientId = 6;
-    }
-    return userClientId;
-}
 
-        //private int GetUserClientId()
-        //{
-        //    var userClientIdClaim = User.FindFirst("clientId")?.Value;
-        //    if (string.IsNullOrEmpty(userClientIdClaim) || !int.TryParse(userClientIdClaim, out var userClientId))
-        //    {
-        //        throw new UnauthorizedAccessException("User does not have a valid clientId.");
-        //    }
-        //    return userClientId;
-        //}
+        private int GetUserClientId ( )
+        {
+            var claim = User.FindFirst("clientId")?.Value;
+            if ( int.TryParse ( claim, out var clientId ) )
+            {
+                return clientId;
+            }
+
+            if ( _env.IsDevelopment ( ) )
+            {
+                _logger.LogWarning ( "Development mode: using fallback clientId 6." );
+                return 6;
+            }
+
+            _logger.LogWarning ( "Unauthorized access attempt: missing or invalid clientId claim." );
+            throw new UnauthorizedAccessException ( "Invalid or missing clientId." );
+        }
+
+
+        private async Task<IActionResult> ExecuteWithLogging<T> ( string operation, int clientId, Func<Task<T>> action )
+        {
+            var stopwatch = Stopwatch.StartNew();
+            try
+            {
+                _logger.LogInformation ( "{Operation} request started for client {ClientId}", operation, clientId );
+                var result = await action();
+                stopwatch.Stop ( );
+                _logger.LogInformation ( "{Operation} request completed for client {ClientId} in {ElapsedMs}ms", operation, clientId, stopwatch.ElapsedMilliseconds );
+                return Ok ( result );
+            }
+            catch ( Exception ex )
+            {
+                stopwatch.Stop ( );
+                _logger.LogError ( ex, "{Operation} request failed for client {ClientId} after {ElapsedMs}ms", operation, clientId, stopwatch.ElapsedMilliseconds );
+                throw;
+            }
+        }
     }
 }

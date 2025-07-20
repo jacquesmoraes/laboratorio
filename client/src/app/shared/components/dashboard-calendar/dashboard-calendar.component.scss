@@ -1,0 +1,66 @@
+.calendar-container {
+  padding: 1rem;
+  background-color: #f4f1ee;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  
+  // Aumentar altura dos slots de tempo
+  ::ng-deep .fc-timegrid-slot {
+    height: 60px !important; // Aumentar de 40px para 60px
+  }
+  
+  // Melhorar visualização dos eventos
+  ::ng-deep .fc-timegrid-event {
+    margin: 2px 4px !important;
+    padding: 6px 8px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    min-height: 30px !important;
+    line-height: 1.3 !important;
+    
+    // Garantir que o texto não seja cortado
+    overflow: visible !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+  }
+  
+  // Melhorar visualização mensal
+  ::ng-deep .fc-daygrid-event {
+    margin: 1px 0;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    min-height: 20px;
+  }
+  
+  // Melhorar cabeçalho das colunas
+  ::ng-deep .fc-col-header-cell {
+    background-color: #334a52;
+    color: white;
+    font-weight: 600;
+    padding: 10px 0;
+    font-size: 14px;
+  }
+  
+  // Melhorar células dos dias
+  ::ng-deep .fc-daygrid-day {
+    min-height: 120px;
+  }
+  
+  // Melhorar visualização de hoje
+  ::ng-deep .fc-day-today {
+    background-color: rgba(39, 102, 120, 0.1) !important;
+  }
+  
+  // Garantir que os eventos não sejam cortados
+  ::ng-deep .fc-event-main {
+    overflow: visible !important;
+    white-space: normal !important;
+  }
+  
+  // Melhorar espaçamento geral
+  ::ng-deep .fc-timegrid-col-events {
+    margin: 0 2px;
+  }
+}

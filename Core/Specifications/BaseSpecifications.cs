@@ -15,90 +15,91 @@ namespace Core.Specifications
         public bool IsPagingEnabled { get; private set; }
 
         // Construtores
-        public BaseSpecification() { }
+        public BaseSpecification ( ) { }
 
-        public BaseSpecification(Expression<Func<T, bool>> criteria)
+        public BaseSpecification ( Expression<Func<T, bool>> criteria )
         {
             Criteria = criteria;
         }
 
         // Includes
-        protected void AddInclude(Expression<Func<T, object>> includeExpression)
+        protected void AddInclude ( Expression<Func<T, object>> includeExpression )
         {
-            Includes.Add(includeExpression);
+            Includes.Add ( includeExpression );
         }
 
-        protected void AddInclude(string includeString)
+        protected void AddInclude ( string includeString )
         {
-            IncludeStrings.Add(includeString);
+            IncludeStrings.Add ( includeString );
         }
 
         // Ordenação
-        protected void AddOrderBy(Expression<Func<T, object>> orderByExpression)
+        protected void AddOrderBy ( Expression<Func<T, object>> orderByExpression )
         {
             OrderBy = orderByExpression;
         }
 
-        protected void AddOrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
+        protected void AddOrderByDescending ( Expression<Func<T, object>> orderByDescendingExpression )
         {
             OrderByDescending = orderByDescendingExpression;
         }
 
         // Paginação
-        protected void ApplyPaging(int skip, int take)
+        protected void ApplyPaging ( int skip, int take )
         {
             Skip = skip;
             Take = take;
             IsPagingEnabled = true;
         }
 
-      
-        // ... existing code ...
 
-protected void ApplySorting(string? sort)
-{
-    if (string.IsNullOrWhiteSpace(sort))
-    {
-        // Determina a propriedade de data padrão baseada no tipo
-        var defaultDateProperty = typeof(T).Name switch
+
+
+        protected void ApplySorting ( string? sort )
         {
-            "Payment" => "PaymentDate",
-            "ServiceOrder" => "DateIn",
-            "ProductionStage" => "DateIn",
-            _ => "CreatedAt" // fallback genérico
-        };
-        
-        AddOrderByDescending(x => EF.Property<object>(x!, defaultDateProperty));
-        return;
-    }
+            if ( string.IsNullOrWhiteSpace ( sort ) )
+            {
+                // Determina a propriedade de data padrão baseada no tipo
+                var defaultDateProperty = typeof(T).Name switch
+                {
+                    "Payment" => "PaymentDate",
+                    "ServiceOrder" => "DateIn",
+                    "ProductionStage" => "DateIn",
+                    _ => "CreatedAt"
+                };
 
-    var descending = sort.EndsWith("Desc", StringComparison.OrdinalIgnoreCase);
-    var propertyName = descending
+                AddOrderByDescending ( x => EF.Property<object> ( x!, defaultDateProperty ) );
+                return;
+            }
+
+            var descending = sort.EndsWith("Desc", StringComparison.OrdinalIgnoreCase);
+            var propertyName = descending
         ? sort[..^4] // remove "Desc"
         : sort;
 
-    var propInfo = typeof(T).GetProperty(propertyName);
-    if (propInfo == null)
-    {
-        // Propriedade não encontrada, aplica fallback baseado no tipo
-        var defaultDateProperty = typeof(T).Name switch
-        {
-            "Payment" => "PaymentDate",
-            "ServiceOrder" => "DateIn",
-            "ProductionStage" => "DateIn",
-            _ => "CreatedAt" // fallback genérico
-        };
-        
-        AddOrderByDescending(x => EF.Property<object>(x!, defaultDateProperty));
-        return;
-    }
+            var propInfo = typeof(T).GetProperties()
+    .FirstOrDefault(p => string.Equals(p.Name, propertyName, StringComparison.OrdinalIgnoreCase));
+            if ( propInfo == null )
+            {
 
-    if (descending)
-        AddOrderByDescending(x => EF.Property<object>(x!, propertyName));
-    else
-        AddOrderBy(x => EF.Property<object>(x!, propertyName));
-}
+                var defaultDateProperty = typeof(T).Name switch
+                {
+                    "Payment" => "PaymentDate",
+                    "ServiceOrder" => "DateIn",
+                    "ProductionStage" => "DateIn",
+                    _ => "CreatedAt"
+                };
 
-// ... existing code ...
+                AddOrderByDescending ( x => EF.Property<object> ( x!, defaultDateProperty ) );
+                return;
+            }
+
+            if ( descending )
+                AddOrderByDescending ( x => EF.Property<object> ( x!, propInfo.Name ) );
+            else
+                AddOrderBy ( x => EF.Property<object> ( x!, propInfo.Name ) );
+        }
+
+
     }
 }

@@ -69,11 +69,29 @@ namespace Infra.Data.Repositories
                 .SumAsync ( );
         }
 
+        public async Task<IReadOnlyList<T>> GetAllWithoutTrackingAsync ( ISpecification<T> spec )
+        {
+            var query = ApplySpecification(spec);
+            return await query.AsNoTracking ( ).ToListAsync ( );
+        }
+
+        public async Task<T?> GetEntityWithSpecWithoutTrackingAsync ( ISpecification<T> spec )
+        {
+            var query = ApplySpecification(spec);
+            return await query.AsNoTracking ( ).FirstOrDefaultAsync ( );
+        }
+
+        public async Task<int> CountWithoutTrackingAsync ( ISpecification<T> spec )
+        {
+            var query = ApplySpecification(spec);
+            return await query.AsNoTracking ( ).CountAsync ( );
+        }
 
         public async Task<int> CountAsync ( ISpecification<T> spec )
         {
             return await ApplySpecification ( spec ).CountAsync ( );
         }
+
 
         private IQueryable<T> ApplySpecification ( ISpecification<T> spec )
         {

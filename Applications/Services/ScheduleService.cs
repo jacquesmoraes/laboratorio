@@ -61,7 +61,7 @@
             var entity = new ServiceOrderSchedule
             {
                 ServiceOrderId = dto.ServiceOrderId,
-                ScheduledDate = dto.ScheduledDate?.ToLocalTime() ?? DateTime.Now,
+                ScheduledDate = dto.ScheduledDate  ?? DateTime.Now,
                 DeliveryType = dto.DeliveryType ?? ScheduledDeliveryType.FinalDelivery,
                 SectorId = dto.SectorId,
                 IsDelivered = false,
@@ -166,6 +166,24 @@
             if ( overdue.Any ( ) )
                 await _uow.SaveChangesAsync ( );
         }
+
+        public async Task<List<SectorScheduleRecord>> GetScheduleByDateRangeAsync ( DateTime start, DateTime end )
+        {
+            var spec = ScheduleSpecs.ForDateRange(start, end);
+            var schedules = await _scheduleRepo.GetAllAsync(spec);
+
+            return schedules
+                .GroupBy ( s => s.SectorId )
+                .Select ( g => new SectorScheduleRecord
+                {
+                    SectorId = g.Key ?? 0,
+                    SectorName = g.First ( ).Sector?.Name ?? "No Sector",
+                    Deliveries = g.Select ( _mapper.Map<ScheduleItemRecord> ).ToList ( )
+                } )
+                .ToList ( );
+        }
+
+
 
         public async Task<SectorScheduleRecord?> GetScheduleByCurrentSectorAsync ( int sectorId, DateTime date )
         {
