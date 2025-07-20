@@ -9,80 +9,32 @@ import { ClientAreaService } from '../services/client-area.services';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <section class="dashboard">
-      <header>
+    <section class="client-area-section client-area-dashboard">
+      <div class="client-info">
         <h2>{{ dashboard()?.clientName }}</h2>
         <p>{{ fullAddress() }}</p>
         <p>{{ dashboard()?.phoneNumber }}</p>
-      </header>
+      </div>
 
-      <div class="totals">
-        <div class="card invoiced">
+      <div class="totals-grid">
+        <div class="total-card invoiced">
           <h3>Total Faturado</h3>
-          <p>{{ dashboard()?.totalInvoiced | currency:'BRL':'symbol' }}</p>
+          <p class="amount neutral">{{ dashboard()?.totalInvoiced | currency:'BRL':'symbol' }}</p>
         </div>
 
-        <div class="card paid">
+        <div class="total-card paid">
           <h3>Total Pago</h3>
-          <p>{{ dashboard()?.totalPaid | currency:'BRL':'symbol' }}</p>
+          <p class="amount positive">{{ dashboard()?.totalPaid | currency:'BRL':'symbol' }}</p>
         </div>
 
-        <div class="card balance">
+        <div class="total-card balance">
           <h3>Saldo</h3>
-          <p>{{ dashboard()?.balance | currency:'BRL':'symbol' }}</p>
+          <p class="amount" [class]="getBalanceClass()">{{ dashboard()?.balance | currency:'BRL':'symbol' }}</p>
         </div>
       </div>
     </section>
   `,
-  styles: [`
-    .dashboard {
-      padding: 1rem;
-      background-color: #f4f1ee;
-      color: #334a52;
-      border-radius: .5rem;
-    }
-
-    header {
-      margin-bottom: 1rem;
-    }
-
-    header h2 {
-      margin: 0;
-      font-size: 1.5rem;
-      color: #276678;
-    }
-
-    header p {
-      margin: 0;
-      font-size: .875rem;
-    }
-
-    .totals {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-    }
-
-    .card {
-      padding: 1rem;
-      border-radius: .5rem;
-      text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .card.invoiced {
-      background-color: #96afb8;
-    }
-
-    .card.paid {
-      background-color: #a288a9;
-    }
-
-    .card.balance {
-      background-color: #276678;
-      color: #f4f1ee;
-    }
-  `],
+  styleUrls: ['../client-area.styles.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientAreaDashboardComponent {
@@ -93,7 +45,10 @@ export class ClientAreaDashboardComponent {
   constructor() {
     this.loadDashboard();
   }
-
+  getBalanceClass(): string {
+    const balance = this.dashboard()?.balance || 0;
+    return balance > 0 ? 'negative' : balance < 0 ? 'positive' : 'neutral';
+  }
   private loadDashboard() {
     this.service.getDashboard().subscribe(d => this.dashboard.set(d));
   }

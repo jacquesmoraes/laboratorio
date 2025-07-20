@@ -18,10 +18,10 @@ import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusVal
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="invoices">
+    <section class="client-area-section">
       <h2>Faturas</h2>
 
-      <form class="filters" (ngSubmit)="onSearch()">
+      <form class="client-area-filters" (ngSubmit)="onSearch()">
         <label>
           Status:
           <select [(ngModel)]="params.status" name="status">
@@ -47,7 +47,7 @@ import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusVal
         <button type="submit">Filtrar</button>
       </form>
 
-      <table>
+      <table class="client-area-table">
         <thead>
           <tr>
             <th>Número</th>
@@ -62,61 +62,30 @@ import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusVal
           @for (invoice of invoices(); track invoice.billingInvoiceId) {
             <tr>
               <td>{{ invoice.invoiceNumber }}</td>
-              <td>{{ invoice.createdAt | date }}</td>
+              <td>{{ invoice.createdAt | date:'dd/MM/yyyy' }}</td>
               <td>{{ invoice.description || 'Sem descrição' }}</td>
               <td>{{ invoice.totalInvoiceAmount | currency:'BRL' }}</td>
-              <td>{{ invoiceStatusLabels[invoice.status] }}</td>
               <td>
-                <a (click)="downloadPdf(invoice.billingInvoiceId)">Baixar PDF</a>
+                <span class="client-area-status" [class]="getStatusClass(invoice.status)">
+                  {{ invoiceStatusLabels[invoice.status] }}
+                </span>
+              </td>
+              <td>
+                <a class="action-link" (click)="downloadPdf(invoice.billingInvoiceId)">Baixar PDF</a>
               </td>
             </tr>
           }
         </tbody>
       </table>
 
-      <footer class="pagination">
+      <footer class="client-area-pagination">
         <button (click)="prevPage()" [disabled]="params.pageNumber === 1">&laquo; Anterior</button>
         <span>Página {{ params.pageNumber }} de {{ totalPages() }}</span>
         <button (click)="nextPage()" [disabled]="params.pageNumber === totalPages()">&raquo; Próxima</button>
       </footer>
     </section>
   `,
-  styles: [`
-    .invoices {
-      padding: 1rem;
-      background-color: #f4f1ee;
-      color: #334a52;
-      border-radius: .5rem;
-    }
-
-    h2 {
-      color: #276678;
-    }
-
-    .filters {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border: 1px solid #96afb8;
-      padding: .5rem;
-      text-align: left;
-    }
-
-    .pagination {
-      margin-top: 1rem;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-    }
-  `],
+  styleUrls: ['../client-area.styles.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientAreaInvoicesComponent {
@@ -170,6 +139,23 @@ export class ClientAreaInvoicesComponent {
     if (this.params.pageNumber > 1) {
       this.params.pageNumber--;
       this.loadInvoices();
+    }
+  }
+
+  getStatusClass(status: InvoiceStatus): string {
+    switch (status) {
+      case 'Open':
+        return 'client-area-status-open';
+      case 'PartiallyPaid':
+        return 'client-area-status-partially-paid';
+      case 'Paid':
+        return 'client-area-status-paid';
+      case 'Cancelled':
+        return 'client-area-status-cancelled';
+      case 'Closed':
+        return 'client-area-status-closed';
+      default:
+        return 'client-area-status-open';
     }
   }
 

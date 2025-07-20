@@ -21,10 +21,10 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-     <section class="orders">
+     <section class="client-area-section">
       <h2>Ordens de Serviço</h2>
 
-      <form class="filters" (ngSubmit)="onSearch()">
+      <form class="client-area-filters" (ngSubmit)="onSearch()">
         <label>
           Buscar:
           <input type="text" [(ngModel)]="params.search" name="search" placeholder="Paciente..." />
@@ -45,7 +45,7 @@ import {
         <button type="submit">Filtrar</button>
       </form>
 
-      <table>
+      <table class="client-area-table">
         <thead>
           <tr>
             <th>Data Entrada</th>
@@ -57,58 +57,27 @@ import {
         <tbody>
           @for (order of orders(); track order.serviceOrderId) {
             <tr>
-              <td>{{ order.dateIn | date }}</td>
+              <td>{{ order.dateIn | date:'dd/MM/yyyy' }}</td>
               <td>{{ order.patientName }}</td>
-              <td>{{ orderStatusLabels[order.status] }}</td>
+              <td>
+                <span class="client-area-status" [class]="getOrderStatusClass(order.status)">
+                  {{ orderStatusLabels[order.status] }}
+                </span>
+              </td>
               <td>{{ order.orderTotal | currency:'BRL' }}</td>
             </tr>
           }
         </tbody>
       </table>
 
-      <footer class="pagination">
+      <footer class="client-area-pagination">
         <button (click)="prevPage()" [disabled]="params.pageNumber === 1">&laquo; Anterior</button>
         <span>Página {{ params.pageNumber }} de {{ totalPages() }}</span>
         <button (click)="nextPage()" [disabled]="params.pageNumber === totalPages()">&raquo; Próxima</button>
       </footer>
     </section>
   `,
-  styles: [`
-    .orders {
-      padding: 1rem;
-      background-color: #f4f1ee;
-      color: #334a52;
-      border-radius: .5rem;
-    }
-
-    h2 {
-      color: #276678;
-    }
-
-    .filters {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border: 1px solid #96afb8;
-      padding: .5rem;
-      text-align: left;
-    }
-
-    .pagination {
-      margin-top: 1rem;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-    }
-  `],
+  styleUrls: ['../client-area.styles.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientAreaOrdersComponent {
@@ -169,4 +138,17 @@ prevPage() {
     this.loadOrders();
   }
 }
+
+  getOrderStatusClass(status: ClientAreaOrderStatus): string {
+    switch (status) {
+      case 'Production':
+        return 'client-area-status-production';
+      case 'TryIn':
+        return 'client-area-status-tryin';
+      case 'Finished':
+        return 'client-area-status-finished';
+      default:
+        return 'client-area-status-production';
+    }
+  }
 }

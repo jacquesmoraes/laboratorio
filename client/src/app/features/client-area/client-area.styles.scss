@@ -1,0 +1,555 @@
+// Client Area Global Styles
+// =========================
+
+// Variables específicas da client area
+$client-area-primary: #276678;
+$client-area-dark: #334a52;
+$client-area-accent: #96afb8;
+$client-area-secondary: #a288a9;
+$client-area-background: #f4f1ee;
+$client-area-white: #ffffff;
+
+// Mixins úteis
+@mixin card-shadow {
+  box-shadow: 0 2px 8px rgba(39, 102, 120, 0.1);
+  border-radius: 8px;
+}
+
+@mixin hover-transition {
+  transition: all 0.3s ease;
+}
+
+@mixin button-primary {
+  background: linear-gradient(135deg, $client-area-primary 0%, darken($client-area-primary, 10%) 100%);
+  color: $client-area-white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  @include hover-transition;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(39, 102, 120, 0.2);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+@mixin button-secondary {
+  background: transparent;
+  color: $client-area-primary;
+  border: 2px solid $client-area-primary;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  @include hover-transition;
+  
+  &:hover {
+    background: $client-area-primary;
+    color: $client-area-white;
+  }
+}
+
+@mixin input-styles {
+  border: 2px solid $client-area-accent;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  background: $client-area-white;
+  color: $client-area-dark;
+  @include hover-transition;
+  
+  &:focus {
+    outline: none;
+    border-color: $client-area-primary;
+    box-shadow: 0 0 0 3px rgba(39, 102, 120, 0.1);
+  }
+  
+  &::placeholder {
+    color: lighten($client-area-dark, 30%);
+  }
+}
+
+@mixin table-styles {
+  width: 100%;
+  border-collapse: collapse;
+  background: $client-area-white;
+  @include card-shadow;
+  
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid lighten($client-area-accent, 20%);
+  }
+  
+  th {
+    background: linear-gradient(135deg, $client-area-primary 0%, darken($client-area-primary, 5%) 100%);
+    color: $client-area-white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  tr {
+    @include hover-transition;
+    
+    &:hover {
+      background: lighten($client-area-accent, 25%);
+    }
+  }
+  
+  td {
+    color: $client-area-dark;
+    font-size: 0.9rem;
+  }
+}
+
+@mixin card-styles {
+  background: $client-area-white;
+  @include card-shadow;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid lighten($client-area-accent, 20%);
+}
+
+@mixin status-badge($color) {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: $color;
+  color: $client-area-white;
+}
+
+// Estilos globais para a client area
+.client-area {
+    &-status {
+    // Status das faturas
+    &-open {
+      @include status-badge(#ffc107);
+    }
+    
+    &-partially-paid {
+      @include status-badge(#fd7e14);
+    }
+    
+    &-paid {
+      @include status-badge(#28a745);
+    }
+    
+    &-cancelled {
+      @include status-badge(#6c757d);
+    }
+    
+    &-closed {
+      @include status-badge(#17a2b8);
+    }
+    
+    // Status das ordens de serviço
+    &-production {
+      @include status-badge(#007bff);
+    }
+    
+    &-tryin {
+      @include status-badge(#ffc107);
+    }
+    
+    &-finished {
+      @include status-badge(#28a745);
+    }
+  }
+  &-layout {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, $client-area-background 0%, #e8e4e0 100%);
+  }
+  
+  &-sidebar {
+    background: linear-gradient(180deg, $client-area-primary 0%, darken($client-area-primary, 10%) 100%);
+    color: $client-area-white;
+    padding: 2rem 1.5rem;
+    width: 280px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+    }
+    
+    h2 {
+      margin: 0 0 2rem 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      color: $client-area-white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 1rem;
+    }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      display: block;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      @include hover-transition;
+      position: relative;
+      overflow: hidden;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s ease;
+      }
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: $client-area-white;
+        transform: translateX(5px);
+        
+        &::before {
+          left: 100%;
+        }
+      }
+      
+      &.active {
+        background: linear-gradient(135deg, $client-area-secondary 0%, darken($client-area-secondary, 10%) 100%);
+        color: $client-area-white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(162, 136, 169, 0.3);
+        
+        &::after {
+          content: '';
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 8px;
+          height: 8px;
+          background: $client-area-white;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+  
+  &-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: lighten($client-area-accent, 30%);
+      border-radius: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: $client-area-accent;
+      border-radius: 4px;
+      
+      &:hover {
+        background: $client-area-primary;
+      }
+    }
+  }
+  
+  &-section {
+    @include card-styles;
+    margin-bottom: 2rem;
+    
+    h2 {
+      color: $client-area-primary;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 1.5rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px solid $client-area-accent;
+    }
+  }
+  
+  &-dashboard {
+    .client-info {
+      background: linear-gradient(135deg, $client-area-primary 0%, darken($client-area-primary, 5%) 100%);
+      color: $client-area-white;
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(39, 102, 120, 0.2);
+      
+      h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: $client-area-white;
+        border: none;
+      }
+      
+      p {
+        margin: 0.25rem 0;
+        font-size: 1rem;
+        opacity: 0.9;
+      }
+    }
+    
+    .totals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .total-card {
+      @include card-styles;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, $client-area-primary, $client-area-secondary);
+      }
+      
+      h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $client-area-dark;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      .amount {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        
+        &.positive {
+          color: #28a745;
+        }
+        
+        &.negative {
+          color: #dc3545;
+        }
+        
+        &.neutral {
+          color: $client-area-primary;
+        }
+      }
+      
+      &.invoiced {
+        border-left: 4px solid $client-area-accent;
+      }
+      
+      &.paid {
+        border-left: 4px solid #28a745;
+      }
+      
+      &.balance {
+        border-left: 4px solid $client-area-secondary;
+      }
+    }
+  }
+  
+  &-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: lighten($client-area-accent, 25%);
+    border-radius: 8px;
+    border: 1px solid lighten($client-area-accent, 20%);
+    
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: $client-area-dark;
+      min-width: 150px;
+      
+      select, input {
+        @include input-styles;
+      }
+    }
+    
+    button {
+      @include button-primary;
+      align-self: end;
+      margin-top: 1.5rem;
+    }
+  }
+  
+  &-table {
+    @include table-styles;
+    margin-bottom: 2rem;
+    
+    .action-link {
+      color: $client-area-primary;
+      text-decoration: none;
+      font-weight: 600;
+      @include hover-transition;
+      
+      &:hover {
+        color: darken($client-area-primary, 15%);
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  &-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: $client-area-white;
+    border-radius: 8px;
+    @include card-shadow;
+    
+    button {
+      @include button-secondary;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    span {
+      font-weight: 600;
+      color: $client-area-dark;
+      padding: 0.5rem 1rem;
+      background: lighten($client-area-accent, 25%);
+      border-radius: 6px;
+    }
+  }
+  
+  &-status {
+    &-pending {
+      @include status-badge(#ffc107);
+    }
+    
+    &-paid {
+      @include status-badge(#28a745);
+    }
+    
+    &-overdue {
+      @include status-badge(#dc3545);
+    }
+    
+    &-cancelled {
+      @include status-badge(#6c757d);
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .client-area {
+    &-layout {
+      flex-direction: column;
+    }
+    &-status {
+        &-open {
+          @include status-badge(#ffc107);
+        }
+        
+        &-partially-paid {
+          @include status-badge(#fd7e14);
+        }
+        
+        &-paid {
+          @include status-badge(#28a745);
+        }
+        
+        &-cancelled {
+          @include status-badge(#6c757d);
+        }
+        
+        &-closed {
+          @include status-badge(#17a2b8);
+        }
+      }
+    &-sidebar {
+      width: 100%;
+      padding: 1rem;
+      
+      ul {
+        display: flex;
+        overflow-x: auto;
+        gap: 1rem;
+        
+        li {
+          margin: 0;
+          flex-shrink: 0;
+        }
+        
+        a {
+          white-space: nowrap;
+          padding: 0.75rem 1rem;
+        }
+      }
+    }
+    
+    &-content {
+      padding: 1rem;
+    }
+    
+    &-filters {
+      flex-direction: column;
+      
+      label {
+        min-width: auto;
+      }
+    }
+    
+    &-dashboard {
+      .totals-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

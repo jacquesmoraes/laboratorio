@@ -1,6 +1,13 @@
 import http from 'k6/http';
 import { check, group, sleep } from 'k6';
 
+function safeJsonParse(response) {
+    try {
+        return JSON.parse(response.body);
+    } catch {
+        return null;
+    }
+}
 export const options = {
     // Configurações de teste
     stages: [
@@ -59,17 +66,11 @@ export default function () {
             'dashboard status 200': (r) => r.status === 200,
             'dashboard response time < 1000ms': (r) => r.timings.duration < 1000,
             'dashboard has client data': (r) => {
-                if (r.status === 200) {
-                    try {
-                        const data = JSON.parse(r.body);
-                        return data.clientName && data.totalInvoiced !== undefined;
-                    } catch {
-                        return false;
-                    }
-                }
-                return false;
+                const data = safeJsonParse(r);
+                return !!(data && data.clientName !== undefined && data.totalInvoiced !== undefined);
             },
         });
+        
     });
 
     sleep(0.5);
@@ -85,17 +86,12 @@ export default function () {
             'payments status 200': (r) => r.status === 200,
             'payments response time < 1500ms': (r) => r.timings.duration < 1500,
             'payments has pagination': (r) => {
-                if (r.status === 200) {
-                    try {
-                        const data = JSON.parse(r.body);
-                        return data.items && data.totalItems !== undefined;
-                    } catch {
-                        return false;
-                    }
-                }
-                return false;
+                const data = safeJsonParse(r);
+                return !!(data && Array.isArray(data.data) && data.totalItems !== undefined);
             },
         });
+        
+        
     });
 
     sleep(0.5);
@@ -115,17 +111,12 @@ export default function () {
             'orders status 200': (r) => r.status === 200,
             'orders response time < 1500ms': (r) => r.timings.duration < 1500,
             'orders has service orders': (r) => {
-                if (r.status === 200) {
-                    try {
-                        const data = JSON.parse(r.body);
-                        return data.items && Array.isArray(data.items);
-                    } catch {
-                        return false;
-                    }
-                }
-                return false;
+                const data = safeJsonParse(r);
+                return !!(data && Array.isArray(data.data) && data.totalItems !== undefined);
             },
         });
+        
+        
     });
 
     sleep(0.5);
@@ -150,17 +141,12 @@ export default function () {
             'invoices status 200': (r) => r.status === 200,
             'invoices response time < 1500ms': (r) => r.timings.duration < 1500,
             'invoices has billing data': (r) => {
-                if (r.status === 200) {
-                    try {
-                        const data = JSON.parse(r.body);
-                        return data.items && data.totalItems !== undefined;
-                    } catch {
-                        return false;
-                    }
-                }
-                return false;
+                const data = safeJsonParse(r);
+                return !!(data && Array.isArray(data.data) && data.totalItems !== undefined);
             },
         });
+        
+        
     });
 
     sleep(0.5);
@@ -174,15 +160,16 @@ export default function () {
         const res = http.get(`${BASE_URL}/invoices/${randomInvoiceId}/download`, HEADERS);
         
         check(res, {
-            'pdf status 200 or 403/404': (r) => r.status === 200 || r.status === 403 || r.status === 404,
+            'pdf status 200 or 403/404': (r) => [200, 403, 404].includes(r.status),
             'pdf response time < 3000ms': (r) => r.timings.duration < 3000,
             'pdf content type correct': (r) => {
                 if (r.status === 200) {
-                    return r.headers['Content-Type'] && r.headers['Content-Type'].includes('application/pdf');
+                    return r.headers['Content-Type']?.includes('application/pdf');
                 }
-                return true; // Se não for 200, não é erro de content-type
+                return true;
             },
         });
+        
     });
 
     // Pausa entre iterações para simular comportamento real
