@@ -44,7 +44,10 @@ import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusVal
           <input type="date" [(ngModel)]="params.endDate" name="endDate" />
         </label>
 
-        <button type="submit">Filtrar</button>
+        <div class="filter-buttons">
+          <button type="submit">Filtrar</button>
+          <button type="button" (click)="clearFilters()" class="clear-filters-btn">Limpar Filtros</button>
+        </div>
       </form>
 
       <table class="client-area-table">
@@ -61,12 +64,12 @@ import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusVal
         <tbody>
           @for (invoice of invoices(); track invoice.billingInvoiceId) {
             <tr>
-              <td>{{ invoice.invoiceNumber }}</td>
-              <td>{{ invoice.createdAt | date:'dd/MM/yyyy' }}</td>
-              <td>{{ invoice.description || 'Sem descrição' }}</td>
-              <td>{{ invoice.totalInvoiceAmount | currency:'BRL' }}</td>
-              <td>
-                <span class="client-area-status" [class]="getStatusClass(invoice.status)">
+              <td data-label="Nº fatura">{{ invoice.invoiceNumber }}</td>
+              <td data-label="Criada em:">{{ invoice.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td data-label="descrição">{{ invoice.description || 'Sem descrição' }}</td>
+              <td data-label="Tota">{{ invoice.totalInvoiceAmount | currency:'BRL' }}</td>
+              <td data-label="Status" >
+                <span  class="client-area-status" [class]="getStatusClass(invoice.status)">
                   {{ invoiceStatusLabels[invoice.status] }}
                 </span>
               </td>
@@ -113,7 +116,13 @@ export class ClientAreaInvoicesComponent {
     this.params.pageNumber = 1;
     this.loadInvoices();
   }
-
+  clearFilters() {
+    this.params.status = undefined;
+    this.params.startDate = undefined;
+    this.params.endDate = undefined;
+    this.params.pageNumber = 1;
+    this.loadInvoices();
+  }
   loadInvoices() {
     console.log('Loading invoices with params:', this.params);
     this.service.getInvoices(this.params).subscribe({

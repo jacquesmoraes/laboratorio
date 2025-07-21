@@ -41,8 +41,10 @@ import {
             }
           </select>
         </label>
-
-        <button type="submit">Filtrar</button>
+        <div class="filter-buttons">
+          <button type="submit">Filtrar</button>
+          <button type="button" (click)="clearFilters()" class="clear-filters-btn">Limpar Filtros</button>
+        </div>
       </form>
 
       <table class="client-area-table">
@@ -57,14 +59,14 @@ import {
         <tbody>
           @for (order of orders(); track order.serviceOrderId) {
             <tr>
-              <td>{{ order.dateIn | date:'dd/MM/yyyy' }}</td>
-              <td>{{ order.patientName }}</td>
-              <td>
-                <span class="client-area-status" [class]="getOrderStatusClass(order.status)">
+              <td data-label="Entrada">{{ order.dateIn | date:'dd/MM/yyyy' }}</td>
+              <td data-label="Paciente">{{ order.patientName }}</td>
+              <td data-label="Status">
+                <span  class="client-area-status" [class]="getOrderStatusClass(order.status)">
                   {{ orderStatusLabels[order.status] }}
                 </span>
               </td>
-              <td>{{ order.orderTotal | currency:'BRL' }}</td>
+              <td data-label="Total">{{ order.orderTotal | currency:'BRL' }}</td>
             </tr>
           }
         </tbody>
@@ -102,6 +104,13 @@ export class ClientAreaOrdersComponent {
   }
 
   onSearch() {
+    this.params.pageNumber = 1;
+    this.loadOrders();
+  }
+
+  clearFilters() {
+    this.params.search = undefined;
+    this.params.status = undefined;
     this.params.pageNumber = 1;
     this.loadOrders();
   }

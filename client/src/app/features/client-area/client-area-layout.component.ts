@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -8,13 +8,28 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule, RouterOutlet,RouterModule],
   template: `
     <div class="client-area-layout">
-      <nav class="client-area-sidebar">
-        <h2>Área do Cliente</h2>
+      <!-- Menu Mobile Toggle -->
+      <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" [class.active]="mobileMenuOpen()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <!-- Overlay para fechar menu mobile -->
+      <div class="mobile-overlay" 
+           [class.active]="mobileMenuOpen()" 
+           (click)="closeMobileMenu()"></div>
+
+      <nav class="client-area-sidebar" [class.mobile-open]="mobileMenuOpen()">
+        <div class="sidebar-header">
+          <h2>Área do Cliente</h2>
+          <button class="close-mobile-menu" (click)="closeMobileMenu()">×</button>
+        </div>
         <ul>
-          <li><a routerLink="/client-area" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a></li>
-          <li><a routerLink="/client-area/payments" routerLinkActive="active">Pagamentos</a></li>
-          <li><a routerLink="/client-area/invoices" routerLinkActive="active">Faturas</a></li>
-          <li><a routerLink="/client-area/orders" routerLinkActive="active">Ordens de Serviço</a></li>
+          <li><a routerLink="/client-area" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Dashboard</a></li>
+          <li><a routerLink="/client-area/payments" routerLinkActive="active" (click)="closeMobileMenu()">Pagamentos</a></li>
+          <li><a routerLink="/client-area/invoices" routerLinkActive="active" (click)="closeMobileMenu()">Faturas</a></li>
+          <li><a routerLink="/client-area/orders" routerLinkActive="active" (click)="closeMobileMenu()">Ordens de Serviço</a></li>
         </ul>
       </nav>
       <main class="client-area-content">
@@ -25,4 +40,14 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./client-area.styles.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClientAreaLayoutComponent {}
+export class ClientAreaLayoutComponent {
+  readonly mobileMenuOpen = signal(false);
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen.update(open => !open);
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen.set(false);
+  }
+}

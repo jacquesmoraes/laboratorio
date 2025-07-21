@@ -35,7 +35,10 @@ import { ClientAreaService } from '../services/client-area.services';
           <input type="date" [(ngModel)]="params.endDate" name="endDate" />
         </label>
 
-        <button type="submit">Filtrar</button>
+        <div class="filter-buttons">
+          <button type="submit">Filtrar</button>
+          <button type="button" (click)="clearFilters()" class="clear-filters-btn">Limpar Filtros</button>
+        </div>
       </form>
 
       <table class="client-area-table">
@@ -49,10 +52,10 @@ import { ClientAreaService } from '../services/client-area.services';
         <tbody>
           @for (payment of payments(); track payment.id) {
             <tr>
-              <td>{{ payment.paymentDate | date:'dd/MM/yyyy' }}</td>
-              <td>{{ payment.description }}</td>
-              <td>{{ payment.amountPaid | currency:'BRL' }}</td>
-            </tr>
+      <td data-label="Data">{{ payment.paymentDate | date:'dd/MM/yyyy' }}</td>
+      <td data-label="Descrição">{{ payment.description }}</td>
+      <td data-label="Valor Pago">{{ payment.amountPaid | currency:'BRL' }}</td>
+    </tr>
           }
         </tbody>
       </table>
@@ -87,6 +90,13 @@ export class ClientAreaPaymentsComponent {
   }
 
   onSearch() {
+    this.params.pageNumber = 1;
+    this.loadPayments();
+  }
+  clearFilters() {
+    this.params.search = undefined;
+    this.params.startDate = undefined;
+    this.params.endDate = undefined;
     this.params.pageNumber = 1;
     this.loadPayments();
   }
