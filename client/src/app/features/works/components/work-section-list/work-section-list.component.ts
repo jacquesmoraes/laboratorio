@@ -36,12 +36,12 @@ export class WorkSectionListComponent implements OnInit {
   displayedColumns: string[] = [ 'name', 'actions'];
 
   ngOnInit(): void {
-    console.log('WorkSectionListComponent: ngOnInit chamado');
+    
     this.loadWorkSections();
   }
 
   loadWorkSections(): void {
-    console.log('WorkSectionListComponent: Carregando seções de trabalho...');
+    
     this.workSectionService.getAll().subscribe({
       next: (data) => {
         console.log('WorkSectionListComponent: Dados recebidos:', data);

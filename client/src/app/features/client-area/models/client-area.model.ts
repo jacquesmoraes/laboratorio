@@ -57,5 +57,38 @@ export const invoiceStatusLabels = {
   Cancelled: 'Cancelado',
   Closed: 'Fechado',
 } satisfies Record<InvoiceStatus, string>;
+export interface ClientAreaServiceOrderDetails {
+  serviceOrderId: number;
+  orderNumber: string;
+  dateIn: string;
+  dateOut?: string | null;
+  patientName: string;
+  status: ClientAreaOrderStatus;
+  orderTotal: number;
+
+  billingInvoiceNumber?: string | null;
+  billingInvoiceId?: number | null;
+
+  works: ClientAreaWork[];
+  stages: ClientAreaStage[];
+}
+
+export interface ClientAreaWork {
+  workTypeId: number;
+  workTypeName: string;
+  quantity: number;
+  priceUnit: number;
+  shadeColor: string;
+  scaleName: string;
+  notes?: string | null;
+}
+
+export interface ClientAreaStage {
+  sectorId: number;
+  sectorName: string;
+  dateIn: string;
+  dateOut?: string | null;
+}
+
 
 export const invoiceStatusValues = Object.keys(invoiceStatusLabels) as InvoiceStatus[];

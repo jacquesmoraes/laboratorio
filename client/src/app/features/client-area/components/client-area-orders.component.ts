@@ -14,7 +14,8 @@ import {
   orderStatusLabels, 
   orderStatusValues, 
   ServiceOrderParams
-} from '../../../core/models/client-area.model';
+} from '../models/client-area.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-client-area-orders',
@@ -57,19 +58,19 @@ import {
           </tr>
         </thead>
         <tbody>
-          @for (order of orders(); track order.serviceOrderId) {
-            <tr>
-              <td data-label="Entrada">{{ order.dateIn | date:'dd/MM/yyyy' }}</td>
-              <td data-label="Paciente">{{ order.patientName }}</td>
-              <td data-label="Status">
-                <span  class="client-area-status" [class]="getOrderStatusClass(order.status)">
-                  {{ orderStatusLabels[order.status] }}
-                </span>
-              </td>
-              <td data-label="Total">{{ order.orderTotal | currency:'BRL' }}</td>
-            </tr>
-          }
-        </tbody>
+  @for (order of orders(); track order.serviceOrderId) {
+    <tr (click)="goToDetails(order.serviceOrderId)" class="clickable-row">
+      <td data-label="Entrada">{{ order.dateIn | date:'dd/MM/yyyy' }}</td>
+      <td data-label="Paciente">{{ order.patientName }}</td>
+      <td data-label="Status">
+        <span class="client-area-status" [class]="getOrderStatusClass(order.status)">
+          {{ orderStatusLabels[order.status] }}
+        </span>
+      </td>
+      <td data-label="Total">{{ order.orderTotal | currency:'BRL' }}</td>
+    </tr>
+  }
+</tbody>
       </table>
 
       <footer class="client-area-pagination">
@@ -84,7 +85,7 @@ import {
 })
 export class ClientAreaOrdersComponent {
   private readonly service = inject(ClientAreaService);
-
+private readonly router = inject(Router);
   readonly orders = signal<ClientAreaServiceOrder[]>([]);
   readonly totalPages = signal<number>(1);
   readonly orderStatusLabels = orderStatusLabels;
@@ -116,13 +117,13 @@ export class ClientAreaOrdersComponent {
   }
 
   loadOrders() {
-  console.log('Loading orders with params:', this.params);
+  
   this.service.getOrders(this.params).subscribe({
     next: (result: Pagination<ClientAreaServiceOrder>) => {
-      console.log('Orders response:', result);
+      
       this.orders.set(result.data);
       this.totalPages.set(result.totalPages);
-      console.log('Total pages set to:', result.totalPages);
+      
     },
     error: (error) => {
       console.error('Error loading orders:', error);
@@ -131,10 +132,10 @@ export class ClientAreaOrdersComponent {
 }
 
 nextPage() {
-  console.log('Next page clicked. Current:', this.params.pageNumber, 'Total:', this.totalPages());
+  
   if (this.params.pageNumber < this.totalPages()) {
     this.params.pageNumber++;
-    console.log('Moving to page:', this.params.pageNumber);
+    
     this.loadOrders();
   }
 }
@@ -143,9 +144,12 @@ prevPage() {
   console.log('Prev page clicked. Current:', this.params.pageNumber);
   if (this.params.pageNumber > 1) {
     this.params.pageNumber--;
-    console.log('Moving to page:', this.params.pageNumber);
+    
     this.loadOrders();
   }
+}
+goToDetails(orderId: number) {
+  this.router.navigate([`/client-area/orders/${orderId}`]);
 }
 
   getOrderStatusClass(status: ClientAreaOrderStatus): string {

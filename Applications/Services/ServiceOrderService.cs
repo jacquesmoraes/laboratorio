@@ -1,4 +1,5 @@
 ﻿using Applications.Projections.ClientArea;
+using AutoMapper.QueryableExtensions;
 using static Core.FactorySpecifications.ClientAreaSpecifications.ClientAreaServiceOrderSpecification;
 
 namespace Applications.Services
@@ -73,7 +74,9 @@ namespace Applications.Services
             }
 
             // Validate and apply stage move
-            var dateInUtc = DateTime.SpecifyKind(dto.DateIn, DateTimeKind.Utc);
+            var localTime = DateTime.SpecifyKind(dto.DateIn, DateTimeKind.Local);
+            var dateInUtc = localTime.ToUniversalTime();
+
             ServiceOrderDateValidator.ValidateNewStageDate ( order.Stages, dateInUtc );
             order.MoveTo ( sector, dateInUtc );
 
@@ -95,7 +98,8 @@ namespace Applications.Services
                 await _scheduleRepo.DeleteAsync ( existingSchedule );
             }
 
-            var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
+            var localTime = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Local);
+            var dateOutUtc = localTime.ToUniversalTime();
             ServiceOrderDateValidator.ValidateTryInDate ( order.Stages, dateOutUtc );
             order.SendToTryIn ( dateOutUtc );
 
@@ -130,7 +134,8 @@ namespace Applications.Services
             if ( serviceOrders.Any ( o => o.ClientId != clientId ) )
                 throw new BusinessRuleException ( "All service orders must belong to the same client." );
 
-            var dateOutUtc = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Utc);
+            var localTime = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Local);
+            var dateOutUtc = localTime.ToUniversalTime();
 
             foreach ( var order in serviceOrders )
             {
@@ -139,7 +144,18 @@ namespace Applications.Services
 
             foreach ( var order in serviceOrders )
             {
+                // Valida data de finalização
+                ServiceOrderDateValidator.ValidateFinishDate ( order, dateOutUtc );
+
+                // Finaliza a OS
                 order.Finish ( dateOutUtc );
+
+                // Remove agendamento ativo, se existir
+                var existingSchedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ActiveByServiceOrderId(order.ServiceOrderId));
+                if ( existingSchedule is not null )
+                {
+                    await _scheduleRepo.DeleteAsync ( existingSchedule );
+                }
             }
 
             await _uow.SaveChangesAsync ( );
@@ -271,6 +287,20 @@ namespace Applications.Services
                 totalItems,
                 projections
             );
+        }
+
+
+        public async Task<ClientAreaServiceOrderDetailsProjection?> GetDetailsForClientAreaAsync ( int serviceOrderId, int clientId )
+        {
+            var spec = ClientAreaServiceOrderSpecs.ByIdForDetails(serviceOrderId, clientId);
+
+            var serviceOrders = await _orderRepo.GetAllWithoutTrackingAsync(spec);
+            var projection = serviceOrders
+        .AsQueryable()
+        .ProjectTo<ClientAreaServiceOrderDetailsProjection>(_mapper.ConfigurationProvider)
+        .FirstOrDefault();
+
+            return projection;
         }
 
 

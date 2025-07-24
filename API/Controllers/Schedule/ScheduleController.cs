@@ -22,11 +22,12 @@
         /// Updates an existing schedule.
         /// </summary>
         [HttpPut ( "{id}" )]
-        public async Task<ActionResult<ServiceOrderSchedule>> UpdateSchedule ( int id, ScheduleDeliveryDto dto )
+        public async Task<ActionResult<ScheduleItemRecord>> UpdateSchedule ( int id, ScheduleDeliveryDto dto )
         {
             var result = await _scheduleService.UpdateScheduleAsync(id, dto);
             return result is null ? NotFound ( ) : Ok ( result );
         }
+
 
         /// <summary>
         /// Deletes a schedule.
@@ -70,6 +71,15 @@
             return Ok ( result );
         }
 
+        /// <summary>
+        /// Gets the active schedule for a service order.
+        /// </summary>
+        [HttpGet ( "service-order/{serviceOrderId}" )]
+        public async Task<ActionResult<ScheduleItemRecord>> GetActiveScheduleByServiceOrder ( int serviceOrderId )
+        {
+            var result = await _scheduleService.GetActiveScheduleByServiceOrderIdAsync(serviceOrderId);
+            return result is null ? NotFound ( ) : Ok ( result );
+        }
 
         /// <summary>
         /// Gets the scheduled deliveries for a specific sector and date.

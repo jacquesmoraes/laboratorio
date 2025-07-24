@@ -120,6 +120,41 @@ export default function () {
     });
 
     sleep(0.5);
+    group('ClientArea Order Details', () => {
+        // ⚠️ IMPORTANTE: Substitua por IDs válidos de service orders que existem no banco para o clientId 6
+        const orderIds = [19, 23, 16, 15, 13]; // IDs de exemplo - substitua pelos reais do clientId 6
+        const randomOrderId = orderIds[Math.floor(Math.random() * orderIds.length)];
+        
+        const res = http.get(`${BASE_URL}/orders/${randomOrderId}`, HEADERS);
+        
+        check(res, {
+            'order details status 200': (r) => r.status === 200,
+            'order details response time < 2000ms': (r) => r.timings.duration < 2000,
+            'order details has service order data': (r) => {
+                const data = safeJsonParse(r);
+                return !!(data && data.serviceOrderId !== undefined && data.orderNumber !== undefined);
+            },
+            'order details has works array': (r) => {
+                const data = safeJsonParse(r);
+                return !!(data && Array.isArray(data.works));
+            },
+            'order details has stages array': (r) => {
+                const data = safeJsonParse(r);
+                return !!(data && Array.isArray(data.stages));
+            },
+            'order details has patient name': (r) => {
+                const data = safeJsonParse(r);
+                return !!(data && data.patientName && data.patientName.length > 0);
+            },
+            'order details has order total': (r) => {
+                const data = safeJsonParse(r);
+                return !!(data && typeof data.orderTotal === 'number' && data.orderTotal >= 0);
+            },
+        });
+        
+    });
+
+    sleep(0.5);
 
     // Grupo 4: Invoices com filtros de data
     group('ClientArea Invoices', () => {

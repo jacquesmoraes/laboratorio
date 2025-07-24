@@ -1,4 +1,17 @@
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    ThreadPool.SetMinThreads(20, 20);
+    ThreadPool.SetMaxThreads(100, 100);
+}
+else
+{
+    ThreadPool.SetMinThreads(50, 50);
+    ThreadPool.SetMaxThreads(200, 200);
+}
 
 // Add services to the container.
 builder.Configuration
@@ -10,6 +23,7 @@ builder.Services.AddControllers ( );
 builder.Services.AddApplicationServices ( builder.Configuration );
 builder.Services.AddIdentityServices ( builder.Configuration );
 builder.Services.AddSwaggerDocumentation ( );
+
 
 var app = builder.Build();
 

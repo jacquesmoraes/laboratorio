@@ -73,4 +73,11 @@ getScheduleByRange(start: string, end: string) {
       `${this.apiUrl}/current-sector/${sectorId}/date/${date}`
     );
   }
+  
+  /**
+ * Busca o agendamento ativo de uma OS
+ */
+getActiveScheduleByServiceOrder(serviceOrderId: number): Observable<ScheduleItemRecord> {
+  return this.http.get<ScheduleItemRecord>(`${this.apiUrl}/service-order/${serviceOrderId}`);
+}
 }

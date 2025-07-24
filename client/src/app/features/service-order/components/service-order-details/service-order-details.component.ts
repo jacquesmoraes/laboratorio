@@ -10,11 +10,16 @@ import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { ServiceOrderDetails, OrderStatus, OrderStatusLabels } from '../../models/service-order.interface';
 import { ServiceOrdersService } from '../../services/service-order.service';
 import Swal from 'sweetalert2';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ScheduleService } from '../../../../core/services/schedule.service';
+import { ScheduleItemRecord } from '../../../../core/models/schedule.model';
+import { ScheduleDeliveryModalComponent } from '../schedule-delivery-modal/schedule-delivery-modal.component';
+import { SectorService } from '../../../sectors/service/sector.service';
 
 @Component({
   selector: 'app-service-order-details',
@@ -40,9 +45,14 @@ export class ServiceOrderDetailsComponent implements OnInit {
   private serviceOrdersService = inject(ServiceOrdersService);
   private route = inject(ActivatedRoute);
   public router = inject(Router);
+private scheduleService = inject(ScheduleService);
+private dialog = inject(MatDialog);
+private snackBar = inject(MatSnackBar);
+private sectorService = inject(SectorService);
 
   serviceOrder = signal<ServiceOrderDetails | null>(null);
   loading = signal(true);
+  schedule = signal<ScheduleItemRecord | null>(null);
 
   OrderStatusLabels = OrderStatusLabels;
 
@@ -99,6 +109,66 @@ export class ServiceOrderDetailsComponent implements OnInit {
       }
     });
   }
+
+   // ... existing code ...
+
+updateSchedule() {
+  const order = this.serviceOrder();
+  if (!order) return;
+
+  // Primeiro, carregar os setores
+  this.sectorService.getAll().subscribe({
+    next: (sectors) => {
+      const sectorsData = sectors.map(s => ({ 
+        sectorId: s.id, 
+        sectorName: s.name 
+      }));
+
+      // Depois, buscar o agendamento ativo
+      this.scheduleService.getActiveScheduleByServiceOrder(order.serviceOrderId).subscribe({
+        next: (schedule: ScheduleItemRecord) => {
+          // Modo edição - passar o agendamento completo
+          const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
+            width: '400px',
+            data: {
+              serviceOrderId: order.serviceOrderId,
+              scheduleId: schedule.scheduleId,
+              existingSchedule: schedule, // Passar o agendamento completo
+              sectors: sectorsData
+            }
+          });
+
+          dialogRef.afterClosed().subscribe((success) => {
+            if (success) {
+              this.snackBar.open('Agendamento atualizado!', 'Fechar', { duration: 3000 });
+            }
+          });
+        },
+        error: () => {
+          // Modo criação - não tem agendamento existente
+          const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
+            width: '400px',
+            data: {
+              serviceOrderId: order.serviceOrderId,
+              sectors: sectorsData
+            }
+          });
+
+          dialogRef.afterClosed().subscribe((success) => {
+            if (success) {
+              this.snackBar.open('Agendamento criado!', 'Fechar', { duration: 3000 });
+            }
+          });
+        }
+      });
+    },
+    error: () => {
+      this.snackBar.open('Erro ao carregar setores', 'Fechar', { duration: 3000 });
+    }
+  });
+}
+
+// ... existing code ...
 
   getStatusColorClass(status: OrderStatus): string {
     switch (status) {

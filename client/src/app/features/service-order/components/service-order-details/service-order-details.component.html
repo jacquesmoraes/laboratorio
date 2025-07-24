@@ -19,6 +19,7 @@
             Paciente: {{ serviceOrder()?.patientName }}
           </mat-card-subtitle>
         </mat-card-header>
+
         <mat-card-actions class="card-actions">
           <button class="btn-primary" (click)="editOrder()">
             <mat-icon>edit</mat-icon>
@@ -27,6 +28,10 @@
           <button class="btn-danger" (click)="deleteOrder()">
             <mat-icon>delete</mat-icon>
             Excluir
+          </button>
+          <button class="btn-accent" (click)="updateSchedule()">
+            <mat-icon>schedule</mat-icon>
+            Atualizar Agendamento
           </button>
           <button class="btn-secondary" (click)="router.navigate(['service-orders'])">
             <mat-icon>arrow_back</mat-icon>
@@ -45,6 +50,8 @@
               Informações Gerais
             </mat-card-title>
           </mat-card-header>
+
+
           <mat-card-content>
             <mat-list>
               <mat-list-item>
@@ -89,6 +96,8 @@
               Cliente
             </mat-card-title>
           </mat-card-header>
+
+
           <mat-card-content>
             <mat-list>
               <mat-list-item>
@@ -124,6 +133,7 @@
               Trabalhos ({{ serviceOrder()?.works?.length }})
             </mat-card-title>
           </mat-card-header>
+
           <mat-card-content>
             <mat-accordion>
               <mat-expansion-panel *ngFor="let work of serviceOrder()?.works" class="work-panel">
@@ -173,17 +183,16 @@
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <mat-list>
-              <mat-list-item *ngFor="let stage of serviceOrder()?.stages" class="stage-item">
-                <mat-icon matListItemIcon class="stage-icon">place</mat-icon>
+            <div class="stages-list">
+              <div *ngFor="let stage of serviceOrder()?.stages" class="stage-item">
+                <mat-icon class="stage-icon">place</mat-icon>
                 <div class="stage-content">
-                  <div matListItemTitle>{{ stage.sectorName }}</div>
-                  <div matListItemLine>Entrada: {{ stage.dateIn | date:'dd/MM/yyyy ' }}</div>
-                  <div matListItemLine *ngIf="stage.dateOut">Saída: {{ stage.dateOut | date:'dd/MM/yyyy' }}</div>
+                  <div class="stage-title">{{ stage.sectorName }}</div>
+                  <div class="stage-line">Entrada: {{ stage.dateIn | date:'dd/MM/yyyy' }}</div>
+                  <div class="stage-line" *ngIf="stage.dateOut">Saída: {{ stage.dateOut | date:'dd/MM/yyyy' }}</div>
                 </div>
-              </mat-list-item>
-
-            </mat-list>
+              </div>
+            </div>
           </mat-card-content>
         </mat-card>
       </div>

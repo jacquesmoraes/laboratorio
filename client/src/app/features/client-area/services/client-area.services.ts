@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ClientAreaInvoice, ClientAreaServiceOrder, ClientDashboard, ServiceOrderParams } from '../../../core/models/client-area.model';
+
 import { InvoiceParams, BillingInvoice } from '../../billing/models/billing-invoice.interface';
 import { PaymentParams, Payment } from '../../payments/models/payment.interface';
 import { Pagination,  ServiceOrder } from '../../service-order/models/service-order.interface';
 import { environment } from '../../../../environments/environment';
+import { ClientAreaInvoice, ClientAreaServiceOrder, ClientAreaServiceOrderDetails, ClientDashboard, ServiceOrderParams } from '../models/client-area.model';
 
 @Injectable({ providedIn: 'root' })
 export class ClientAreaService {
@@ -55,6 +56,10 @@ export class ClientAreaService {
       params: this.toHttpParams(params)
     });
   }
+  getOrderDetails(id: number): Observable<ClientAreaServiceOrderDetails> {
+  return this.http.get<ClientAreaServiceOrderDetails>(`${this.apiUrl}/orders/${id}`);
+}
+
 
   private toHttpParams<T extends object>(obj: T): HttpParams {
   let httpParams = new HttpParams();

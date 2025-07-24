@@ -15,10 +15,7 @@ import { CommonModule } from '@angular/common';
         <span></span>
       </button>
 
-      <!-- Overlay para fechar menu mobile -->
-      <div class="mobile-overlay" 
-           [class.active]="mobileMenuOpen()" 
-           (click)="closeMobileMenu()"></div>
+      
 
       <nav class="client-area-sidebar" [class.mobile-open]="mobileMenuOpen()">
         <div class="sidebar-header">

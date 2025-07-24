@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ClientDashboard } from '../../../core/models/client-area.model';
+
 import { ClientAreaService } from '../services/client-area.services';
+import { ClientDashboard } from '../models/client-area.model';
 
 
 @Component({
@@ -47,7 +48,7 @@ export class ClientAreaDashboardComponent {
   }
   getBalanceClass(): string {
     const balance = this.dashboard()?.balance || 0;
-    return balance > 0 ? 'negative' : balance < 0 ? 'positive' : 'neutral';
+    return balance > 0 ? 'positive' : balance < 0 ? 'negative' : 'neutral';
   }
   private loadDashboard() {
     this.service.getDashboard().subscribe(d => this.dashboard.set(d));

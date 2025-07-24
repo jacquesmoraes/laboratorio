@@ -10,7 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { ClientAreaService } from '../services/client-area.services';
 
 import { Pagination } from '../../service-order/models/service-order.interface';
-import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusValues } from '../../../core/models/client-area.model';
+import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusValues } from '../models/client-area.model';
+
 
 
 @Component({
@@ -108,7 +109,7 @@ export class ClientAreaInvoicesComponent {
   };
 
   constructor() {
-    console.log('ClientAreaInvoicesComponent initialized');
+    
     this.loadInvoices();
   }
 
@@ -124,10 +125,10 @@ export class ClientAreaInvoicesComponent {
     this.loadInvoices();
   }
   loadInvoices() {
-    console.log('Loading invoices with params:', this.params);
+    
     this.service.getInvoices(this.params).subscribe({
       next: (result: Pagination<ClientAreaInvoice>) => {
-        console.log('Invoices loaded:', result);
+        
         this.invoices.set(result.data);
         this.totalPages.set(result.totalPages);
       },

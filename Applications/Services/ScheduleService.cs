@@ -73,16 +73,18 @@
             return _mapper.Map<ScheduleItemRecord> ( created );
         }
 
-        public async Task<ServiceOrderSchedule?> UpdateScheduleAsync ( int scheduleId, ScheduleDeliveryDto dto )
+
+
+        public async Task<ScheduleItemRecord?> UpdateScheduleAsync ( int scheduleId, ScheduleDeliveryDto dto )
         {
             var schedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ById(scheduleId))
-                ?? throw new NotFoundException($"Schedule {scheduleId} not found.");
+        ?? throw new NotFoundException($"Schedule {scheduleId} not found.");
 
             if ( schedule.IsDelivered )
                 throw new BusinessRuleException ( "Cannot update a schedule that has already been delivered." );
 
             var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(schedule.ServiceOrderId))
-                ?? throw new NotFoundException($"Service order {schedule.ServiceOrderId} not found.");
+        ?? throw new NotFoundException($"Service order {schedule.ServiceOrderId} not found.");
 
             // Validate sector (if provided)
             if ( dto.SectorId.HasValue )
@@ -99,9 +101,9 @@
                     throw new BusinessRuleException ( "For 'Sector Transfer' scheduling, the destination sector must be provided." );
 
                 var currentSectorId = order.Stages?
-                    .Where(s => s.DateOut == null)
-                    .OrderByDescending(s => s.DateIn)
-                    .FirstOrDefault()?.SectorId;
+            .Where(s => s.DateOut == null)
+            .OrderByDescending(s => s.DateIn)
+            .FirstOrDefault()?.SectorId;
 
                 if ( currentSectorId.HasValue && dto.SectorId.Value == currentSectorId.Value )
                     throw new BusinessRuleException ( "Destination sector must be different from the current sector." );
@@ -119,8 +121,12 @@
             schedule.DeliveryType = dto.DeliveryType ?? schedule.DeliveryType;
             schedule.SectorId = dto.SectorId;
 
-            return await _scheduleRepo.UpdateAsync ( scheduleId, schedule );
+            var updated = await _scheduleRepo.UpdateAsync(scheduleId, schedule);
+
+            // Retornar o record mapeado em vez da entidade
+            return updated != null ? _mapper.Map<ScheduleItemRecord> ( updated ) : null;
         }
+
 
         public async Task<bool> RemoveScheduleAsync ( int scheduleId )
         {
@@ -183,7 +189,25 @@
                 .ToList ( );
         }
 
+        public async Task MarkAsDeliveredAsync ( int serviceOrderId )
+        {
+            var schedule = await _scheduleRepo
+        .GetEntityWithSpec(ScheduleSpecs.ActiveByServiceOrderId(serviceOrderId));
 
+            if ( schedule is not null )
+            {
+                schedule.IsDelivered = true;
+                await _scheduleRepo.UpdateAsync ( schedule.Id, schedule );
+                await _uow.SaveChangesAsync ( );
+            }
+        }
+
+
+        public async Task<ScheduleItemRecord?> GetActiveScheduleByServiceOrderIdAsync ( int serviceOrderId )
+        {
+            var schedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ActiveByServiceOrderId(serviceOrderId));
+            return schedule != null ? _mapper.Map<ScheduleItemRecord> ( schedule ) : null;
+        }
 
         public async Task<SectorScheduleRecord?> GetScheduleByCurrentSectorAsync ( int sectorId, DateTime date )
         {

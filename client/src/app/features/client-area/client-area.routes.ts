@@ -5,6 +5,7 @@ import { ClientAreaDashboardComponent } from './components/client-area-dashboard
 import { ClientAreaInvoicesComponent } from './components/client-area-invoices.component';
 import { ClientAreaOrdersComponent } from './components/client-area-orders.component';
 import { ClientAreaPaymentsComponent } from './components/client-area-payments.component';
+import { ClientAreaOrderDetailsComponent } from './components/client-area-order-details.component';
 
 export const CLIENT_AREA_ROUTES: Routes = [
   {
@@ -14,7 +15,9 @@ export const CLIENT_AREA_ROUTES: Routes = [
       { path: '', component: ClientAreaDashboardComponent },
       { path: 'payments', component: ClientAreaPaymentsComponent },
       { path: 'invoices', component: ClientAreaInvoicesComponent },
-      { path: 'orders', component: ClientAreaOrdersComponent }
+      { path: 'orders', component: ClientAreaOrdersComponent },
+      { path: 'orders/:id', component: ClientAreaOrderDetailsComponent }
+
     ]
   }
 ];

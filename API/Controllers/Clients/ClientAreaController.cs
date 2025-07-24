@@ -1,5 +1,4 @@
-﻿using Applications.Projections.ClientArea;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace API.Controllers.Clients
 {
@@ -61,6 +60,18 @@ namespace API.Controllers.Clients
                 "Orders",
                 clientId,
                 ( ) => _serviceOrderService.GetPaginatedForClientAreaAsync ( parameters )
+            );
+        }
+
+        [HttpGet ( "orders/{id}" )]
+        public Task<IActionResult> GetOrderDetails ( int id )
+        {
+            var clientId = GetUserClientId();
+
+            return ExecuteWithLogging (
+                $"OrderDetails-{id}",
+                clientId,
+                ( ) => _serviceOrderService.GetDetailsForClientAreaAsync ( id, clientId )
             );
         }
 

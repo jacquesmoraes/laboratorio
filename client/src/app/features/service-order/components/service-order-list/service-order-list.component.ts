@@ -21,6 +21,9 @@ import { FilterChangeEvent } from './service-order-filters/service-order-filters
 import { PageEvent } from '@angular/material/paginator';
 import { SERVICE_ORDER_LIST_CONFIG } from './models/service-order-list.config';
 import { ServiceOrderTableComponent, TableActionEvent } from './service-order-table/service-order-table.component';
+import { ScheduleDeliveryModalComponent } from '../schedule-delivery-modal/schedule-delivery-modal.component';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-service-order-list',
@@ -40,7 +43,8 @@ import { ServiceOrderTableComponent, TableActionEvent } from './service-order-ta
 export class ServiceOrderListComponent implements OnInit, OnDestroy {
   private readonly serviceOrderListService = inject(ServiceOrderListService);
   private readonly router = inject(Router);
-
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar); 
   // Estado do componente
   readonly serviceOrders = this.serviceOrderListService.serviceOrders;
   readonly selectedOrderIds = this.serviceOrderListService.selectedOrderIds;
@@ -142,8 +146,36 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
   }
 
   moveToStage(orderId: number) {
-    this.serviceOrderListService.moveToStage(orderId).subscribe();
+    this.serviceOrderListService.moveToStage(orderId).subscribe({
+      next: () => {
+        // Após mover para o setor com sucesso, abrir modal de agendamento
+        this.openScheduleModal(orderId);
+      }
+    });
   }
+
+  private openScheduleModal(serviceOrderId: number) {
+    const scheduleDialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
+      width: '400px',
+      data: {
+        serviceOrderId: serviceOrderId,
+        sectors: this.sectors().map(s => ({ 
+          sectorId: s.id, 
+          sectorName: s.name 
+        }))
+      }
+    });
+
+    scheduleDialogRef.afterClosed().subscribe((scheduleSuccess) => {
+      if (scheduleSuccess) {
+        this.snackBar.open('Entrega agendada com sucesso!', 'Fechar', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
+      }
+    });
+  }
+
 
   reopenOrder(orderId: number) {
     this.serviceOrderListService.reopenOrder(orderId).subscribe();

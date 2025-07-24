@@ -13,6 +13,7 @@ namespace Applications.Contracts
         Task<Pagination<ServiceOrderListProjection>> GetPaginatedAsync ( ServiceOrderParams p );
         Task<Pagination<ClientAreaServiceOrderProjection>> GetPaginatedForClientAreaAsync(ServiceOrderParams p);
         Task<IReadOnlyList<ServiceOrder>> GetOutForTryInAsync ( int days );
+        Task<ClientAreaServiceOrderDetailsProjection?> GetDetailsForClientAreaAsync(int serviceOrderId, int clientId);
         Task<ServiceOrder?> DeleteOrderAsync ( int serviceOrderId );
         Task<ServiceOrder?> ReopenOrderAsync ( int id );
 
