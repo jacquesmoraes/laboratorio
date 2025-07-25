@@ -42,15 +42,14 @@ export class SectorModalComponent implements OnInit {
   private sectorId = this.data.sector?.id;
 
   readonly sectorForm = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
-    description: ['']
+    name: ['', [Validators.required, Validators.minLength(2)]]
   });
 
   ngOnInit(): void {
     if (this.isEditMode && this.data.sector) {
       this.sectorForm.patchValue({
-        name: this.data.sector.name,
-        description: this.data.sector.description || ''
+        name: this.data.sector.name
+        
       });
     }
   }
@@ -58,11 +57,11 @@ export class SectorModalComponent implements OnInit {
   onSubmit(): void {
     if (this.sectorForm.invalid) return;
 
-    const { name, description } = this.sectorForm.value;
+    const { name } = this.sectorForm.value;
 
     const payload = {
-      name: name!,
-      description: description || undefined
+      name: name!
+      
     };
 
     const request$ = this.isEditMode && this.sectorId

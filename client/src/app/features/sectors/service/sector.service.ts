@@ -16,7 +16,7 @@ export class SectorService {
         apiSectors.map(apiSector => ({
           id: apiSector.sectorId,
           name: apiSector.name,
-          description: undefined,
+          
           
         }))
       )
@@ -28,7 +28,7 @@ export class SectorService {
       map(apiSector => ({
         id: apiSector.sectorId,
         name: apiSector.name,
-        description: undefined,
+        
         
       }))
     );
@@ -41,7 +41,6 @@ export class SectorService {
       map(apiSector => ({
         id: apiSector.sectorId,
         name: apiSector.name,
-        description: sector.description,
         
       }))
     );
@@ -55,7 +54,7 @@ export class SectorService {
       map(apiSector => ({
         id: apiSector.sectorId,
         name: apiSector.name,
-        description: sector.description,
+        
         
       }))
     );
