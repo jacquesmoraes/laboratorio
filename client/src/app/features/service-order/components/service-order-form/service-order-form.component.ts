@@ -139,7 +139,9 @@ export class ServiceOrderFormComponent implements OnInit {
 
     this.workTypeService.getAll().subscribe({
       next: workTypes => this.workTypes.set(
-        workTypes.map(w => ({ workTypeId: w.id, workTypeName: w.name }))
+        workTypes
+        .filter(w => w.isActive)
+        .map(w => ({ workTypeId: w.id, workTypeName: w.name }))
       ),
       error: () => this.showError('Erro ao carregar tipos de trabalho')
     });

@@ -1,27 +1,56 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BillingInvoiceService } from '../../services/billing-invoice.service';
 import { BillingInvoice, InvoiceParams, Pagination, InvoiceStatus } from '../../models/billing-invoice.interface';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { debounceTime, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-billing-invoice-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+      CommonModule,
+  FormsModule,
+  MatButtonModule,
+  MatFormFieldModule,
+  MatInputModule,
+  MatDatepickerModule,
+  MatNativeDateModule,
+  MatTableModule,
+  MatProgressSpinnerModule,
+  MatIconModule,
+  MatPaginatorModule,
+  MatCardModule,
+  MatSelectModule
+    ],
   templateUrl: './billing-invoice-list.component.html',
   styleUrls: ['./billing-invoice-list.component.scss']
 })
-export class BillingInvoiceListComponent implements OnInit {
+export class BillingInvoiceListComponent implements OnInit, OnDestroy  {
   private billingService = inject(BillingInvoiceService);
   private router = inject(Router);
-
+  private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
   loading = signal(false);
   invoices = signal<BillingInvoice[]>([]);
   pagination = signal<Pagination<BillingInvoice> | null>(null);
   filters = signal<InvoiceParams>(this.resetFilters());
+displayedColumns = ['invoiceNumber', 'clientName', 'createdAt', 'status', 'total', 'actions'];
 
   ngOnInit(): void {
+    this.setupSearchDebounce();
     this.loadInvoices();
   }
 
@@ -41,12 +70,21 @@ export class BillingInvoiceListComponent implements OnInit {
   }
 
   onSearchChange(value: string): void {
-  this.filters.update(f => ({
-    ...f,
-    pageNumber: 1,
-    search: value
-  }));
-  this.loadInvoices();
+    this.searchSubject.next(value);
+  }
+
+private setupSearchDebounce(): void {
+  this.searchSubject.pipe(
+    debounceTime(500),
+    takeUntil(this.destroy$)
+  ).subscribe(searchTerm => {
+    this.filters.update(f => ({
+      ...f,
+      pageNumber: 1,
+      search: searchTerm
+    }));
+    this.loadInvoices();
+  });
 }
 
 
@@ -118,5 +156,10 @@ export class BillingInvoiceListComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

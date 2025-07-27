@@ -48,14 +48,14 @@ private loadClient(id: number) {
     }
   });
 }
-// ... existing code ...
+
 
 hasAddress(): boolean {
   const address = this.client()?.address;
   return !!(address?.street || address?.city || address?.neighborhood);
 }
 
-// ... existing code ...
+
   getBillingModeLabel(mode?: number): string {
     if (mode === undefined) return 'Não informado';
     return BillingModeLabels[mode as keyof typeof BillingModeLabels] || 'Desconhecido';
@@ -70,7 +70,7 @@ hasAddress(): boolean {
   goBack() {
     this.router.navigate(['/clients']);
   }
-  // ... existing code ...
+
 getStatusClass(status?: string): string {
   if (!status) return 'status-unknown';
   return `status-${status.toLowerCase()}`;
@@ -79,5 +79,5 @@ getStatusClass(status?: string): string {
 getStatusLabel(status?: string): string {
   return status || 'N/A';
 }
-// ... existing code ...
+
 }

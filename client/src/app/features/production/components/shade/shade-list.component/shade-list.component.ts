@@ -48,6 +48,9 @@ export class ShadeListComponent implements OnInit {
   protected readonly filterForm = this.fb.group({
     scaleId: [undefined]
   });
+  trackByShadeId = (_: number, shade: { id: number }) => shade.id;
+trackByScaleId = (_: number, scale: { id: number }) => scale.id;
+
 
   ngOnInit(): void {
     this.loadScales();

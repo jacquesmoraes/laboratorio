@@ -1,9 +1,17 @@
 .alerts-card {
   background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
   border-left: 5px solid #ff9800;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border-radius: 0 12px 12px 0;
   margin-bottom: 1.5rem;
+  padding: 1rem;
+
+  @media (max-width: 768px) {
+    border-left: none;
+    border-top: 5px solid #ff9800;
+    border-radius: 12px;
+    padding: 1rem 0.75rem;
+  }
 }
 
 .card-title {
@@ -21,6 +29,14 @@
     width: 1.5rem;
     height: 1.5rem;
   }
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+
+    .title-icon {
+      font-size: 1.25rem;
+    }
+  }
 }
 
 .loading-container {
@@ -30,6 +46,7 @@
   gap: 1rem;
   padding: 2rem;
   color: var(--accent);
+  font-size: 0.95rem;
 }
 
 .error-message {
@@ -40,6 +57,7 @@
   padding: 1rem;
   background: rgba(244, 67, 54, 0.1);
   border-radius: 8px;
+  font-size: 0.95rem;
 }
 
 .no-alerts {
@@ -64,6 +82,11 @@
 .alerts-list {
   max-height: 400px;
   overflow-y: auto;
+  padding-right: 4px;
+
+  @media (max-width: 768px) {
+    max-height: none;
+  }
 }
 
 .alert-item {
@@ -78,7 +101,7 @@
   &:hover {
     background: var(--background);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   &:last-child {
@@ -100,6 +123,18 @@
 
   .days-chip {
     font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+
+    .order-number {
+      font-size: 1rem;
+    }
   }
 }
 
@@ -137,8 +172,22 @@
 
 .card-actions {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--accent);
+
+  button {
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
 }

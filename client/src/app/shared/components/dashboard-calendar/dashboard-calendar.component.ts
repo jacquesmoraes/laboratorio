@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { SectorScheduleRecord } from '../../../core/models/schedule.model';
@@ -20,33 +19,42 @@ export class DashboardCalendarComponent {
   private readonly scheduleService = inject(ScheduleService);
 
   readonly calendarOptions = signal<CalendarOptions>({
-    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-     timeZone: 'local',
-    initialView: 'timeGridWeek',
+    plugins: [dayGridPlugin, interactionPlugin],
+    timeZone: 'local',
+    initialView: 'dayGridMonth',
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      right: 'dayGridMonth,dayGridWeek,dayGridDay'
     },
-    eventColor: '#276678',
     height: 'auto',
-
-    dayMaxEvents: false,
+    dayMaxEventRows: true,
     eventDisplay: 'block',
-    slotMinTime: '07:00:00',
-    slotMaxTime: '20:00:00',
-    slotDuration: '01:00:00',
 
-    slotLabelFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
+    eventContent: function (arg) {
+      const { event, view } = arg;
+      const { clientName, patientName } = event.extendedProps;
+
+      let content = '';
+
+      if (view.type === 'dayGridMonth' || view.type === 'dayGridWeek') {
+        content = `#${clientName} | ${patientName}`;
+      } else {
+        content = event.title; // título completo na visualização do dia
+      }
+
+      return {
+        html: `<div class="fc-custom-content">${content}</div>`
+      };
     },
 
-    eventTimeFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
+    eventDidMount: (info) => {
+      const el = info.el as HTMLElement;
+      if (window.innerWidth < 768) {
+        el.style.fontSize = '0.75rem';
+        el.style.whiteSpace = 'normal';
+        el.style.wordBreak = 'break-word';
+      }
     },
 
     events: (fetchInfo, successCallback, failureCallback) => {
@@ -58,20 +66,14 @@ export class DashboardCalendarComponent {
           const allEvents: EventInput[] = [];
 
           records.forEach(record => {
-            let offset = 0; // para distribuir os horários no mesmo dia
-
             record.deliveries.forEach(delivery => {
-              let destino = '';
-
-              if (delivery.deliveryType === 'FinalDelivery') {
-                destino = 'entrega final';
-              } else if (delivery.deliveryType === 'TryIn') {
-                destino = 'prova (try-in)';
-              } else if (delivery.deliveryType === 'SectorTransfer') {
-                destino = `destino: ${delivery.targetSectorName ?? record.sectorName}`;
-              } else {
-                destino = 'desconhecido';
-              }
+              const destino = delivery.deliveryType === 'FinalDelivery'
+                ? 'entrega final'
+                : delivery.deliveryType === 'TryIn'
+                ? 'prova (try-in)'
+                : delivery.deliveryType === 'SectorTransfer'
+                ? `destino: ${delivery.targetSectorName ?? record.sectorName}`
+                : 'desconhecido';
 
               const title = `#${delivery.orderNumber} | ${delivery.clientName.trim()} | ${delivery.patientName.trim()} | ${destino}`;
 
@@ -80,22 +82,15 @@ export class DashboardCalendarComponent {
               if (delivery.deliveryType === 'TryIn') backgroundColor = '#a288a9';
               if (delivery.isOverdue) backgroundColor = '#b873b8';
 
-              const eventStart = new Date(delivery.scheduledDate);
-              eventStart.setHours(9 + offset, 0, 0, 0);
-
-              const eventEnd = new Date(eventStart);
-              eventEnd.setHours(eventStart.getHours() + 1);
-
-              offset++; // próximo evento no mesmo setor no mesmo dia sobe para a hora seguinte
+              const scheduledDay = new Date(delivery.scheduledDate);
 
               allEvents.push({
                 title,
-                start: eventStart,
-                end: eventEnd,
+                start: scheduledDay,
+                allDay: true,
                 backgroundColor,
                 borderColor: backgroundColor,
                 textColor: '#ffffff',
-                allDay: false,
                 extendedProps: {
                   orderNumber: delivery.orderNumber,
                   patientName: delivery.patientName,

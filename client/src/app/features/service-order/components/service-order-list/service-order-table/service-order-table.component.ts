@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OrderStatus, ServiceOrder } from '../../../models/service-order.interface';
 import { SERVICE_ORDER_LIST_CONFIG } from '../models/service-order-list.config';
+
 export interface TableActionEvent {
   type: 'view' | 'edit' | 'sendToTryIn' | 'moveToStage' | 'reopen';
   orderId: number;
@@ -31,136 +32,78 @@ export interface TableActionEvent {
   ],
   template: `
     <div class="table-container">
-      <table mat-table [dataSource]="serviceOrders()" class="service-order-table">
-        <!-- Seleção -->
-        <ng-container matColumnDef="select">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-icon>check_box_outline_blank</mat-icon>
-          </th>
-          <td mat-cell *matCellDef="let order">
-            <mat-checkbox 
-              [checked]="selectedOrderIds().includes(order.serviceOrderId)"
-              (change)="onSelectionChange(order.serviceOrderId)" 
-              color="primary">
-            </mat-checkbox>
-          </td>
-        </ng-container>
-
-        <!-- Número da Ordem -->
-        <ng-container matColumnDef="orderNumber">
-          <th mat-header-cell *matHeaderCellDef>Número</th>
-          <td mat-cell *matCellDef="let order">{{ order.orderNumber }}</td>
-        </ng-container>
-
-        <!-- Cliente -->
-        <ng-container matColumnDef="clientName">
-          <th mat-header-cell *matHeaderCellDef>Cliente</th>
-          <td mat-cell *matCellDef="let order">
-            <a 
-              [routerLink]="['/clients', order.clientId]" 
-              class="client-link" 
-              (click)="$event.stopPropagation()">
-              {{ order.clientName }}
-            </a>
-          </td>
-        </ng-container>
-
-        <!-- Paciente -->
-        <ng-container matColumnDef="patientName">
-          <th mat-header-cell *matHeaderCellDef>Paciente</th>
-          <td mat-cell *matCellDef="let order">{{ order.patientName }}</td>
-        </ng-container>
-
-        <!-- Data de Entrada -->
-        <ng-container matColumnDef="dateIn">
-          <th mat-header-cell *matHeaderCellDef>Data Entrada</th>
-          <td mat-cell *matCellDef="let order">{{ order.dateIn | date: 'dd/MM/yyyy' }}</td>
-        </ng-container>
-
-        <!-- Última Movimentação -->
-        <ng-container matColumnDef="lastMovementDate">
-          <th mat-header-cell *matHeaderCellDef>Última Movimentação</th>
-          <td mat-cell *matCellDef="let order">
-            <span *ngIf="order.lastMovementDate; else noMovement">
-              {{ order.lastMovementDate | date: 'dd/MM/yyyy' }}
-            </span>
-            <ng-template #noMovement>
-              <span class="text-muted">-</span>
-            </ng-template>
-          </td>
-        </ng-container>
-
-        <!-- Status -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let order">
+      <table class="service-order-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Número</th>
+            <th>Cliente</th>
+            <th>Paciente</th>
+            <th>Data Entrada</th>
+            <th>Última Movimentação</th>
+            <th>Status</th>
+            <th>Setor Atual</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of serviceOrders()">
+            <td data-label="Seleção">
+              <mat-checkbox 
+                [checked]="selectedOrderIds().includes(order.serviceOrderId)"
+                (change)="onSelectionChange(order.serviceOrderId)"
+                color="primary">
+              </mat-checkbox>
+            </td>
+            <td data-label="Número">{{ order.orderNumber }}</td>
+            <td data-label="Cliente">
+              <a [routerLink]="['/clients', order.clientId]" class="client-link" (click)="$event.stopPropagation()">
+                {{ order.clientName }}
+              </a>
+            </td>
+            <td data-label="Paciente">{{ order.patientName }}</td>
+            <td data-label="Data Entrada">{{ order.dateIn | date: 'dd/MM/yyyy' }}</td>
+            <td data-label="Última Movimentação">
+              <span *ngIf="order.lastMovementDate; else noMovement">
+                {{ order.lastMovementDate | date: 'dd/MM/yyyy' }}
+              </span>
+              <ng-template #noMovement>
+                <span class="text-muted">-</span>
+              </ng-template>
+            </td>
+            <td data-label="Status">
+             
             <mat-chip [class]="getStatusColorClass(order.status)" class="status-chip">
-              {{ getStatusLabel(order.status) }}
-            </mat-chip>
-          </td>
-        </ng-container>
-
-        <!-- Setor Atual -->
-        <ng-container matColumnDef="currentSectorName">
-          <th mat-header-cell *matHeaderCellDef>Setor Atual</th>
-          <td mat-cell *matCellDef="let order">{{ order.currentSectorName || '-' }}</td>
-        </ng-container>
-
-        <!-- Ações -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Ações</th>
-          <td mat-cell *matCellDef="let order">
-            <button 
-              mat-icon-button 
-              class="action-btn" 
-              (click)="onAction('view', order.serviceOrderId)"
-              matTooltip="Ver detalhes">
-              <mat-icon>visibility</mat-icon>
-            </button>
-            
-            <button 
-              mat-icon-button 
-              class="action-btn" 
-              (click)="onAction('edit', order.serviceOrderId)" 
-              matTooltip="Editar">
-              <mat-icon>edit</mat-icon>
-            </button>
-            
-            <button 
-              mat-icon-button 
-              class="action-btn" 
-              (click)="onAction('sendToTryIn', order.serviceOrderId)"
-              matTooltip="Enviar para Prova" 
-              [disabled]="order.status === 'TryIn' || order.status === 'Finished'">
-              <mat-icon>send</mat-icon>
-            </button>
-            
-            <button 
-              mat-icon-button 
-              class="action-btn" 
-              (click)="onAction('moveToStage', order.serviceOrderId)"
-              matTooltip="Mudar de Setor" 
-              [disabled]="order.status === 'Finished'">
-              <mat-icon>swap_horiz</mat-icon>
-            </button>
-            
-            <button 
-              mat-icon-button 
-              class="action-btn" 
-              (click)="onAction('reopen', order.serviceOrderId)"
-              matTooltip="Reabrir OS" 
-              [disabled]="order.status !== 'Finished'">
-              <mat-icon>refresh</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <!-- Linhas da tabela -->
-        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-header-row"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+  {{ getStatusLabel(order.status) }}
+</mat-chip>
+            </td>
+            <td data-label="Setor Atual">{{ order.currentSectorName || '-' }}</td>
+            <td data-label="Ações">
+              <div class="action-buttons">
+                <button mat-icon-button class="action-btn" (click)="onAction('view', order.serviceOrderId)" matTooltip="Ver detalhes">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button class="action-btn" (click)="onAction('edit', order.serviceOrderId)" matTooltip="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button class="action-btn" (click)="onAction('sendToTryIn', order.serviceOrderId)" matTooltip="Enviar para Prova" [disabled]="order.status === OrderStatus.TryIn || order.status === OrderStatus.Finished">
+  <mat-icon>send</mat-icon>
+</button>
+<button mat-icon-button class="action-btn" (click)="onAction('moveToStage', order.serviceOrderId)" matTooltip="Mudar de Setor" [disabled]="order.status === OrderStatus.Finished">
+  <mat-icon>swap_horiz</mat-icon>
+</button>
+<button mat-icon-button class="action-btn"
+        (click)="onAction('reopen', order.serviceOrderId)"
+        matTooltip="Reabrir OS"
+        [disabled]="!isFinished(order.status)">
+  <mat-icon>refresh</mat-icon>
+</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
       </table>
 
-      <!-- Paginador -->
       <mat-paginator 
         [length]="totalItems()" 
         [pageSize]="pageSize()"
@@ -175,7 +118,6 @@ export interface TableActionEvent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServiceOrderTableComponent {
-  // Inputs
   readonly serviceOrders = input.required<ServiceOrder[]>();
   readonly selectedOrderIds = input.required<number[]>();
   readonly totalItems = input.required<number>();
@@ -183,18 +125,20 @@ export class ServiceOrderTableComponent {
   readonly pageIndex = input.required<number>();
   readonly pageSizeOptions = input.required<number[]>();
   readonly loading = input<boolean>(false);
-
-  // Outputs
+  readonly OrderStatus = OrderStatus;
   readonly selectionChange = output<number>();
   readonly pageChange = output<PageEvent>();
   readonly action = output<TableActionEvent>();
 
-  // Configurações
   readonly displayedColumns = SERVICE_ORDER_LIST_CONFIG.displayedColumns;
   readonly statusMap = SERVICE_ORDER_LIST_CONFIG.statusMap;
   readonly statusClasses = SERVICE_ORDER_LIST_CONFIG.statusClasses;
 
-  // Métodos
+  isFinished(status: OrderStatus | string | number): boolean {
+  // Resolve status mesmo que venha como string
+  const resolved = typeof status === 'string' ? this.statusMap[status] : Number(status);
+  return resolved === OrderStatus.Finished;
+}
   onSelectionChange(orderId: number) {
     this.selectionChange.emit(orderId);
   }
@@ -207,15 +151,16 @@ export class ServiceOrderTableComponent {
     this.action.emit({ type, orderId });
   }
 
-  getStatusColorClass(status: string): string {
-    const statusNum = this.statusMap[status] ?? -1;
+  getStatusLabel(status: OrderStatus): string {
+    const statusNum = this.statusMap[status as any];
+    return statusNum ? this.getStatusLabelFromEnum(statusNum as OrderStatus) : String(status);
+  }
+
+  getStatusColorClass(status: OrderStatus): string {
+    const statusNum = this.statusMap[status as any] ?? -1;
     return this.statusClasses[statusNum] ?? 'status-default';
   }
 
-  getStatusLabel(status: string): string {
-    const statusNum = this.statusMap[status];
-    return statusNum ? this.getStatusLabelFromEnum(statusNum) : status;
-  }
 
   private getStatusLabelFromEnum(status: OrderStatus): string {
     switch (status) {

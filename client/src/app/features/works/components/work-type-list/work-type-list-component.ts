@@ -36,15 +36,15 @@ export class WorkTypeListComponent implements OnInit {
   displayedColumns: string[] = [ 'name', 'description', 'workSectionName', 'isActive', 'actions'];
 
   ngOnInit(): void {
-    console.log('WorkTypeListComponent: ngOnInit chamado');
+    
     this.loadWorkTypes();
   }
 
   loadWorkTypes(): void {
-    console.log('WorkTypeListComponent: Carregando tipos de trabalho...');
+    
     this.workTypeService.getAll().subscribe({
       next: (data) => {
-        console.log('WorkTypeListComponent: Dados recebidos:', data);
+        
         this.workTypes.set(data);
       },
       error: (error) => {

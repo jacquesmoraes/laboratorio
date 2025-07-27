@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { LoadingSpinnerComponent } from './shared/components/loading-spinner/loading-spinner.component/loading-spinner.component';
-import { HeaderComponent } from './shared/components/header/header.component';
+
 
 @Component({
   selector: 'app-root',
@@ -9,15 +9,12 @@ import { HeaderComponent } from './shared/components/header/header.component';
   imports: [
     RouterOutlet,
     LoadingSpinnerComponent,
-    HeaderComponent
+    
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-loading-spinner />
-    @if (!isClientArea()) {
-      <app-header />
-    }
-    <router-outlet></router-outlet>
+     <app-loading-spinner />
+     <router-outlet></router-outlet>
   `
 })
 export class App {

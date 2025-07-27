@@ -13,10 +13,10 @@ export class WorkSectionService {
   constructor(private http: HttpClient) { }
 
   getAll(): Observable<WorkSection[]> {
-    console.log('WorkSectionService: Fazendo requisição para:', this.apiUrl);
+    
     return this.http.get<WorkSectionApiResponse[]>(this.apiUrl)
       .pipe(
-        tap(response => console.log('WorkSectionService: Resposta recebida:', response)),
+        
         map(response => response.map(item => ({
           id: item.id,
           name: item.name

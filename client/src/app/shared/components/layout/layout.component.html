@@ -1,24 +1,119 @@
-<div class="container">
-  <nav>
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
-    <a routerLink="/sectors" routerLinkActive="active">Setores</a>
-    <a routerLink="/work-sections" routerLinkActive="active">Seções de Trabalho</a>
-    <a routerLink="/work-types" routerLinkActive="active">Tipos de Trabalho</a>
-    <a routerLink="/scales" routerLinkActive="active">Escalas</a>
-    <a routerLink="/shades" routerLinkActive="active">cores</a>
-    <a routerLink="/table-price" routerLinkActive="active">Tabelas de Preço</a>
-    <a routerLink="/clients" routerLinkActive="active">Clientes</a>
-  <a routerLink="/service-orders" routerLinkActive="active">Ordens de Serviço</a>
-  <a routerLink="/billing" routerLinkActive="active">Faturas</a>
-  <a routerLink="/client-area" routerLinkActive="active">area do cliente</a>
-  <a routerLink="/payments" routerLinkActive="active">pagamentos</a>
-    <a routerLink="/settings" routerLinkActive="active">
-      <i class="nav-icon">⚙️</i>
-      Configurações
-    </a>
+<div class="layout-container">
+  <!-- Sidebar que ocupa toda a altura -->
+  <nav class="sidebar" [class.open]="sidebarOpen()">
+    <div class="sidebar-content">
+      <!-- Logo no topo da sidebar -->
+      <div class="sidebar-logo">
+        <h1 class="sidebar-title">Elite Laboratorio</h1>
+        
+      </div>
+      
+      <!-- Menu de navegação -->
+      <div class="nav-menu">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeSidebar()">
+          
+          Dashboard
+        </a>
+        <a routerLink="/sectors" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Setores
+        </a>
+        <a routerLink="/work-sections" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Seções de Trabalho
+        </a>
+        <a routerLink="/work-types" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Tipos de Trabalho
+        </a>
+        <a routerLink="/scales" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Escalas
+        </a>
+        <a routerLink="/shades" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Cores
+        </a>
+        <a routerLink="/table-price" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Tabelas de Preço
+        </a>
+        <a routerLink="/clients" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Clientes
+        </a>
+        <a routerLink="/service-orders" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Ordens de Serviço
+        </a>
+        <a routerLink="/billing" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Faturas
+        </a>
+        <a routerLink="/client-area" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Área do Cliente
+        </a>
+        <a routerLink="/payments" routerLinkActive="active" (click)="closeSidebar()">
+          
+          Pagamentos
+        </a>
+        <a routerLink="/settings" routerLinkActive="active" (click)="closeSidebar()">
+          <mat-icon>settings</mat-icon>
+          Configurações
+        </a>
+      </div>
+      
+      <!-- Ações do usuário no final da sidebar -->
+      <div class="sidebar-actions">
+        <button class="sidebar-btn" title="Notificações">
+          <mat-icon>notification_important</mat-icon>
+        </button>
+        <button class="sidebar-btn" title="Perfil do Usuário">
+         <mat-icon>person_outline</mat-icon>
+        </button>
+      </div>
+    </div>
   </nav>
 
-  <main>
-    <router-outlet></router-outlet>
-  </main>
+  <!-- Container principal com header e conteúdo -->
+  <div class="main-wrapper">
+    <!-- Header principal -->
+    <header class="main-header">
+      <div class="header-content">
+        <!-- Botão hamburger para mobile -->
+        <button 
+          class="hamburger-btn" 
+          (click)="toggleSidebar()"
+          [class.active]="sidebarOpen()"
+          aria-label="Toggle menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        
+        <!-- Título do header -->
+        <div class="header-title">
+          <h2 class="page-title">Dashboard</h2>
+        </div>
+        
+        <!-- Espaço para ações futuras -->
+        <div class="header-actions">
+          <!-- Ações podem ser adicionadas aqui -->
+        </div>
+      </div>
+    </header>
+
+    <!-- Conteúdo principal -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <!-- Overlay para fechar o menu no mobile -->
+  <div 
+    class="sidebar-overlay" 
+    [class.active]="sidebarOpen()"
+    (click)="closeSidebar()">
+  </div>
 </div>

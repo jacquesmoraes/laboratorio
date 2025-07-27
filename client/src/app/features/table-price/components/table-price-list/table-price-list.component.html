@@ -46,12 +46,14 @@
               mat-icon-button 
               aria-label="Visualizar"
               (click)="onView(tablePrice.id)"
+              matTooltip="Ver detalhes"
               class="action-icon-btn">
               <mat-icon>visibility</mat-icon>
             </button>
             <button 
               mat-icon-button 
               aria-label="Editar"
+              matTooltip="editar"
               (click)="onEdit(tablePrice.id)"
               class="action-icon-btn">
               <mat-icon>edit</mat-icon>
@@ -59,6 +61,7 @@
             <button 
               mat-icon-button 
               aria-label="Excluir"
+              matTooltip="excluir"
               (click)="deleteTablePrice(tablePrice.id)"
               class="action-icon-btn">
               <mat-icon>delete</mat-icon>

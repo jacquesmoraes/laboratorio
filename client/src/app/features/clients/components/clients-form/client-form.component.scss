@@ -1,25 +1,31 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: var(--background);
+}
+
 .form-container {
-  
-  
+  max-width: 900px;
   margin: 0 auto;
+  padding: 2rem 1.5rem;
+  overflow-x: hidden;
 }
 
 .form-card {
   background: var(--white);
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
 .form-card mat-card-header {
-
   background-color: var(--primary);
   color: var(--white);
   padding-bottom: 1rem;
 }
 
 .form-card mat-card-title {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
   display: flex;
@@ -38,27 +44,23 @@
 }
 
 mat-card-content {
-  padding: 1rem 1.5rem;
+  padding: 1.5rem 2rem;
   color: var(--text-dark);
 }
 
-.loading-container {
+mat-card-actions {
+  padding: 1.5rem 2rem;
+  background: var(--light-gray);
+  margin-top: 1rem;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
-  
-  p {
-    margin-top: 16px;
-    font-size: 14px;
-  }
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
+// Seções do formulário
 .section {
-  margin-bottom: 24px;
-  
+  margin-bottom: 2rem;
+
   .section-title {
     display: flex;
     align-items: center;
@@ -66,8 +68,8 @@ mat-card-content {
     font-size: 1rem;
     font-weight: 600;
     color: var(--primary);
-    margin-bottom: 12px;
-    
+    margin-bottom: 1rem;
+
     mat-icon {
       font-size: 20px;
       color: var(--accent);
@@ -75,23 +77,39 @@ mat-card-content {
   }
 }
 
+// Linhas do formulário
 .form-row {
   display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-  
+  gap: 1rem;
+  margin-bottom: 1rem;
+
   .w-100 { flex: 1; }
-  .w-70 { flex: 0 0 70%; }
-  .w-50 { flex: 0 0 48%; }
-  .w-33 { flex: 0 0 32%; }
-  .w-30 { flex: 0 0 30%; }
-  
+  .w-70  { flex: 0 0 70%; }
+  .w-50  { flex: 0 0 48%; }
+  .w-33  { flex: 0 0 32%; }
+  .w-30  { flex: 0 0 30%; }
+
   mat-form-field {
     width: 100%;
   }
 }
 
-// Estilos dos campos de formulário (igual aos modais)
+// Campo de loading
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+
+  p {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+// Estilos dos campos de formulário
 ::ng-deep .mat-mdc-text-field-wrapper {
   background: var(--light-gray);
   border-radius: 6px;
@@ -105,7 +123,7 @@ mat-card-content {
 
 ::ng-deep .mat-mdc-text-field-wrapper.mdc-text-field--focused {
   border-color: var(--primary);
-  box-shadow: 0 0 4px rgba(39,102,120,0.3);
+  box-shadow: 0 0 4px rgba(39, 102, 120, 0.3);
 }
 
 ::ng-deep .mat-mdc-form-field-label {
@@ -134,15 +152,13 @@ mat-card-content {
   font-size: 0.85rem;
 }
 
-mat-card-actions {
-  padding: 1rem 1.5rem;
-  background: var(--light-gray);
-  margin-top: 1rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
+.option-description {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  font-style: italic;
 }
 
+// Botões
 .cancel-btn {
   background-color: transparent;
   color: var(--text-muted);
@@ -155,7 +171,7 @@ mat-card-actions {
   gap: 0.25rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background-color: var(--white);
     color: var(--text-dark);
@@ -175,49 +191,58 @@ mat-card-actions {
   gap: 0.25rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     background-color: var(--secondary);
   }
-  
+
   &:disabled {
     background-color: var(--text-muted);
     cursor: not-allowed;
   }
 }
 
-.option-description {
-  color: var(--text-muted);
-  font-size: 0.9em;
-  font-style: italic;
-}
-
 // Responsividade
 @media (max-width: 768px) {
   .form-container {
-    padding: 16px;
-  }
-  
-  .form-row {
-    flex-direction: column;
-    gap: 8px;
-    
-    .w-100, .w-70, .w-50, .w-33, .w-30 {
-      width: 100%;
-    }
-  }
-  
-  mat-card-content {
     padding: 1rem;
   }
-  
+
+  mat-card-content,
   mat-card-actions {
     padding: 1rem;
+  }
+
+  .form-row {
     flex-direction: column;
-    
+    gap: 0.75rem;
+
+    .w-100,
+    .w-70,
+    .w-50,
+    .w-33,
+    .w-30 {
+      width: 100%;
+      flex: 1 1 100%;
+    }
+  }
+
+  mat-card-actions {
+    flex-direction: column;
+
     button {
       width: 100%;
       justify-content: center;
     }
+  }
+}
+
+@media (max-width: 480px) {
+  .form-card mat-card-title {
+    font-size: 1.1rem;
+  }
+
+  .form-container {
+    padding: 0.5rem;
   }
 }

@@ -1,45 +1,42 @@
-<div class="service-order-list-container">
-  <mat-card class="main-card">
-    <mat-card-header>
-      <mat-card-title class="card-title">
-        <mat-icon class="title-icon">assignment</mat-icon>
-        Ordens de Serviço
-      </mat-card-title>
-      <mat-card-actions>
-        <button class="btn-primary" (click)="navigateToNew()">
-          <mat-icon>add</mat-icon>
-          Nova Ordem
-        </button>
-        <button class="btn-secondary" [disabled]="!hasSelection()" (click)="finishSelectedOrders()">
-          <mat-icon>receipt</mat-icon>
-          finalizar OS
-        </button>
-      </mat-card-actions>
-    </mat-card-header>
+<div class="container">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="title">
+      <mat-icon class="title-icon">assignment</mat-icon>
+      Ordens de Serviço
+    </h1>
 
-    <mat-card-content>
-      <!-- Filtros -->
-            <app-service-order-filters
-        [initialSearch]="currentParams().search || ''"
-        [initialStatus]="currentParams().status || ''"
-        [initialSortBy]="currentParams().sort || 'DateIn'"
-        [initialShowFinishedOrders]="!currentParams().excludeFinished"
-        (filterChange)="onFilterChange($event)">
-      </app-service-order-filters>
+    <div class="button-group">
+      <button class="btn btn-primary" (click)="navigateToNew()">
+        <mat-icon>add</mat-icon>
+        Nova Ordem
+      </button>
+      <button class="btn btn-secondary" [disabled]="!hasSelection()" (click)="finishSelectedOrders()">
+        <mat-icon>receipt</mat-icon>
+        Finalizar OS
+      </button>
+    </div>
+  </div>
 
-      <!-- Tabela -->
-      <app-service-order-table
-        [serviceOrders]="serviceOrders()"
-        [selectedOrderIds]="selectedOrderIds()"
-        [totalItems]="totalItems()"
-        [pageSize]="pageSize()"
-        [pageIndex]="pageIndex()"
-        [pageSizeOptions]="pageSizeOptions"
-        [loading]="loading()"
-        (selectionChange)="onSelectionChange($event)"
-        (pageChange)="onPageChange($event)"
-        (action)="onAction($event)">
-      </app-service-order-table>
-    </mat-card-content>
-  </mat-card>
+  <div class="table-container">
+    <app-service-order-filters
+      [initialSearch]="currentParams().search || ''"
+      [initialStatus]="currentParams().status || ''"
+      [initialSortBy]="currentParams().sort || 'DateIn'"
+      [initialShowFinishedOrders]="!currentParams().excludeFinished"
+      (filterChange)="onFilterChange($event)">
+    </app-service-order-filters>
+
+    <app-service-order-table
+      [serviceOrders]="serviceOrders()"
+      [selectedOrderIds]="selectedOrderIds()"
+      [totalItems]="totalItems()"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="pageSizeOptions"
+      [loading]="loading()"
+      (selectionChange)="onSelectionChange($event)"
+      (pageChange)="onPageChange($event)"
+      (action)="onAction($event)">
+    </app-service-order-table>
+  </div>
 </div>

@@ -1,40 +1,39 @@
-<mat-card class="scale-card">
-  <mat-card-header>
-    <mat-card-title>Setores</mat-card-title>
-    <mat-card-subtitle>Gerencie os setores do laboratório</mat-card-subtitle>
-  </mat-card-header>
+<div class="container">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="title">Setores</h1>
+    <button class="btn btn-primary" (click)="onNew()">
+      <mat-icon>add</mat-icon>
+      Novo Setor
+    </button>
+  </div>
 
-  <mat-card-content>
-    <div class="actions-bar">
-      <button (click)="onNew()" class="btn">
-        <mat-icon>add</mat-icon>
-        Novo Setor
-      </button>
-    </div>
-
-    <div class="table-container">
-      <mat-table [dataSource]="sectors()" class="mat-elevation-z8 custom-table">
-
-        <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef>Nome</mat-header-cell>
-          <mat-cell *matCellDef="let sector">{{ sector.name }}</mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <mat-header-cell *matHeaderCellDef>Ações</mat-header-cell>
-          <mat-cell *matCellDef="let sector">
-            <button mat-icon-button color="primary" (click)="onEdit(sector)" class="action-icon-btn" matTooltip="editar">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="onDelete(sector)" matTooltip="deletar" class="action-icon-btn">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </mat-cell>
-        </ng-container>
-
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-      </mat-table>
-    </div>
-  </mat-card-content>
-</mat-card>
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th style="width: 1%;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sector of sectors(); track sector.id) {
+          <tr>
+            <td>{{ sector.name }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-primary btn-sm" (click)="onEdit(sector)">
+                  <mat-icon>edit</mat-icon>
+                  Editar
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="onDelete(sector)">
+                  <mat-icon>delete</mat-icon>
+                  Excluir
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

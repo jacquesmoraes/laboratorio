@@ -19,7 +19,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     CommonModule,
     MatTableModule,
     MatButtonModule,
-    MatTooltip,
+    
     MatIconModule,
     MatCardModule,
     MatDialogModule
@@ -44,7 +44,7 @@ export class WorkSectionListComponent implements OnInit {
     
     this.workSectionService.getAll().subscribe({
       next: (data) => {
-        console.log('WorkSectionListComponent: Dados recebidos:', data);
+        
         this.workSections.set(data);
       },
       error: (error) => {

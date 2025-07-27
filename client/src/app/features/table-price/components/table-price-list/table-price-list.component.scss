@@ -1,7 +1,13 @@
+:host {
+  display: block;
+  min-height: 80vh;
+  background-color: var(--background);
+}
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem;
+
 }
 
 .header {
@@ -135,7 +141,7 @@
 
 .action-icon-btn {
   margin-left: 0.5rem;
-  color: var(--accent);
+  color: var(--primary);
 
   &:hover {
     color: var(--secondary);

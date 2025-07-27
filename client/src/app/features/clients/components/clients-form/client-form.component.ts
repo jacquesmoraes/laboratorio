@@ -142,9 +142,7 @@ export class ClientFormComponent implements OnInit {
   }
 
   private populateForm(client: Client) {
-    console.log('Populating form with client:', client);
-    console.log('Table price ID:', client.tablePriceId);
-    console.log('Available table prices:', this.tablePriceOptions());
+    
     
    this.clientForm.patchValue({
   name: client.clientName,

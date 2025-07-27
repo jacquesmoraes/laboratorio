@@ -11,6 +11,7 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { TablePriceService } from '../../services/table-price.services';
 import { TablePrice } from '../../table-price.interface';
 import Swal from 'sweetalert2';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-table-price-list',
@@ -19,6 +20,7 @@ import Swal from 'sweetalert2';
     CommonModule,
     RouterModule,
     MatCardModule,
+    MatTooltip,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,

@@ -1,9 +1,10 @@
-import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
 import { Payment, PaymentParams } from '../../models/payment.interface';
+import { debounceTime, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-payment-list',
@@ -13,10 +14,12 @@ import { Payment, PaymentParams } from '../../models/payment.interface';
   styleUrls: ['./payment-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PaymentListComponent implements OnInit {
+export class PaymentListComponent implements OnInit, OnDestroy {
   private paymentService = inject(PaymentService);
   private router = inject(Router);
-
+  private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
+  
   loading = signal(false);
   payments = signal<Payment[]>([]);
   pagination = signal<any>(null);
@@ -36,6 +39,7 @@ export class PaymentListComponent implements OnInit {
   Math = Math;
 
   ngOnInit(): void {
+    this.setupSearchDebounce();
     this.loadPayments();
   }
 
@@ -51,6 +55,16 @@ export class PaymentListComponent implements OnInit {
         console.error('Erro ao carregar pagamentos:', error);
         this.loading.set(false);
       }
+    });
+  }
+
+  private setupSearchDebounce(): void {
+    this.searchSubject.pipe(
+      debounceTime(500),
+      takeUntil(this.destroy$)
+    ).subscribe(searchTerm => {
+      this.filters.update(f => ({ ...f, search: searchTerm, pageNumber: 1 }));
+      this.loadPayments();
     });
   }
 
@@ -102,7 +116,7 @@ export class PaymentListComponent implements OnInit {
 
   // Setters for form binding
   setSearchFilter(value: string): void {
-    this.filters.update(f => ({ ...f, search: value }));
+    this.searchSubject.next(value);
   }
 
   setStartDateFilter(value: string): void {
@@ -111,5 +125,10 @@ export class PaymentListComponent implements OnInit {
 
   setEndDateFilter(value: string): void {
     this.filters.update(f => ({ ...f, endDate: value }));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
