@@ -8,7 +8,18 @@
       Ordens há mais de {{ daysThreshold() }} dias em prova
     </mat-card-subtitle>
   </mat-card-header>
-
+  <div class="days-selector">
+    <mat-form-field appearance="outline" class="days-select-field">
+      <mat-label>Mostrar ordens há mais de:</mat-label>
+      <mat-select 
+        [ngModel]="daysThreshold()" 
+        (ngModelChange)="daysThreshold.set($event); onDaysThresholdChange()">
+        @for (days of daysOptions; track days) {
+          <mat-option [value]="days">{{ days }} dias</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
   <mat-card-content>
     @if (loading()) {
       <div class="loading-container">

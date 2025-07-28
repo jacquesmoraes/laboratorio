@@ -8,6 +8,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ServiceOrderAlert } from '../../../features/service-order/models/service-order.interface';
 import { ServiceOrdersService } from '../../../features/service-order/services/service-order.service';
+import { MatFormField, MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-try-in-alerts',
@@ -15,6 +17,9 @@ import { ServiceOrdersService } from '../../../features/service-order/services/s
   imports: [
     CommonModule,
     MatCardModule,
+    MatSelectModule,
+    MatFormField,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
@@ -31,7 +36,8 @@ export class TryInAlertsComponent implements OnInit {
   alerts = signal<ServiceOrderAlert[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
-  daysThreshold = signal(5);
+  daysThreshold = signal(30);
+  daysOptions = [5, 10, 15, 20, 30, 45, 60];
 
   ngOnInit() {
     this.loadAlerts();
@@ -53,6 +59,10 @@ export class TryInAlertsComponent implements OnInit {
           console.error('Erro ao carregar alertas:', err);
         }
       });
+  }
+  
+  onDaysThresholdChange() {
+    this.loadAlerts();
   }
 
   viewOrder(orderId: number) {

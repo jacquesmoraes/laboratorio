@@ -91,7 +91,7 @@ $client-area-white: #ffffff;
   }
   
   th {
-    background: linear-gradient(135deg, $client-area-primary 0%, darken($client-area-primary, 5%) 100%);
+    background: var(--accent);
     color: $client-area-white;
     font-weight: 600;
     font-size: 0.9rem;
@@ -299,7 +299,7 @@ $client-area-white: #ffffff;
   
   &-dashboard {
     .client-info {
-      background: linear-gradient(135deg, $client-area-primary 0%, darken($client-area-primary, 5%) 100%);
+      background:var(--accent);
       color: $client-area-white;
       padding: 2rem;
       border-radius: 12px;
@@ -689,7 +689,7 @@ $client-area-white: #ffffff;
     top: 1rem;
     right: 1rem;
     z-index: 1001;
-    background: $client-area-primary;
+    background: var(--accent);
     border: none;
     border-radius: 6px;
     padding: 0.75rem;

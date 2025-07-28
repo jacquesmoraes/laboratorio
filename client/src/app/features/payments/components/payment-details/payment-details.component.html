@@ -9,11 +9,7 @@
       </button>
     </div>
 
-    @if (loading()) {
-      <div class="loading-container">
-        <div class="loading-spinner"></div>
-      </div>
-    } @else if (payment()) {
+   @if (payment()) {
       <div class="details-card">
         <div class="details-grid">
           <div class="details-section">
@@ -67,7 +63,7 @@
           </div>
         </div>
       </div>
-    } @else {
+    } @else if(!loading()) {
       <div class="not-found">
         <div class="not-found-icon">⚠️</div>
         <h2 class="not-found-title">Pagamento não encontrado</h2>

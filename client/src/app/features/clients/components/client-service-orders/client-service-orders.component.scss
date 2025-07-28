@@ -1,0 +1,369 @@
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.card-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  h2 {
+    margin: 0;
+    color: #334a52;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 200px;
+  flex: 1;
+
+  &:focus {
+    outline: none;
+    border-color: #276678;
+    box-shadow: 0 0 0 3px rgba(39, 102, 120, 0.1);
+  }
+}
+
+.clear-btn {
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+}
+
+.loading-container {
+  padding: 40px;
+  text-align: center;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #276678;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(150, 175, 184, 0.1);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  td {
+    color: #6b7280;
+  }
+
+  tr:hover {
+    background: #f9fafb;
+  }
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: capitalize;
+
+  &.status-production {
+    background: linear-gradient(135deg, var(--success) 20%, #1976d2 100%);
+    color: var(--prymary);
+    border: 2px solid var(--success);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.8);
+  }
+
+  &.status-tryin {
+    background: linear-gradient(135deg, var(--success) 20%, #f57c00 100%);
+    color: var(--prymary);
+    border: 2px solid var(--success);
+    box-shadow: 0 2px 8px rgba(245, 124, 0, 0.8);
+  }
+
+  &.status-finished {
+    background: linear-gradient(135deg, var(--success) 20%, #388e3c 100%);
+    color: var(--prymary);
+    border: 2px solid var(--success);
+    box-shadow: 0 2px 8px rgba(56, 142, 60, 0.8);
+  }
+
+  &.status-default {
+    background-color: #f5f5f5;
+    color: #666;
+  }
+
+
+  &.status-open {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+
+  &.status-unknown {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+}
+
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+
+  &.btn-primary {
+    background: #276678;
+    color: white;
+
+    &:hover {
+      background: #1e4a5a;
+    }
+  }
+
+  &.btn-sm {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+.pagination-container {
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 14px;
+
+  .font-medium {
+    font-weight: 500;
+    color: #374151;
+  }
+}
+
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pagination-button {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #9ca3af;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.pagination-current {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.no-data {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+// ✅ RESPONSIVIDADE ADICIONADA
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    
+    h2 {
+      text-align: center;
+    }
+  }
+
+  .search-container {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .search-input {
+      min-width: auto;
+      width: 100%;
+    }
+    
+    .clear-btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  .pagination-container {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .pagination-nav {
+    justify-content: center;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: block;
+    }
+
+    tbody tr {
+      display: block;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
+      padding: 15px;
+    }
+
+    tbody td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4f6;
+
+      &::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        margin-right: 10px;
+        flex: 1;
+        font-size: 12px;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .status-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+    
+    &.btn-sm {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    margin: 10px 0;
+  }
+
+  .card-header {
+    padding: 15px;
+  }
+
+  .pagination-info {
+    font-size: 12px;
+  }
+
+  .pagination-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}

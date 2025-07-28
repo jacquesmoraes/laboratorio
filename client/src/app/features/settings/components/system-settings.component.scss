@@ -26,7 +26,7 @@
 }
 
 .settings-card mat-card-header {
-  background: linear-gradient(135deg, var(--primary) 0%, #1e4a5a 100%) !important;
+  background: var(--accent);
   color: var(--white) !important;
   margin: -1rem -1rem 1rem -1rem !important;
   padding: 1.5rem !important;

@@ -38,12 +38,12 @@
       <tbody>
         <tr *ngFor="let shade of shades(); trackBy: trackByShadeId">
 
-          <td >
+          <td data-label="Cor" >
             <div class="color-display">
               {{ shade.color || '-' }}
             </div>
           </td>
-          <td >{{ getScaleName(shade.scaleId) }}</td>
+          <td data-label="Escala" >{{ getScaleName(shade.scaleId) }}</td>
           <td >
             <div class="action-buttons">
               <button class="btn btn-primary btn-sm" (click)="onEdit(shade)">

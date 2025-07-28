@@ -189,24 +189,22 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
-    tbody td {
+     tbody td {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      
       padding: 0.5rem 0;
       border-bottom: 1px solid var(--border-color);
       font-size: 0.875rem;
 
-      // &::before {
-      //   content: attr(data-label);
-      //   font-weight: 600;
-      //   content: none !important;
-      //   text-transform: uppercase;
-      //   color: var(--dark);
-      //   margin-right: 1rem;
-      //   flex: 1;
-      // }
+      &::before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--dark);
+        margin-right: 1rem;
+        flex: 1;
+      }
 
       &:last-child {
         border-bottom: none;

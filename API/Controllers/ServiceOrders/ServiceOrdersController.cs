@@ -97,7 +97,7 @@ namespace API.Controllers.ServiceOrders
         }
 
         [HttpGet("alert/tryin")]
-        public async Task<IActionResult> GetWorksOutForTryin([FromQuery] int days = 5)
+        public async Task<IActionResult> GetWorksOutForTryin([FromQuery] int days = 30)
         {
             var orders = await _serviceOrderService.GetOutForTryInAsync(days);
             var response = _mapper.Map<List<ServiceOrderAlertRecord>>(orders);

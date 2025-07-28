@@ -69,6 +69,10 @@ private sectorService = inject(SectorService);
       next: (order) => {
         this.serviceOrder.set(order);
         this.loading.set(false);
+        this.scheduleService.getActiveScheduleByServiceOrder(id).subscribe({
+        next: (sched) => this.schedule.set(sched),
+        error: () => this.schedule.set(null)
+      });
       },
       error: () => {
         this.loading.set(false);
@@ -170,19 +174,27 @@ updateSchedule() {
 
 // ... existing code ...
 
-  getStatusColorClass(status: OrderStatus): string {
-    switch (status) {
-      case OrderStatus.Production: return 'status-production';
-      case OrderStatus.TryIn: return 'status-tryin';
-      case OrderStatus.Finished: return 'status-finished';
-      default: return 'status-default';
-    }
-  }
+ getStatusColorClass(status: string | OrderStatus): string {
+  const enumValue = typeof status === 'string'
+    ? OrderStatus[status as keyof typeof OrderStatus]
+    : status;
 
-  getStatusLabel(status: OrderStatus | undefined): string {
-    if (status === undefined) return '';
-    return OrderStatusLabels[status];
+  switch (enumValue) {
+    case OrderStatus.Production: return 'status-production';
+    case OrderStatus.TryIn: return 'status-tryin';
+    case OrderStatus.Finished: return 'status-finished';
+    default: return 'status-default';
   }
+}
+
+
+  getStatusLabel(status: string | OrderStatus | undefined): string {
+  if (!status) return '';
+  const enumValue = typeof status === 'string'
+    ? OrderStatus[status as keyof typeof OrderStatus]
+    : status;
+  return OrderStatusLabels[enumValue as OrderStatus] ?? 'Desconhecido';
+}
 
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('pt-BR', {

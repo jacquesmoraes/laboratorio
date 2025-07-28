@@ -272,7 +272,14 @@
     }
   }
 }
+.payment-row {
+  cursor: pointer;
+  transition: background 0.2s;
 
+  &:hover {
+    background: var(--background);
+  }
+}
 // Paginação
 .pagination-container {
   background: var(--white);

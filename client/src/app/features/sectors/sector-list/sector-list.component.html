@@ -18,7 +18,7 @@
       <tbody>
         @for (sector of sectors(); track sector.id) {
           <tr>
-            <td>{{ sector.name }}</td>
+            <td data-label="Nome">{{ sector.name }}</td>
             <td>
               <div class="action-buttons">
                 <button class="btn btn-primary btn-sm" (click)="onEdit(sector)">

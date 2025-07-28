@@ -18,7 +18,7 @@
       <tbody>
         @for (section of workSections(); track section.id) {
           <tr>
-            <td >{{ section.name }}</td>
+            <td data-label="Nome">{{ section.name }}</td>
             <td >
               <div class="action-buttons">
                 <button class="btn btn-primary btn-sm" (click)="onEdit(section)">

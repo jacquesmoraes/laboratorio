@@ -1,0 +1,88 @@
+<div class="card">
+  <div class="card-header">
+    <h2>Pagamentos</h2>
+    <div class="search-container">
+      <input 
+        type="text" 
+        placeholder="Buscar por descrição..."
+        (input)="onSearchChange($any($event.target).value)"
+        class="search-input">
+      <button 
+        type="button" 
+        (click)="clearFilters()"
+        class="clear-btn">
+        Limpar
+      </button>
+    </div>
+  </div>
+
+  @if (payments().length > 0) {
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Valor</th>
+            <th>Descrição</th>
+            <th>Fatura</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of payments(); track payment.id) {
+            <tr>
+              <td>{{ formatDate(payment.paymentDate) }}</td>
+              <td>{{ formatCurrency(payment.amountPaid) }}</td>
+              <td>{{ payment.description || '-' }}</td>
+              <td>{{ payment.invoiceNumber || '-' }}</td>
+              <td>
+                <button 
+                  class="btn btn-primary btn-sm" 
+                  (click)="viewPayment(payment.id)">
+                  <mat-icon>visibility</mat-icon>
+                  Ver
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginação -->
+    @if (pagination()) {
+      <div class="pagination-container">
+        <div class="pagination-info">
+          Mostrando 
+          <span class="font-medium">{{ (pagination()!.pageNumber - 1) * pagination()!.pageSize + 1 }}</span>
+          a 
+          <span class="font-medium">{{ Math.min(pagination()!.pageNumber * pagination()!.pageSize, pagination()!.totalItems) }}</span>
+          de 
+          <span class="font-medium">{{ pagination()!.totalItems }}</span>
+          resultados
+        </div>
+        <nav class="pagination-nav">
+          <button 
+            (click)="onPageChange(pagination()!.pageNumber - 1)"
+            [disabled]="pagination()!.pageNumber <= 1"
+            class="pagination-button pagination-prev">
+            <mat-icon>chevron_left</mat-icon>
+            Anterior
+          </button>
+          <span class="pagination-current">
+            Página {{ pagination()!.pageNumber }} de {{ pagination()!.totalPages }}
+          </span>
+          <button 
+            (click)="onPageChange(pagination()!.pageNumber + 1)"
+            [disabled]="pagination()!.pageNumber >= pagination()!.totalPages"
+            class="pagination-button pagination-next">
+            Próxima
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </nav>
+      </div>
+    }
+  } @else if (!loading()) {
+    <p class="no-data">Nenhum pagamento registrado.</p>
+  }
+</div>

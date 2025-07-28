@@ -25,6 +25,7 @@
             CreateMap<ServiceOrder, ServiceOrderDetailsProjection> ( )
     .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status.ToString ( ) ) )
      .ForMember ( dest => dest.Client, opt => opt.MapFrom ( src => src.Client ) )
+     .ForMember ( dest => dest.OrderTotal, opt => opt.MapFrom ( src => src.OrderTotal ) )
     .ForMember ( dest => dest.CurrentSectorName, opt => opt.MapFrom<CurrentSectorNameResolver> ( ) );
 
             CreateMap<ServiceOrder, ServiceOrderListProjection> ( )

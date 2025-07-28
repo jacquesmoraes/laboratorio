@@ -1,0 +1,94 @@
+<div class="card">
+  <div class="card-header">
+    <h2>Pedidos de Serviço</h2>
+    <div class="search-container">
+      <input 
+        type="text" 
+        placeholder="Buscar por paciente..."
+        (input)="onSearchChange($any($event.target).value)"
+        class="search-input">
+      <button 
+        type="button" 
+        (click)="clearFilters()"
+        class="clear-btn">
+        Limpar
+      </button>
+    </div>
+  </div>
+
+  @if (serviceOrders().length > 0) {
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Data entrada</th>
+            <th>Paciente</th>
+            <th>Status</th>
+            <th>Valor</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of serviceOrders(); track order.serviceOrderId) {
+            <tr>
+              <td>{{ order.orderNumber }}</td>
+              <td>{{ formatDate(order.dateIn) }}</td>
+              <td>{{ order.patientName }}</td>
+              <td>
+                <span class="status-badge {{ getStatusClass(order.status) }}">
+                  {{ getStatusLabel(order.status) }}
+                </span>
+              </td>
+              <td>{{ formatCurrency(order.orderTotal) }}</td>
+              <td>
+                <button 
+                  class="btn btn-primary btn-sm" 
+                  (click)="viewServiceOrder(order.serviceOrderId)">
+                  <mat-icon>visibility</mat-icon>
+                  Ver
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginação -->
+    @if (pagination()) {
+      <div class="pagination-container">
+        <div class="pagination-info">
+          Mostrando 
+          <span class="font-medium">{{ (pagination()!.pageNumber - 1) * pagination()!.pageSize + 1 }}</span>
+          a 
+          <span class="font-medium">{{ Math.min(pagination()!.pageNumber * pagination()!.pageSize, pagination()!.totalItems) }}</span>
+          de 
+          <span class="font-medium">{{ pagination()!.totalItems }}</span>
+          resultados
+        </div>
+        <nav class="pagination-nav">
+          <button 
+            (click)="onPageChange(pagination()!.pageNumber - 1)"
+            [disabled]="pagination()!.pageNumber <= 1"
+            class="pagination-button pagination-prev">
+            <mat-icon>chevron_left</mat-icon>
+            Anterior
+          </button>
+          <span class="pagination-current">
+            Página {{ pagination()!.pageNumber }} de {{ pagination()!.totalPages }}
+          </span>
+          <button 
+            (click)="onPageChange(pagination()!.pageNumber + 1)"
+            [disabled]="pagination()!.pageNumber >= pagination()!.totalPages"
+            class="pagination-button pagination-next">
+            Próxima
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </nav>
+      </div>
+    }
+  } @else if (!loading()) {
+    <p class="no-data">Nenhum pedido de serviço encontrado.</p>
+  }
+</div>

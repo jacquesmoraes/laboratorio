@@ -20,7 +20,7 @@
         @for (scale of scales(); track scale.id) {
           <tr>
             
-            <td >{{ scale.name }}</td>
+            <td data-label="Nome" >{{ scale.name }}</td>
             <td >
               <div class="action-buttons">
                 <button class="btn btn-primary btn-sm" (click)="onEdit(scale)">

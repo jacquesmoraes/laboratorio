@@ -22,16 +22,7 @@
     </div>
   </div>
 
-  @if (loading()) {
-    <div class="loading-container">
-      <div class="loading-spinner"></div>
-    </div>
-  } @else if (clients().length === 0) {
-    <div class="empty-state">
-      <mat-icon>people</mat-icon>
-      <p>Nenhum cliente encontrado</p>
-    </div>
-  } @else {
+  @if (clients().length > 0) {
     <div class="table-container">
       <table class="table">
         <thead>
@@ -46,12 +37,12 @@
         <tbody>
           @for (client of clients(); track client.clientId) {
             <tr>
-              <td >{{ client.clientName }}</td>
-              <td >{{ client.city || '-' }}</td>
-              <td >
+              <td data-label="Nome">{{ client.clientName }}</td>
+              <td data-label="Cidade" >{{ client.city || '-' }}</td>
+              <td data-label="Cobrança" >
                 <mat-chip>{{ getBillingModeLabel(client.billingMode) }}</mat-chip>
               </td>
-              <td >
+              <td data-label="Status" >
                 <mat-chip [color]="client.isInactive ? 'warn' : 'accent'" selected>
                   {{ client.isInactive ? 'Inativo' : 'Ativo' }}
                 </mat-chip>
@@ -92,6 +83,11 @@
           showFirstLastButtons>
         </mat-paginator>
       </div>
+    </div>
+  } @else if (!loading()) {
+    <div class="empty-state">
+      <mat-icon>people</mat-icon>
+      <p>Nenhum cliente encontrado</p>
     </div>
   }
 </div>

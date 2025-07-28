@@ -137,6 +137,20 @@
     }
   }
 }
+.days-selector {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--accent);
+}
+
+.days-select-field {
+  width: 100%;
+  max-width: 200px;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
+}
 
 .alert-details {
   margin-bottom: 0.5rem;

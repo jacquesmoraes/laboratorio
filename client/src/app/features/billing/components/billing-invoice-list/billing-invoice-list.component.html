@@ -42,15 +42,8 @@
     </div>
   </div>
 
-  <!-- Loading -->
-  @if (loading()) {
-    <div class="loading-container">
-      <div class="loading-spinner"></div>
-    </div>
-  }
-
   <!-- Lista de Faturas -->
-  @if (!loading() && invoices().length > 0) {
+  @if (invoices().length > 0) {
     <div class="table-container">
       <table class="table">
         <thead>
@@ -66,15 +59,15 @@
         <tbody>
           @for (invoice of invoices(); track invoice.billingInvoiceId) {
             <tr>
-              <td class="invoice-number">{{ invoice.invoiceNumber }}</td>
-              <td class="client-name">{{ invoice.client.clientName }}</td>
-              <td class="payment-date">{{ formatDate(invoice.createdAt) }}</td>
-              <td>
+              <td data-label="Fat" class="invoice-number">{{ invoice.invoiceNumber }}</td>
+              <td data-label="Name" class="client-name">{{ invoice.client.clientName }}</td>
+              <td data-label="Date" class="payment-date">{{ formatDate(invoice.createdAt) }}</td>
+              <td data-label="Status">
                 <span [class]="'status-badge ' + getStatusClass(invoice.status)">
                   {{ invoice.status }}
                 </span>
               </td>
-              <td class="payment-amount">{{ formatCurrency(invoice.totalInvoiceAmount) }}</td>
+              <td data-label="Total" class="payment-amount">{{ formatCurrency(invoice.totalInvoiceAmount) }}</td>
               <td class="actions">
                 <div class="action-buttons">
                   <button class="btn btn-primary btn-sm" (click)="viewInvoice(invoice.billingInvoiceId)">

@@ -34,13 +34,7 @@
       </div>
     </div>
 
-    @if (loading()) {
-      <div class="loading-container">
-        <div class="loading-spinner"></div>
-      </div>
-    }
-
-    @if (!loading() && invoice()) {
+    @if (invoice()) {
       <div class="content">
         <!-- Informações da Fatura -->
         <div class="card">

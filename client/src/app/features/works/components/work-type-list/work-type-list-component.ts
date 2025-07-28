@@ -64,10 +64,18 @@ export class WorkTypeListComponent implements OnInit {
       data: { isEditMode: false } as WorkTypeModalData,
       width: '550px'
     });
-
+  
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadWorkTypes();
+        // ✅ ADICIONADO: SweetAlert na lista
+        Swal.fire({
+          icon: 'success',
+          title: 'Sucesso!',
+          text: 'Tipo de trabalho criado com sucesso',
+          timer: 1000,
+          showConfirmButton: false
+        });
       }
     });
   }
@@ -77,10 +85,18 @@ export class WorkTypeListComponent implements OnInit {
       data: { workType, isEditMode: true } as WorkTypeModalData,
       width: '550px'
     });
-
+  
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadWorkTypes();
+        // ✅ ADICIONADO: SweetAlert na lista
+        Swal.fire({
+          icon: 'success',
+          title: 'Sucesso!',
+          text: 'Tipo de trabalho atualizado com sucesso',
+          timer: 1000,
+          showConfirmButton: false
+        });
       }
     });
   }

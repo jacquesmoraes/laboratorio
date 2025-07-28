@@ -105,7 +105,7 @@ export class WorkTypeModalComponent implements OnInit {
         });
         return;
       }
-
+  
       if (this.isEditMode && this.workTypeId) {
         const updateData: UpdateWorkTypeDto = {
           name: formData.name,
@@ -113,15 +113,14 @@ export class WorkTypeModalComponent implements OnInit {
           isActive: formData.isActive,
           workSectionId: formData.workSectionId
         };
-
+  
         this.workTypeService.update(this.workTypeId, updateData).subscribe({
           next: () => {
             Swal.fire({
               icon: 'success',
               title: 'Sucesso!',
               text: 'Tipo de trabalho atualizado com sucesso',
-              timer: 1000,
-              showConfirmButton: false
+              confirmButtonText: 'OK'
             });
             this.dialogRef.close(true);
           },
@@ -142,15 +141,14 @@ export class WorkTypeModalComponent implements OnInit {
           isActive: formData.isActive,
           workSectionId: formData.workSectionId
         };
-
+  
         this.workTypeService.create(createData).subscribe({
           next: () => {
             Swal.fire({
               icon: 'success',
               title: 'Sucesso!',
               text: 'Tipo de trabalho criado com sucesso',
-              timer: 1000,
-              showConfirmButton: false
+              confirmButtonText: 'OK'
             });
             this.dialogRef.close(true);
           },
