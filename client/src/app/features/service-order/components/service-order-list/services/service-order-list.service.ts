@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subject } from 'rxjs';
-
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { 
   ServiceOrder, 
@@ -18,6 +18,8 @@ import { Sector } from '../../../../sectors/models/sector.interface';
 import { SERVICE_ORDER_MESSAGES, LOADING_CONFIG } from '../models/service-order-list.config';
 import { MoveToStageDialogComponent } from '../dialogs/move-to-stage-dialog.component';
 import { FinishOrdersDialogComponent } from '../dialogs/finish-orders-dialog.component';
+import { ErrorMappingService } from '../../../../../core/services/error.mapping.service';
+
 
 export interface ServiceOrderListState {
   serviceOrders: ServiceOrder[];
@@ -34,6 +36,7 @@ export interface ServiceOrderListState {
 export class ServiceOrderListService {
   private readonly serviceOrdersService = inject(ServiceOrdersService);
   private readonly sectorService = inject(SectorService);
+  private readonly errorMappingService = inject(ErrorMappingService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly destroy$ = new Subject<void>();
@@ -70,6 +73,7 @@ export class ServiceOrderListService {
   constructor() {
     this.loadSectors();
   }
+  
 
   // Métodos para atualizar estado
   updateParams(params: Partial<ServiceOrderParams>) {
@@ -113,7 +117,7 @@ export class ServiceOrderListService {
           observer.next(res);
           observer.complete();
         },
-        error: (err) => {
+        error: (err: HttpErrorResponse) => {
           console.error('Error loading service orders:', err);
           this.setLoading(false);
           this.showError(SERVICE_ORDER_MESSAGES.error.loadOrders);
@@ -128,7 +132,7 @@ export class ServiceOrderListService {
       next: (sectors) => {
         this.state.update(state => ({ ...state, sectors }));
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         console.error('Error loading sectors:', err);
         this.showError(SERVICE_ORDER_MESSAGES.error.loadSectors);
       },
@@ -136,28 +140,7 @@ export class ServiceOrderListService {
   }
 
   // Ações de OS
-  reopenOrder(orderId: number): Observable<void> {
-    this.setLoading(true);
-    
-    return new Observable(observer => {
-      this.serviceOrdersService.reopenServiceOrder(orderId).subscribe({
-        next: () => {
-          this.showSuccess(SERVICE_ORDER_MESSAGES.success.reopened);
-          this.loadServiceOrders().subscribe();
-          this.setLoading(false);
-          observer.next();
-          observer.complete();
-        },
-        error: (err) => {
-          console.error('Erro ao reabrir ordem:', err);
-          this.showError(SERVICE_ORDER_MESSAGES.error.reopen);
-          this.setLoading(false);
-          observer.error(err);
-        },
-      });
-    });
-  }
-
+ 
   sendToTryIn(orderId: number): Observable<void> {
     const today = new Date().toISOString().split('T')[0];
     const sendToTryInDto: SendToTryInDto = {
@@ -176,9 +159,10 @@ export class ServiceOrderListService {
           observer.next();
           observer.complete();
         },
-        error: (err) => {
+        error: (err: HttpErrorResponse) => {
           console.error('Error sending to try in:', err);
-          this.showError(SERVICE_ORDER_MESSAGES.error.sendToTryIn);
+          const errorMessage = this.extractErrorMessage(err);
+          this.showError(errorMessage);
           this.setLoading(false);
           observer.error(err);
         },
@@ -213,9 +197,10 @@ export class ServiceOrderListService {
               observer.next();
               observer.complete();
             },
-            error: (err) => {
+            error: (err: HttpErrorResponse) => {
               console.error('Error moving to stage:', err);
-              this.showError(SERVICE_ORDER_MESSAGES.error.moveToStage);
+              const errorMessage = this.extractErrorMessage(err);
+              this.showError(errorMessage);
               this.setLoading(false);
               observer.error(err);
             },
@@ -265,15 +250,15 @@ export class ServiceOrderListService {
           this.serviceOrdersService.finishOrders(finishOrderDto).subscribe({
             next: () => {
               this.showSuccess(SERVICE_ORDER_MESSAGES.success.finished(selectedIds.length));
-              this.setSelectedOrderIds([]);
               this.loadServiceOrders().subscribe();
               this.setLoading(false);
               observer.next();
               observer.complete();
             },
-            error: (err) => {
-              console.error('Erro ao finalizar ordens:', err);
-              this.showError(SERVICE_ORDER_MESSAGES.error.finish);
+            error: (err: HttpErrorResponse) => {
+              console.error('Error finishing orders:', err);
+              const errorMessage = this.extractErrorMessage(err);
+              this.showError(errorMessage);
               this.setLoading(false);
               observer.error(err);
             },
@@ -284,6 +269,31 @@ export class ServiceOrderListService {
       });
     });
   }
+
+  reopenOrder(orderId: number): Observable<void> {
+    this.setLoading(true);
+    
+    return new Observable(observer => {
+      this.serviceOrdersService.reopenServiceOrder(orderId).subscribe({
+        next: () => {
+          this.showSuccess(SERVICE_ORDER_MESSAGES.success.reopened);
+          this.loadServiceOrders().subscribe();
+          this.setLoading(false);
+          observer.next();
+          observer.complete();
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error('Error reopening order:', err);
+          const errorMessage = this.extractErrorMessage(err);
+          this.showError(errorMessage);
+          this.setLoading(false);
+          observer.error(err);
+        },
+      });
+    });
+  }
+  
+
 
   // Métodos auxiliares
   private showSuccess(message: string) {
@@ -296,6 +306,10 @@ export class ServiceOrderListService {
     this.snackBar.open(message, SERVICE_ORDER_MESSAGES.actions.close, {
       duration: LOADING_CONFIG.errorSnackBarDuration,
     });
+  }
+
+  private extractErrorMessage(error: HttpErrorResponse | string): string {
+    return this.errorMappingService.mapServiceOrderError(error);
   }
 
   // Cleanup

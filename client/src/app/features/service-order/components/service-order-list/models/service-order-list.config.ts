@@ -85,6 +85,11 @@ export const SERVICE_ORDER_MESSAGES = {
   validation: {
     selectOrders: 'Selecione pelo menos uma ordem de serviço para finalizar.',
     sameClient: 'Todas as ordens de serviço selecionadas devem ser do mesmo cliente.',
+    noOpenStage: 'Não há estágio aberto para enviar para prova.',
+    invalidDate: 'Data inválida. Verifique a data informada.',
+    orderFinished: 'Não é possível alterar uma ordem finalizada.',
+    orderInTryIn: 'A ordem já está em prova.',
+    orderNotFound: 'Ordem de serviço não encontrada.',
   },
   actions: {
     close: 'Fechar',

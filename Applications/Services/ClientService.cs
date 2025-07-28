@@ -93,7 +93,7 @@ namespace Applications.Services
 
             return projection;
         }
-        // ... existing code ...
+        
 
         public async Task<Client?> UpdateFromDtoAsync ( UpdateClientDto dto )
         {
