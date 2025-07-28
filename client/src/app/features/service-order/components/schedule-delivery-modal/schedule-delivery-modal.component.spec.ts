@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { ScheduleDeliveryModalComponent } from './schedule-delivery-modal.component';
 
@@ -8,7 +12,16 @@ describe('ScheduleDeliveryModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ScheduleDeliveryModalComponent]
+      imports: [
+        ScheduleDeliveryModalComponent,
+        NoopAnimationsModule
+      ],
+      providers: [
+        provideHttpClient(withFetch()),
+        provideRouter([]),
+        { provide: MatDialogRef, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: {} }
+      ]
     })
     .compileComponents();
 

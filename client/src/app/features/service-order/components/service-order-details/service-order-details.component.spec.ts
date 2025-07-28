@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ServiceOrderDetailsComponent } from './service-order-details.component';
 
@@ -8,7 +11,14 @@ describe('ServiceOrderDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ServiceOrderDetailsComponent]
+      imports: [
+        ServiceOrderDetailsComponent,
+        NoopAnimationsModule
+      ],
+      providers: [
+        provideHttpClient(withFetch()),
+        provideRouter([])
+      ]
     })
     .compileComponents();
 

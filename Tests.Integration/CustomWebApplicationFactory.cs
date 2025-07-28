@@ -13,7 +13,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureAppConfiguration((context, config) =>
         {
-            // 🔥 Tenta diferentes caminhos para o arquivo de configuração
+            
             var testConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "AppSettings.Tests.json");
             if (File.Exists(testConfigPath))
             {
