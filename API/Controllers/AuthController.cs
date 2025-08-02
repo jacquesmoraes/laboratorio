@@ -6,9 +6,7 @@
     {
         private readonly IIdentityService _identityService = identityService;
 
-        // ---------------------------
-        // REGISTRO
-        // ---------------------------
+        
 
         [HttpPost ( "register-admin" )]
         [Authorize ( Roles = "admin" )]
@@ -26,9 +24,7 @@
             return Ok ( result );
         }
 
-        // ---------------------------
-        // LOGIN
-        // ---------------------------
+       
 
         [HttpPost ( "login" )]
         public async Task<IActionResult> Login ( [FromBody] LoginDto dto )
@@ -37,9 +33,7 @@
             return Ok ( result );
         }
 
-        // ---------------------------
-        // PRIMEIRO ACESSO
-        // ---------------------------
+    
 
        
 

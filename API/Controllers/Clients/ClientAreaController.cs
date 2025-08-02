@@ -3,14 +3,15 @@
 namespace API.Controllers.Clients
 {
     [ApiController]
+     [Authorize(Roles = "client")]
     [Route ( "api/client-area" )]
     public class ClientAreaController (
         IClientAreaService clientAreaService,
         IPaymentService paymentService,
         IBillingService billingService,
         IServiceOrderService serviceOrderService,
-        ILogger<ClientAreaController> logger,
-        IWebHostEnvironment env
+        ILogger<ClientAreaController> logger
+        
     ) : ControllerBase
     {
         private readonly IClientAreaService _clientAreaService = clientAreaService;
@@ -18,7 +19,7 @@ namespace API.Controllers.Clients
         private readonly IBillingService _billingService = billingService;
         private readonly IServiceOrderService _serviceOrderService = serviceOrderService;
         private readonly ILogger<ClientAreaController> _logger = logger;
-        private readonly IWebHostEnvironment _env = env;
+        
         static ClientAreaController ( )
         {
             QuestPDF.Settings.License = LicenseType.Community;
@@ -147,22 +148,31 @@ namespace API.Controllers.Clients
         }
 
 
-        private int GetUserClientId ( )
+        private int GetUserClientId()
         {
-            var claim = User.FindFirst("clientId")?.Value;
-            if ( int.TryParse ( claim, out var clientId ) )
+            // Buscar o clientId do token JWT
+            var clientIdClaim = User.FindFirst("clientId")?.Value;
+            
+            if (string.IsNullOrEmpty(clientIdClaim))
             {
-                return clientId;
+                _logger.LogError("Token JWT não contém claim 'clientId'");
+                throw new UnauthorizedAccessException("Token inválido: clientId não encontrado.");
             }
 
-            if ( _env.IsDevelopment ( ) )
+            if (!int.TryParse(clientIdClaim, out var clientId))
             {
-                _logger.LogWarning ( "Development mode: using fallback clientId 6." );
-                return 6;
+                _logger.LogError("Claim 'clientId' não é um número válido: {ClientIdClaim}", clientIdClaim);
+                throw new UnauthorizedAccessException("Token inválido: clientId não é um número válido.");
             }
 
-            _logger.LogWarning ( "Unauthorized access attempt: missing or invalid clientId claim." );
-            throw new UnauthorizedAccessException ( "Invalid or missing clientId." );
+            if (clientId <= 0)
+            {
+                _logger.LogError("ClientId inválido: {ClientId}", clientId);
+                throw new UnauthorizedAccessException("Token inválido: clientId deve ser maior que zero.");
+            }
+
+            _logger.LogDebug("ClientId extraído do token: {ClientId}", clientId);
+            return clientId;
         }
 
 

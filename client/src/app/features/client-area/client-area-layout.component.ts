@@ -1,11 +1,13 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../core/services/auth.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-client-area-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet,RouterModule],
+  imports: [CommonModule, RouterOutlet,RouterModule, MatIconModule],
   template: `
     <div class="client-area-layout">
       <!-- Menu Mobile Toggle -->
@@ -28,8 +30,24 @@ import { CommonModule } from '@angular/common';
           <li><a routerLink="/client-area/invoices" routerLinkActive="active" (click)="closeMobileMenu()">Faturas</a></li>
           <li><a routerLink="/client-area/orders" routerLinkActive="active" (click)="closeMobileMenu()">Ordens de Serviço</a></li>
         </ul>
+
+        <div class="sidebar-footer">
+          <button class="logout-btn" (click)="logout()" title="Sair">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </div>
       </nav>
       <main class="client-area-content">
+      <header class="client-area-header">
+          <div class="header-content">
+            <h1>Área do Cliente</h1>
+            <button class="header-logout-btn" (click)="logout()" title="Sair">
+              <mat-icon>logout</mat-icon>
+              <span>Sair</span>
+            </button>
+          </div>
+        </header>
         <router-outlet></router-outlet>
       </main>
     </div>
@@ -38,6 +56,7 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientAreaLayoutComponent {
+  private authService = inject(AuthService);
   readonly mobileMenuOpen = signal(false);
 
   toggleMobileMenu() {
@@ -46,5 +65,8 @@ export class ClientAreaLayoutComponent {
 
   closeMobileMenu() {
     this.mobileMenuOpen.set(false);
+  }
+  logout(): void {
+    this.authService.logout();
   }
 }

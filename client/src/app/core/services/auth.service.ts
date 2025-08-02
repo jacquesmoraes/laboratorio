@@ -1,0 +1,124 @@
+import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import {
+  AuthResponse,
+  LoginRequest,
+  CompleteFirstAccessRequest,
+  RegisterAdminRequest,
+  RegisterClientRequest,
+  ResendAccessCodeResponse,
+  UserInfo,
+  
+} from '../models/auth.interface';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private tokenKey = 'auth_token';
+  private userKey = 'auth_user';
+private authBaseUrl = 'https://localhost:7058';
+  private userSignal = signal<UserInfo | null>(this.loadUser());
+  private tokenSignal = signal<string | null>(this.loadToken());
+
+  readonly isAuthenticated = computed(() => !!this.tokenSignal() && !!this.userSignal());
+  readonly user = computed(() => this.userSignal());
+  readonly token = computed(() => this.tokenSignal());
+
+  constructor(private http: HttpClient, private router: Router) {}
+
+
+  
+  async login(dto: LoginRequest): Promise<boolean> {
+    try {
+      const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.authBaseUrl}/auth/login`, dto));
+      if (res) this.setSession(res);
+      return !!res;
+    } catch {
+      return false;
+    }
+  }
+
+  async completeFirstAccess(dto: CompleteFirstAccessRequest): Promise<boolean> {
+    try {
+      const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.authBaseUrl}/auth/complete-first-access`, dto));
+      if (res) this.setSession(res);
+      return !!res;
+    } catch {
+      return false;
+    }
+  }
+
+  async registerAdmin(dto: RegisterAdminRequest): Promise<boolean> {
+    try {
+      await firstValueFrom(this.http.post(`${this.authBaseUrl}/auth/register-admin`, dto));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async registerClient(dto: RegisterClientRequest): Promise<boolean> {
+    try {
+      await firstValueFrom(this.http.post(`${this.authBaseUrl}/auth/register-client`, dto));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async resendAccessCode(clientId: number): Promise<string | null> {
+    try {
+      const res = await firstValueFrom(this.http.post<ResendAccessCodeResponse>(`${this.authBaseUrl}/auth/resend-access-code/${clientId}`, {}));
+      return res?.accessCode || null;
+    } catch {
+      return null;
+    }
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    this.userSignal.set(null);
+    this.tokenSignal.set(null);
+    this.router.navigate(['/login']);
+  }
+
+  isAdmin(): boolean {
+    return this.userSignal()?.role === 'admin';
+  }
+
+  isClient(): boolean {
+    return this.userSignal()?.role === 'client';
+  }
+
+  isFirstLogin(): boolean {
+    return this.userSignal()?.isFirstLogin ?? false;
+  }
+
+  getAccessCode(): string {
+    return this.userSignal()?.accessCode ?? '';
+  }
+
+  // Private helpers
+  private setSession(res: AuthResponse): void {
+    localStorage.setItem(this.tokenKey, res.token);
+    localStorage.setItem(this.userKey, JSON.stringify(res.user));
+    this.tokenSignal.set(res.token);
+    this.userSignal.set(res.user);
+  }
+
+  private loadToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  private loadUser(): UserInfo | null {
+    try {
+      const user = localStorage.getItem(this.userKey);
+      return user ? JSON.parse(user) : null;
+    } catch {
+      return null;
+    }
+  }
+}

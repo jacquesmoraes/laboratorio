@@ -86,7 +86,8 @@ global using static Core.FactorySpecifications.ScheduleSpecification;
 global using static Core.FactorySpecifications.SectorSpecifications.SectorSpecification;
 global using static Core.FactorySpecifications.ServiceOrderSpecifications.ServiceOrderSpecification;
 
-
+global using Applications.Projections.ClientArea;
+global using static Core.FactorySpecifications.ClientAreaSpecifications.ClientAreaBillingInvoiceSpecification;
 // ==========================
 // Mapping Utilities
 // ==========================

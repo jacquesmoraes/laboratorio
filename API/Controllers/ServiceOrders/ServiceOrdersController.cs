@@ -1,6 +1,4 @@
-﻿using Applications.Services;
-
-namespace API.Controllers.ServiceOrders
+﻿namespace API.Controllers.ServiceOrders
 {
     [ApiController]
     [Route ( "api/[controller]" )]

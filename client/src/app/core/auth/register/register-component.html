@@ -1,0 +1,233 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>Registrar Novo Usuário</mat-card-title>
+      <mat-card-subtitle>Apenas administradores podem registrar usuários</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Tipo de Usuário -->
+      <div class="user-type-section">
+        <h3>Tipo de Usuário</h3>
+        <mat-radio-group [(ngModel)]="userType" class="radio-group">
+          <mat-radio-button value="admin" class="radio-button">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>Administrador</span>
+          </mat-radio-button>
+          <mat-radio-button value="client" class="radio-button">
+            <mat-icon>person</mat-icon>
+            <span>Cliente</span>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Formulário Admin -->
+      @if (userType() === 'admin') {
+        <form (ngSubmit)="registerAdmin()" class="register-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome Completo</mat-label>
+            <input 
+              matInput 
+              [(ngModel)]="adminData().displayName" 
+              name="displayName"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>person</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome de Usuário</mat-label>
+            <input 
+              matInput 
+              [(ngModel)]="adminData().userName" 
+              name="userName"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>account_circle</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input 
+              matInput 
+              type="email" 
+              [(ngModel)]="adminData().email" 
+              name="email"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>email</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Senha</mat-label>
+            <input 
+              matInput 
+              type="password" 
+              [(ngModel)]="adminData().password" 
+              name="password"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>lock</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirmar Senha</mat-label>
+            <input 
+              matInput 
+              type="password" 
+              [(ngModel)]="adminData().confirmPassword" 
+              name="confirmPassword"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>lock_reset</mat-icon>
+          </mat-form-field>
+
+          @if (error()) {
+            <div class="error-message">
+              <mat-icon>error</mat-icon>
+              <span>{{ error() }}</span>
+            </div>
+          }
+
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            class="full-width"
+            [disabled]="loading()"
+          >
+            @if (loading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Registrando...</span>
+            } @else {
+              <ng-container>
+
+                <mat-icon>admin_panel_settings</mat-icon>
+                <span>Registrar Administrador</span>
+              </ng-container>
+              
+            }
+          </button>
+        </form>
+      }
+
+      <!-- Formulário Cliente -->
+      @if (userType() === 'client') {
+        <form (ngSubmit)="registerClient()" class="register-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Cliente</mat-label>
+            <mat-select 
+              [(ngModel)]="clientData().clientId" 
+              name="clientId"
+              required
+              [disabled]="loading()"
+            >
+              <mat-option value="">Selecione um cliente</mat-option>
+              @for (client of clients(); track client.clientId) {
+                <mat-option [value]="client.clientId">
+                  {{ client.clientName }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>business</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome Completo</mat-label>
+            <input 
+              matInput 
+              [(ngModel)]="clientData().displayName" 
+              name="displayName"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>person</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input 
+              matInput 
+              type="email" 
+              [(ngModel)]="clientData().email" 
+              name="email"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>email</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Senha</mat-label>
+            <input 
+              matInput 
+              type="password" 
+              [(ngModel)]="clientData().password" 
+              name="password"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>lock</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirmar Senha</mat-label>
+            <input 
+              matInput 
+              type="password" 
+              [(ngModel)]="clientData().confirmPassword" 
+              name="confirmPassword"
+              required
+              [disabled]="loading()"
+            />
+            <mat-icon matSuffix>lock_reset</mat-icon>
+          </mat-form-field>
+
+          @if (error()) {
+            <div class="error-message">
+              <mat-icon>error</mat-icon>
+              <span>{{ error() }}</span>
+            </div>
+          }
+
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            class="full-width"
+            [disabled]="loading()"
+          >
+            @if (loading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Registrando...</span>
+            } @else {
+              <ng-container>
+                <mat-icon>person_add</mat-icon>
+                <span>Registrar Cliente</span>
+              </ng-container>
+              
+            }
+          </button>
+        </form>
+      }
+
+      <mat-divider></mat-divider>
+
+      <button 
+        mat-stroked-button 
+        (click)="goBack()"
+        class="full-width back-button"
+      >
+        <mat-icon>arrow_back</mat-icon>
+        <span>Voltar</span>
+      </button>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,6 +1,4 @@
-﻿using Applications.Projections.ClientArea;
-
-namespace Applications.Mapping
+﻿namespace Applications.Mapping
 {
     public class ClientAreaMappingProfile : Profile
     {
@@ -40,7 +38,7 @@ namespace Applications.Mapping
                 .ForMember ( dest => dest.PatientName, opt => opt.MapFrom ( src => src.PatientName ) )
                 .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status ) )
                 .ForMember ( dest => dest.OrderTotal, opt => opt.MapFrom ( src => src.OrderTotal ) )
-               
+
                 .ForMember ( dest => dest.Works, opt => opt.MapFrom ( src => src.Works ) )
                 .ForMember ( dest => dest.Stages, opt => opt.MapFrom ( src => src.Stages ) );
 
@@ -79,8 +77,8 @@ namespace Applications.Mapping
     .ForMember ( dest => dest.Quantity, opt => opt.MapFrom ( src => src.Quantity ) )
     .ForMember ( dest => dest.PriceUnit, opt => opt.MapFrom ( src => src.PriceUnit ) )
     .ForMember ( dest => dest.Notes, opt => opt.MapFrom ( src => src.Notes ) )
-   .ForMember(dest => dest.ShadeColor, opt => opt.MapFrom(src => src.Shade != null ? src.Shade.color : string.Empty))
-.ForMember(dest => dest.ScaleName, opt => opt.MapFrom(src => src.Shade != null && src.Shade.Scale != null ? src.Shade.Scale.Name : string.Empty));
+   .ForMember ( dest => dest.ShadeColor, opt => opt.MapFrom ( src => src.Shade != null ? src.Shade.color : string.Empty ) )
+.ForMember ( dest => dest.ScaleName, opt => opt.MapFrom ( src => src.Shade != null && src.Shade.Scale != null ? src.Shade.Scale.Name : string.Empty ) );
 
 
 

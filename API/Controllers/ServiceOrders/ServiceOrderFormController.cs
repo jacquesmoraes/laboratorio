@@ -36,7 +36,7 @@
         [HttpGet ( "works-data" )]
         public async Task<IActionResult> GetFormWorksData ( )
         {
-            var workTypes = await _workTypeService.GetAllForFormAsync(); // agora válido
+            var workTypes = await _workTypeService.GetAllForFormAsync(); 
             var scales = await _scaleService.GetAllWithSpecAsync(new BaseSpecification<Scale>());
             var shades = await _shadeService.GetAllWithSpecAsync(ShadeSpecs.AllWithScale());
 

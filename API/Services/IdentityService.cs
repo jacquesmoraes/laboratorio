@@ -79,7 +79,7 @@
                 ?? throw new UnauthorizedAccessException("Invalid credentials.");
 
             if ( !user.IsActive )
-                throw new UnauthorizedAccessException ( "Account is deactivated." );
+                throw new UnauthorizedAccessException ( "Account is not activated." );
 
             if ( !await _userManager.CheckPasswordAsync ( user, dto.Password ) )
             {

@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, signal } from "@angular/core";
+import { Component, ChangeDetectionStrategy, signal, inject } from "@angular/core";
 import { RouterOutlet, RouterLink, RouterLinkActive } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { MatIcon } from "@angular/material/icon";
+import { AuthService } from "../../../core/services/auth.service";
 
 @Component({
   selector: 'app-layout',
@@ -12,6 +13,7 @@ import { MatIcon } from "@angular/material/icon";
   styleUrls: ['./layout.component.scss']
 })
 export class LayoutComponent {
+  private authService = inject(AuthService);
   sidebarOpen = signal(false);
 
   toggleSidebar() {
@@ -20,5 +22,8 @@ export class LayoutComponent {
 
   closeSidebar() {
     this.sidebarOpen.set(false);
+  }
+  logout(): void {
+    this.authService.logout();
   }
 }

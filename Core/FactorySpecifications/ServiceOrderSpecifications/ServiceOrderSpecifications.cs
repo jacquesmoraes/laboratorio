@@ -30,12 +30,7 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
                 return spec;
             }
 
-            public static ServiceOrderSpecification AvailableForScheduling ( )
-            {
-                var spec = new ServiceOrderSpecification(o => o.Status != OrderStatus.Finished);
-                AddFullIncludes ( spec );
-                return spec;
-            }
+            
             public static ServiceOrderSpecification ByIds ( List<int> ids )
             {
                 var spec = new ServiceOrderSpecification(o => ids.Contains(o.ServiceOrderId));
@@ -65,20 +60,7 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
                 return spec;
             }
 
-            public static ServiceOrderSpecification Filtered ( string? status, int? clientId, DateTime? start, DateTime? end )
-            {
-                Expression<Func<ServiceOrder, bool>> criteria = x =>
-                    (string.IsNullOrEmpty(status) || x.Status.ToString() == status) &&
-                    (!clientId.HasValue || x.ClientId == clientId.Value) &&
-                    (!start.HasValue || x.DateIn >= start.Value) &&
-                    (!end.HasValue || x.DateIn <= end.Value);
-
-                var spec = new ServiceOrderSpecification(criteria);
-                AddFullIncludes ( spec );
-
-                return spec;
-            }
-
+            
             // ✅ NOVO: Paginação, filtro e ordenação dinâmicos
             public static ServiceOrderSpecification Paged ( ServiceOrderParams p )
             {

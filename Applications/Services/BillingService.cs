@@ -1,7 +1,4 @@
-﻿using Applications.Projections.ClientArea;
-using static Core.FactorySpecifications.ClientAreaSpecifications.ClientAreaBillingInvoiceSpecification;
-
-namespace Applications.Services
+﻿namespace Applications.Services
 {
     public class BillingService (
         IGenericRepository<BillingInvoice> invoiceRepo,

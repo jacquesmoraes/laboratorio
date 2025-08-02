@@ -5,11 +5,13 @@
     {
         public DateTime Resolve ( ServiceOrder src, ServiceOrderAlertRecord dest, DateTime member, ResolutionContext context )
         {
-            // Se a ordem não está em TryIn, nem faz sentido calcular
+            //if the order is not in TryIn, it doesn't make sense to calculate
+            
             if ( src.Status != OrderStatus.TryIn )
                 return DateTime.MinValue;
 
-            // Pega o último Stage registrado (independente do setor) enquanto a OS já estava em TryIn
+            //take the least stage registered independent of the sector while the service order was in TryIn
+            
             var tryInStage = src.Stages
             .OrderByDescending(s => s.DateIn)
             .FirstOrDefault();

@@ -4,14 +4,14 @@
     {
         public BillingInvoiceProfile ( )
         {
-            // Projeção para tela (resumo de fatura)
+            
             CreateMap<BillingInvoice, BillingInvoiceResponseProjection> ( )
                 .ForMember ( dest => dest.TotalInvoiceAmount,
                     opt => opt.MapFrom ( src => src.TotalServiceOrdersAmount + src.PreviousDebit - src.PreviousCredit ) )
                 .ForMember ( dest => dest.TotalPaid,
                     opt => opt.MapFrom ( src => src.Payments != null ? src.Payments.Sum ( p => p.AmountPaid ) : 0m ) );
 
-            // Projeção principal para geração de PDF
+            
             CreateMap<BillingInvoice, BillingInvoiceRecord> ( )
                 .ForMember ( dest => dest.ClientId, opt => opt.MapFrom ( src => src.ClientId ) );
 
