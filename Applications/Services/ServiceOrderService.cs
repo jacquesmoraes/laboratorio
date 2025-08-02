@@ -10,7 +10,8 @@ namespace Applications.Services
         IGenericRepository<Client> clientRepo,
         IGenericRepository<Sector> sectorRepo,
         IGenericRepository<ServiceOrderSchedule> scheduleRepo,
-        IUnitOfWork uow )
+        IUnitOfWork uow,
+        IPerformanceLoggingService perfLogger )
         : GenericService<ServiceOrder> ( orderRepo ), IServiceOrderService
     {
         private readonly IMapper _mapper = mapper;
@@ -19,39 +20,46 @@ namespace Applications.Services
         private readonly IGenericRepository<Sector>       _sectorRepo = sectorRepo;
         private readonly IGenericRepository<ServiceOrderSchedule> _scheduleRepo = scheduleRepo;
         private readonly IUnitOfWork _uow = uow;
+        private readonly IPerformanceLoggingService _perfLogger = perfLogger;
 
 
         public async Task<ServiceOrder> CreateOrderAsync ( CreateServiceOrderDto dto )
         {
-            await using var tx = await _uow.BeginTransactionAsync();
-
-            var client = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(dto.ClientId))
-        ?? throw new NotFoundException("Client not found.");
-
-            var order = _mapper.Map<ServiceOrder>(dto);
-            order.ClientId = client.ClientId;
-            order.Client = client;
-            order.OrderNumber = await GenerateOrderNumberAsync ( client.ClientId );
-            order.Status = OrderStatus.Production;
-            order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
-
-            var firstSector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.FirstSectorId))
-        ?? throw new NotFoundException("Initial sector not found.");
-
-            order.Stages.Add ( new ProductionStage
+            using ( _perfLogger.MeasureOperation ( "CreateServiceOrder", new Dictionary<string, object>
             {
-                Sector = firstSector,
-                SectorId = firstSector.SectorId,
-                DateIn = DateTime.SpecifyKind ( dto.DateIn, DateTimeKind.Utc ),
-                ServiceOrder = order
-            } );
+                ["ClientId"] = dto.ClientId
+            } ) )
+            {
+                await using var tx = await _uow.BeginTransactionAsync();
 
-            await _orderRepo.CreateAsync ( order );
-            await _uow.SaveChangesAsync ( );
-            await tx.CommitAsync ( );
+                var client = await _clientRepo.GetEntityWithSpec(ClientSpecs.ById(dto.ClientId))
+            ?? throw new NotFoundException("Client not found.");
 
-            var fullOrder = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(order.ServiceOrderId));
-            return fullOrder!;
+                var order = _mapper.Map<ServiceOrder>(dto);
+                order.ClientId = client.ClientId;
+                order.Client = client;
+                order.OrderNumber = await GenerateOrderNumberAsync ( client.ClientId );
+                order.Status = OrderStatus.Production;
+                order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
+
+                var firstSector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.FirstSectorId))
+            ?? throw new NotFoundException("Initial sector not found.");
+
+                order.Stages.Add ( new ProductionStage
+                {
+                    Sector = firstSector,
+                    SectorId = firstSector.SectorId,
+                    DateIn = DateTime.SpecifyKind ( dto.DateIn, DateTimeKind.Utc ),
+                    ServiceOrder = order
+                } );
+
+                await _orderRepo.CreateAsync ( order );
+                await _uow.SaveChangesAsync ( );
+                await tx.CommitAsync ( );
+
+                var fullOrder = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(order.ServiceOrderId));
+                return fullOrder!;
+            }
         }
 
         public async Task<ServiceOrder?> MoveToStageAsync ( MoveToStageDto dto )
@@ -109,6 +117,21 @@ namespace Applications.Services
             return order;
         }
 
+        public async Task<Pagination<ServiceOrderListDto>> GetPaginatedLightAsync ( ServiceOrderParams p )
+        {
+            var spec = ServiceOrderSpecs.PagedLightForLists(p);
+            var countSpec = ServiceOrderSpecs.PagedForCount(p);
+
+            var totalItems = await _orderRepo.CountAsync(countSpec);
+            var items = await _orderRepo.GetAllAsync(spec);
+
+            var data = _mapper.Map<IReadOnlyList<ServiceOrderListDto>>(items);
+
+            return new Pagination<ServiceOrderListDto> ( p.PageNumber, p.PageSize, totalItems, data );
+        }
+
+
+
         public async Task<List<ServiceOrder>> FinishOrdersAsync ( FinishOrderDto dto )
         {
             await using var tx = await _uow.BeginTransactionAsync();
@@ -136,11 +159,6 @@ namespace Applications.Services
 
             var localTime = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Local);
             var dateOutUtc = localTime.ToUniversalTime();
-
-            foreach ( var order in serviceOrders )
-            {
-                ServiceOrderDateValidator.ValidateFinishDate ( serviceOrders.First ( ), dateOutUtc );
-            }
 
             foreach ( var order in serviceOrders )
             {

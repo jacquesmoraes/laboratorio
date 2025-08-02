@@ -1,7 +1,7 @@
 ﻿using Core.Enums;
+using Core.Exceptions;
 using Core.Models.Billing;
 using Core.Models.Clients;
-using Core.Models.Production;
 using Core.Models.Works;
 
 
@@ -55,10 +55,11 @@ namespace Core.Models.ServiceOrders
 
 
 
+
         public void MoveTo ( Sector sector, DateTime dateIn )
         {
             if ( Status == OrderStatus.Finished )
-                throw new InvalidOperationException ( "A ordem já está finalizada." );
+                throw new BusinessRuleException ( "A ordem já está finalizada." );
 
             // Finaliza o estágio anterior, se ainda estiver aberto
             var last = Stages.LastOrDefault();
@@ -80,11 +81,11 @@ namespace Core.Models.ServiceOrders
         public void SendToTryIn ( DateTime dateOut )
         {
             if ( Stages == null || !Stages.Any ( ) )
-                throw new InvalidOperationException ( "A ordem de serviço não possui estágios." );
+                throw new BusinessRuleException ( "A ordem de serviço não possui estágios." );
 
             var openStage = Stages.FirstOrDefault(s => s.DateOut == null);
             if ( openStage == null )
-                throw new InvalidOperationException ( "Não há estágio aberto para enviar para prova." );
+                throw new BusinessRuleException ( "Não há estágio aberto para enviar para prova." );
 
             openStage.DateOut = dateOut;
             Status = OrderStatus.TryIn;
@@ -96,7 +97,7 @@ namespace Core.Models.ServiceOrders
         {
             var last = Stages.LastOrDefault();
             if ( last == null || last.DateOut != null )
-                throw new InvalidOperationException ( "Não há estágio aberto para finalizar." );
+                throw new BusinessRuleException ( "Não há estágio aberto para finalizar." );
 
             last.DateOut = dateOut;
             Status = OrderStatus.Finished;

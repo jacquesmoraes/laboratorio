@@ -23,6 +23,12 @@ namespace Core.FactorySpecifications
             : base(criteria)
         {
         }
+        public WorkTypeSpecification(Expression<Func<WorkType, bool>> criteria, bool includeRelations = false)
+            : base(criteria)
+        {
+            if (includeRelations)
+                AddInclude(x => x.WorkSection);
+        }
     }
 
     public static class WorkTypeSpecs
@@ -30,6 +36,7 @@ namespace Core.FactorySpecifications
         public static WorkTypeSpecification All() => new(includeRelations: true);
         public static WorkTypeSpecification ById(int id) => new(id);
         public static WorkTypeSpecification ByIdWithRelations(int id) => new(id, includeRelations: true);
+          public static WorkTypeSpecification AllForForm() => new(x => x.IsActive == true, includeRelations: false);
 
         public static WorkTypeSpecification ByIds(IEnumerable<int> ids)
             => new(w => ids.Contains(w.Id));

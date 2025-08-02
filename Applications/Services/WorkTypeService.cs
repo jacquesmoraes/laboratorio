@@ -17,5 +17,11 @@
             var spec = WorkTypeSpecs.ByIdWithRelations(id);
             return GetEntityWithSpecAsync ( spec );
         }
+
+        public Task<IReadOnlyList<WorkType>> GetAllForFormAsync ( )
+        {
+            var spec = WorkTypeSpecs.AllForForm();
+            return GetAllWithSpecAsync ( spec );
+        }
     }
 }

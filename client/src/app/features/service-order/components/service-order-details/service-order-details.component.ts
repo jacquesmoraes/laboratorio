@@ -145,6 +145,7 @@ updateSchedule() {
           dialogRef.afterClosed().subscribe((success) => {
             if (success) {
               this.snackBar.open('Agendamento atualizado!', 'Fechar', { duration: 3000 });
+              this.reloadSchedule(order.serviceOrderId);
             }
           });
         },
@@ -161,6 +162,7 @@ updateSchedule() {
           dialogRef.afterClosed().subscribe((success) => {
             if (success) {
               this.snackBar.open('Agendamento criado!', 'Fechar', { duration: 3000 });
+              this.reloadSchedule(order.serviceOrderId);
             }
           });
         }
@@ -201,5 +203,16 @@ updateSchedule() {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
+  }
+
+  private reloadSchedule(serviceOrderId: number) {
+    this.scheduleService.getActiveScheduleByServiceOrder(serviceOrderId).subscribe({
+      next: (schedule) => {
+        this.schedule.set(schedule);
+      },
+      error: () => {
+        this.schedule.set(null);
+      }
+    });
   }
 }

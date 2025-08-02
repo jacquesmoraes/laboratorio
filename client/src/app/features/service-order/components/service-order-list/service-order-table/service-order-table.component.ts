@@ -64,9 +64,9 @@ export interface TableActionEvent {
             <td data-label="Paciente">{{ order.patientName }}</td>
             <td data-label="Data Entrada">{{ order.dateIn | date: 'dd/MM/yyyy' }}</td>
             <td data-label="Última Movimentação">
-              <span *ngIf="order.lastMovementDate; else noMovement">
-                {{ order.lastMovementDate | date: 'dd/MM/yyyy' }}
-              </span>
+            <span *ngIf="order.lastMovement; else noMovement">
+    {{ order.lastMovement | date: 'dd/MM/yyyy' }}
+  </span>
               <ng-template #noMovement>
                 <span class="text-muted">-</span>
               </ng-template>
@@ -135,10 +135,10 @@ export class ServiceOrderTableComponent {
   readonly statusClasses = SERVICE_ORDER_LIST_CONFIG.statusClasses;
 
   isFinished(status: OrderStatus | string | number): boolean {
-  // Resolve status mesmo que venha como string
-  const resolved = typeof status === 'string' ? this.statusMap[status] : Number(status);
-  return resolved === OrderStatus.Finished;
-}
+    // Resolve status mesmo que venha como string
+    const resolved = typeof status === 'string' ? this.statusMap[status] : Number(status);
+    return resolved === OrderStatus.Finished;
+  }
   onSelectionChange(orderId: number) {
     this.selectionChange.emit(orderId);
   }

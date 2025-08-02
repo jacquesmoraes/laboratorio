@@ -11,8 +11,8 @@
         public async Task<IActionResult> GetAll ( [FromQuery] int? scaleId )
         {
             var spec = scaleId.HasValue
-                ? ShadeSpecifications.ByScaleId(scaleId.Value)
-                : ShadeSpecifications.All();
+    ? ShadeSpecs.ByScaleId(scaleId.Value)
+    : ShadeSpecs.AllWithScale();
 
             var shades = await _shadeService.GetAllWithSpecAsync(spec);
             return Ok ( _mapper.Map<List<ShadeRecord>> ( shades ) );
@@ -21,7 +21,7 @@
         [HttpGet ( "{id}" )]
         public async Task<IActionResult> GetById ( int id )
         {
-            var spec = ShadeSpecifications.ById(id);
+            var spec = ShadeSpecs.ById(id);
             var shade = await _shadeService.GetEntityWithSpecAsync(spec);
             return shade == null
                 ? NotFound ( )

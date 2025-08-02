@@ -132,6 +132,22 @@ namespace Core.FactorySpecifications.ClientsSpecifications
 
                 return spec;
             }
+            public static ClientSpecification AllForForm ( )
+            {
+                var spec = new ClientSpecification();
+                spec.AddInclude ( x => x.TablePrice! );
+                spec.AddInclude ( x => x.Address );
+                return spec;
+            }
+
+            public static ClientSpecification AllForForm ( int id )
+            {
+                var spec = new ClientSpecification(id);
+                spec.AddInclude ( x => x.TablePrice! );
+                spec.AddInclude ( x => x.Address );
+                return spec;
+            }
+
 
 
             public static ClientSpecification ByIdWithInvoices ( int id )

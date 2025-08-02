@@ -26,6 +26,8 @@
                     BadRequestException => HandleBadRequestException(ex),
                     UnauthorizedAccessException => HandleUnauthorizedException(ex),
                     ForbiddenException => HandleForbiddenException(ex),
+                    BusinessRuleException => HandleBusinessRuleException(ex),
+
                     NotFoundException => HandleNotFoundException(ex),
                     ConflictException => HandleConflictException(ex),
                     UnprocessableEntityException => HandleUnprocessableEntityException(ex),
@@ -77,6 +79,9 @@
 
         private ApiResponse HandleForbiddenException(Exception ex) =>
             new ApiException(403, ex.Message);
+
+        private ApiResponse HandleBusinessRuleException(Exception ex) =>
+    new ApiException(400, ex.Message);
 
         private ApiResponse HandleInvalidException(Exception ex) =>
             new ApiException(400, "Invalid operation: " + ex.Message);

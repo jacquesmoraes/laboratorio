@@ -106,6 +106,29 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
 
                 return spec;
             }
+            public static ServiceOrderSpecification PagedLightForLists ( ServiceOrderParams p )
+            {
+                Expression<Func<ServiceOrder, bool>> criteria = o =>
+        (!p.ClientId.HasValue || o.ClientId == p.ClientId) &&
+        (!p.Status.HasValue || o.Status == p.Status) &&
+
+        (!p.ExcludeFinished || o.Status != OrderStatus.Finished) &&
+        (string.IsNullOrEmpty(p.Search) ||
+            o.PatientName.ToLower().Contains(p.Search.ToLower()) ||
+            o.Client.ClientName.ToLower().Contains(p.Search.ToLower())) &&
+        (!p.StartDate.HasValue || o.DateIn >= p.StartDate.Value) &&
+        (!p.EndDate.HasValue || o.DateIn <= p.EndDate.Value) &&
+        (!p.ExcludeInvoiced || o.BillingInvoiceId == null);
+
+                var spec = new ServiceOrderSpecification(criteria);
+                spec.AddInclude ( o => o.Client );
+                spec.AddInclude ( o => o.Stages ); // necessário para último setor
+                spec.AddInclude("Stages.Sector");
+                spec.ApplySorting ( p.Sort );
+                spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
+
+                return spec;
+            }
 
             public static ServiceOrderSpecification PagedForCount ( ServiceOrderParams p )
             {

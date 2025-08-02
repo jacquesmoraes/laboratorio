@@ -41,6 +41,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { ScheduleDeliveryModalComponent } from '../schedule-delivery-modal/schedule-delivery-modal.component';
+import { ClientFormData, ScaleFormData, SectorFormData, ShadeFormData, WorkTypeFormData } from '../../../sectors/models/serviceOrderForm.interface';
 
 @Component({
   selector: 'app-service-order-form',
@@ -71,11 +72,7 @@ export class ServiceOrderFormComponent implements OnInit {
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
-  private clientService = inject(ClientService);
-  private sectorService = inject(SectorService);
-  private workTypeService = inject(WorkTypeService);
-  private scaleService = inject(ScaleService);
-  private shadeService = inject(ShadeService);
+
   private tablePriceService = inject(TablePriceService);
 
   serviceOrderForm!: FormGroup;
@@ -83,16 +80,19 @@ export class ServiceOrderFormComponent implements OnInit {
   loading = signal(false);
   serviceOrderId = signal<number | null>(null);
   shadesByWorkIndex = signal<Record<number, { shadeId: number; shadeColor: string }[]>>({});
-  clients = signal<{ clientId: number; clientName: string }[]>([]);
-  sectors = signal<{ sectorId: number; sectorName: string }[]>([]);
-  workTypes = signal<{ workTypeId: number; workTypeName: string }[]>([]);
-  shades = signal<{ shadeId: number; shadeColor: string; scaleId: number | null }[]>([]);
+  clients = signal<ClientFormData[]>([]);
+  sectors = signal<SectorFormData[]>([]);
+  workTypes = signal<WorkTypeFormData[]>([]);
+  shades = signal<ShadeFormData[]>([]);
+  scales = signal<ScaleFormData[]>([]);
+  basicDataLoaded = signal(false);
+  worksDataLoaded = signal(false);
+  loadingWorksData = signal(false);
 
-  scales = signal<{ scaleId: number; scaleName: string }[]>([]);
 
   ngOnInit() {
     this.initializeForm();
-    this.loadFormData();
+    this.loadBasicData();
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -100,6 +100,7 @@ export class ServiceOrderFormComponent implements OnInit {
       this.serviceOrderId.set(Number(id));
       this.loadServiceOrder(Number(id));
     }
+    this.setupFormListeners();
   }
 
   initializeForm() {
@@ -122,45 +123,28 @@ export class ServiceOrderFormComponent implements OnInit {
     });
   }
 
-  loadFormData() {
+  loadBasicData() {
+    
     this.loading.set(true);
 
-    this.clientService.getClients().subscribe({
-      next: clients => this.clients.set(clients),
-      error: () => this.showError('Erro ao carregar clientes')
-    });
+    this.serviceOrdersService.getBasicFormData().subscribe({
+      next: (data) => {
+        
 
-    this.sectorService.getAll().subscribe({
-      next: sectors => this.sectors.set(
-        sectors.map(s => ({ sectorId: s.id, sectorName: s.name }))
-      ),
-      error: () => this.showError('Erro ao carregar setores')
-    });
+        // ✅ SIMPLIFICADO: Usar objetos completos da API
+        this.clients.set(data.clients);
+        this.sectors.set(data.sectors);
 
-    this.workTypeService.getAll().subscribe({
-      next: workTypes => this.workTypes.set(
-        workTypes
-        .filter(w => w.isActive)
-        .map(w => ({ workTypeId: w.id, workTypeName: w.name }))
-      ),
-      error: () => this.showError('Erro ao carregar tipos de trabalho')
+        this.basicDataLoaded.set(true);
+        this.loading.set(false);
+        
+      },
+      error: (error) => {
+        
+        this.showError('Erro ao carregar dados básicos');
+        this.loading.set(false);
+      }
     });
-
-    this.scaleService.getAll().subscribe({
-      next: scales => this.scales.set(
-        scales.map(s => ({ scaleId: s.id, scaleName: s.name }))
-      ),
-      error: () => this.showError('Erro ao carregar escalas')
-    });
-
-    this.shadeService.getAll().subscribe({
-      next: shades => this.shades.set(
-        shades.map(s => ({ shadeId: s.id, shadeColor: s.color ?? '', scaleId: s.scaleId ?? null }))
-      ),
-      error: () => this.showError('Erro ao carregar cores')
-    });
-
-    this.loading.set(false);
   }
 
   loadServiceOrder(id: number) {
@@ -199,21 +183,39 @@ export class ServiceOrderFormComponent implements OnInit {
     });
   }
 
-  private getShadeIdByName(shadeColor?: string): number | undefined {
-    return this.shades().find(s => s.shadeColor === shadeColor)?.shadeId;
+
+  loadWorksDataIfNeeded() {
+    if (this.worksDataLoaded() || this.loadingWorksData()) return;
+
+    const clientId = this.serviceOrderForm.get('clientId')?.value;
+    const sectorId = this.serviceOrderForm.get('firstSectorId')?.value;
+
+    if (!clientId || !sectorId) return;
+
+    this.loadingWorksData.set(true);
+
+    this.serviceOrdersService.getWorksFormData().subscribe({
+      next: (data) => {
+        console.log('🔵 ServiceOrderFormComponent - getWorksFormData sucesso:', data);
+
+        // ✅ SIMPLIFICADO: Usar objetos completos da API
+        this.workTypes.set(data.workTypes);
+        this.scales.set(data.scales);
+        this.shades.set(data.shades);
+
+        this.worksDataLoaded.set(true);
+        this.loadingWorksData.set(false);
+        console.log('✅ ServiceOrderFormComponent - dados de works carregados:', data);
+      },
+      error: (error) => {
+        console.error('❌ ServiceOrderFormComponent - getWorksFormData erro:', error);
+        this.showError('Erro ao carregar dados de works');
+        this.loadingWorksData.set(false);
+      }
+    });
   }
 
-  private getSectorIdByName(sectorName?: string): number | undefined {
-    return this.sectors().find(s => s.sectorName === sectorName)?.sectorId;
-  }
 
-  private getScaleIdByName(scaleName?: string): number | undefined {
-    return this.scales().find(s => s.scaleName === scaleName)?.scaleId;
-  }
-
-  get worksArray() {
-    return this.serviceOrderForm.get('works') as FormArray;
-  }
 
   createWorkFormGroup(work?: Partial<CreateWorkDto>): FormGroup {
     const workGroup = this.fb.group({
@@ -238,41 +240,27 @@ export class ServiceOrderFormComponent implements OnInit {
     return workGroup;
   }
 
-
-  private filterShadesForWork(scaleId: number | null | undefined, index: number) {
-    if (!scaleId) {
-      this.shadesByWorkIndex.update(state => ({ ...state, [index]: this.shades() }));
-      return;
-    }
-
-    const filtered = this.shades().filter(shade => shade.scaleId === scaleId);
-    this.shadesByWorkIndex.update(state => ({ ...state, [index]: filtered }));
-  }
-
-  private loadPriceForWorkType(workGroup: FormGroup, workTypeId: number) {
-    const clientId = this.serviceOrderForm.get('clientId')?.value;
-
-    if (!clientId) {
-      this.snackBar.open('Selecione um cliente primeiro', 'Fechar', {
-        duration: 3000,
-        panelClass: ['warning-snackbar']
-      });
-      return;
-    }
-
-    this.tablePriceService.getPriceByClientAndWorkType(clientId, workTypeId).subscribe({
-      next: (result) => {
-        if (result?.price != null) {
-          workGroup.patchValue({ priceUnit: result.price });
-        }
-      }
-      ,
-      error: () => {
-        console.log('Erro ao buscar preço');
-      }
+  setupFormListeners() {
+    // Listener para cliente
+    this.serviceOrderForm.get('clientId')?.valueChanges.subscribe(() => {
+      this.checkAndLoadWorksData();
     });
 
+    // Listener para setor
+    this.serviceOrderForm.get('firstSectorId')?.valueChanges.subscribe(() => {
+      this.checkAndLoadWorksData();
+    });
   }
+
+  checkAndLoadWorksData() {
+    const clientId = this.serviceOrderForm.get('clientId')?.value;
+    const sectorId = this.serviceOrderForm.get('firstSectorId')?.value;
+
+    if (clientId && sectorId && !this.worksDataLoaded()) {
+      this.loadWorksDataIfNeeded();
+    }
+  }
+
 
   addWork() {
     this.worksArray.push(this.createWorkFormGroup());
@@ -283,16 +271,16 @@ export class ServiceOrderFormComponent implements OnInit {
   }
 
   onSubmit() {
-   this.worksArray.controls.forEach((workGroup, index) => {
+    this.worksArray.controls.forEach((workGroup, index) => {
     });
     if (this.serviceOrderForm.invalid) {
-     
+
       this.markFormGroupTouched();
       return;
     }
     this.loading.set(true);
     const formValue = this.serviceOrderForm.value;
-     const serviceOrderData: CreateServiceOrderDto = {
+    const serviceOrderData: CreateServiceOrderDto = {
       clientId: formValue.clientId,
       dateIn: (formValue.dateIn as Date).toISOString(),
       patientName: formValue.patientName,
@@ -302,7 +290,7 @@ export class ServiceOrderFormComponent implements OnInit {
     const request = this.isEditMode()
       ? this.serviceOrdersService.updateServiceOrder(this.serviceOrderId()!, serviceOrderData)
       : this.serviceOrdersService.createServiceOrder(serviceOrderData);
-   request.subscribe({
+    request.subscribe({
       next: result => {
         this.loading.set(false);
         this.snackBar.open(
@@ -310,25 +298,28 @@ export class ServiceOrderFormComponent implements OnInit {
           'Fechar',
           { duration: 3000, panelClass: ['success-snackbar'] }
         );
-       const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
-  width: '400px',
-  data: {
-    serviceOrderId: result.serviceOrderId,
-    sectors: this.sectors()
-  }
-});
+         const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
+        width: '400px',
+        data: {
+          serviceOrderId: result.serviceOrderId,
+          sectors: this.sectors().map(s => ({
+            sectorId: s.sectorId,
+            sectorName: s.name // ✅ CORRIGIDO: Usar s.name em vez de s.sectorName
+          }))
+        }
+      });
 
-dialogRef.afterClosed().subscribe(scheduleSuccess => {
-  if (scheduleSuccess) {
-    this.snackBar.open('Entrega agendada com sucesso!', 'Fechar', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
-  }
+        dialogRef.afterClosed().subscribe(scheduleSuccess => {
+          if (scheduleSuccess) {
+            this.snackBar.open('Entrega agendada com sucesso!', 'Fechar', {
+              duration: 3000,
+              panelClass: ['success-snackbar']
+            });
+          }
 
-  // Depois do modal, navegue para detalhes da OS
-  this.router.navigate(['service-orders', result.serviceOrderId]);
-});
+          // Depois do modal, navegue para detalhes da OS
+          this.router.navigate(['service-orders', result.serviceOrderId]);
+        });
 
       },
       error: (error) => {
@@ -351,7 +342,9 @@ dialogRef.afterClosed().subscribe(scheduleSuccess => {
   cancel() {
     this.router.navigate(['service-orders']);
   }
-
+  getShadesForWork(index: number) {
+    return this.shadesByWorkIndex()[index] || this.shades();
+  }
   getErrorMessage(controlName: string): string {
     const control = this.serviceOrderForm.get(controlName);
     if (control?.hasError('required')) return 'Este campo é obrigatório';
@@ -380,12 +373,82 @@ dialogRef.afterClosed().subscribe(scheduleSuccess => {
   trackByIndex(index: number): number {
     return index;
   }
+  trackByShadeId(index: number, shade: { shadeId: number; shadeColor: string }): number {
+    return shade.shadeId;
+  }
+  
 
+
+
+
+
+
+
+
+
+  private getShadeIdByName(shadeColor?: string): number | undefined {
+    return this.shades().find(s => s.color === shadeColor)?.id;
+  }
+
+  private getSectorIdByName(sectorName?: string): number | undefined {
+    return this.sectors().find(s => s.name === sectorName)?.sectorId;
+  }
+
+  private getScaleIdByName(scaleName?: string): number | undefined {
+    return this.scales().find(s => s.name === scaleName)?.id;
+  }
+  get worksArray() {
+    return this.serviceOrderForm.get('works') as FormArray;
+  }
   private showError(message: string) {
     this.loading.set(false);
     this.snackBar.open(message, 'Fechar', {
       duration: 3000,
       panelClass: ['error-snackbar']
     });
+  }
+
+  private filterShadesForWork(scaleId: number | null | undefined, index: number) {
+    if (!scaleId) {
+      const mappedShades = this.shades().map(shade => ({
+        shadeId: shade.id,
+        shadeColor: shade.color
+      }));
+      this.shadesByWorkIndex.update(state => ({ ...state, [index]: mappedShades }));
+      return;
+    }
+
+    const filtered = this.shades()
+      .filter(shade => shade.scaleId === scaleId)
+      .map(shade => ({
+        shadeId: shade.id,
+        shadeColor: shade.color
+      }));
+    this.shadesByWorkIndex.update(state => ({ ...state, [index]: filtered }));
+  }
+
+  private loadPriceForWorkType(workGroup: FormGroup, workTypeId: number) {
+    const clientId = this.serviceOrderForm.get('clientId')?.value;
+
+    if (!clientId) {
+      this.snackBar.open('Selecione um cliente primeiro', 'Fechar', {
+        duration: 3000,
+        panelClass: ['warning-snackbar']
+      });
+      return;
+    }
+
+    this.tablePriceService.getPriceByClientAndWorkType(clientId, workTypeId).subscribe({
+      next: (result) => {
+        if (result?.price != null) {
+          workGroup.patchValue({ priceUnit: result.price });
+        }
+      }
+      ,
+      error: () => {
+        console.log('Erro ao buscar preço');
+      }
+    });
+
   }
 }

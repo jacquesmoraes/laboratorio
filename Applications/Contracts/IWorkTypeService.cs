@@ -4,5 +4,6 @@
     {
         Task<IReadOnlyList<WorkType>> GetAllWithSectionsAsync ( );
         Task<WorkType?> GetByIdWithSectionAsync ( int id );
+        Task<IReadOnlyList<WorkType>> GetAllForFormAsync();
     }
 }

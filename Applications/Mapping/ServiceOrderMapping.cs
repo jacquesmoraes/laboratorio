@@ -20,6 +20,13 @@
       .ForMember ( dest => dest.Subtotal, opt => opt.MapFrom ( src =>
           src.Works != null ? src.Works.Sum ( w => w.Quantity * w.PriceUnit ) : 0 ) );
 
+            CreateMap<ServiceOrder, ServiceOrderListDto>()
+    .ForMember(dest => dest.ClientName, opt => opt.MapFrom(src => src.Client.ClientName))
+        .ForMember(dest => dest.OrderTotal, opt => opt.MapFrom(src => src.OrderTotal))
+    .ForMember(dest => dest.LastMovement, opt => opt.MapFrom<LastMovementDateForListDtoResolver>())
+    .ForMember(dest => dest.CurrentSectorName, opt => opt.MapFrom<CurrentSectorNameForListDtoResolver>());
+
+
 
 
             CreateMap<ServiceOrder, ServiceOrderDetailsProjection> ( )

@@ -40,8 +40,8 @@ export class SectorService {
     }).pipe(
       map(apiSector => ({
         id: apiSector.sectorId,
-        name: apiSector.name,
-        description: sector.description,
+        name: apiSector.name
+        
         
       }))
     );
@@ -54,8 +54,8 @@ export class SectorService {
     }).pipe(
       map(apiSector => ({
         id: apiSector.sectorId,
-        name: apiSector.name,
-        description: sector.description,
+        name: apiSector.name
+        
         
       }))
     );

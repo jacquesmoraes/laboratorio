@@ -9,7 +9,7 @@ export interface ServiceOrder {
   clientId: number;
   orderTotal: number;
   currentSectorName?: string;
-  lastMovementDate?: string;
+  lastMovement?: string;
 }
 
 export interface ServiceOrderDetails extends ServiceOrder {

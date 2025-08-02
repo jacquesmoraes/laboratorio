@@ -2,17 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { 
-  ServiceOrder, 
-  ServiceOrderDetails, 
-  ServiceOrderAlert, 
-  CreateServiceOrderDto, 
-  MoveToStageDto, 
-  SendToTryInDto, 
-  FinishOrderDto, 
-  ServiceOrderParams, 
-  Pagination 
+import {
+  ServiceOrder,
+  ServiceOrderDetails,
+  ServiceOrderAlert,
+  CreateServiceOrderDto,
+  MoveToStageDto,
+  SendToTryInDto,
+  FinishOrderDto,
+  ServiceOrderParams,
+  Pagination
 } from '../models/service-order.interface';
+import { BasicFormData, WorksFormData } from '../../sectors/models/serviceOrderForm.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -20,20 +21,14 @@ import {
 export class ServiceOrdersService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/serviceorders`;
+  private formUrl = `${environment.apiUrl}/serviceorders/form`; 
 
-   getServiceOrders(params: ServiceOrderParams): Observable<Pagination<ServiceOrder>> {
-    const queryParams = new HttpParams()
-      .set('pageNumber', params.pageNumber.toString())
-      .set('pageSize', params.pageSize.toString())
-      .set('sort', params.sort || 'dateIn')
-      .set('search', params.search || '' )     
-      .set('clientId', params.clientId?.toString() || '')
-       .set('excludeFinished', params.excludeFinished?.toString() || 'false')
-       .set('excludeInvoiced', params.excludeInvoiced?.toString() || 'false')
-      .set('status', params.status?.toString() || '');
-   
-    return this.http.get<Pagination<ServiceOrder>>(this.apiUrl, { params: queryParams });
+  getServiceOrders(params: ServiceOrderParams): Observable<Pagination<ServiceOrder>> {
+    return this.http.get<Pagination<ServiceOrder>>(this.apiUrl, {
+      params: this.toHttpParams(params)
+    });
   }
+
 
   getServiceOrderById(id: number): Observable<ServiceOrderDetails> {
     return this.http.get<ServiceOrderDetails>(`${this.apiUrl}/${id}`);
@@ -72,4 +67,24 @@ export class ServiceOrdersService {
   reopenServiceOrder(id: number): Observable<ServiceOrderDetails> {
     return this.http.post<ServiceOrderDetails>(`${this.apiUrl}/${id}/reopen`, {});
   }
+  getBasicFormData(): Observable<BasicFormData> {
+    return this.http.get<BasicFormData>(`${this.formUrl}/basic-data`);
+  }
+
+  getWorksFormData(): Observable<WorksFormData> {
+    return this.http.get<WorksFormData>(`${this.formUrl}/works-data`);
+  }
+
+  private toHttpParams(params: ServiceOrderParams): HttpParams {
+    let httpParams = new HttpParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        httpParams = httpParams.set(key, value.toString());
+      }
+    });
+
+    return httpParams;
+  }
+
 }

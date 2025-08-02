@@ -101,10 +101,11 @@ export class ServiceOrderListService {
   }
 
   // Carregamento de dados
-  loadServiceOrders(): Observable<Pagination<ServiceOrder>> {
+    loadServiceOrders(): Observable<Pagination<ServiceOrder>> {
     this.setLoading(true);
     
     return new Observable(observer => {
+      // ✅ USAR: Método otimizado que usa PagedLightForLists no backend
       this.serviceOrdersService.getServiceOrders(this.currentParams()).subscribe({
         next: (res) => {
           this.state.update(state => ({
@@ -127,17 +128,7 @@ export class ServiceOrderListService {
     });
   }
 
-  private loadSectors() {
-    this.sectorService.getAll().subscribe({
-      next: (sectors) => {
-        this.state.update(state => ({ ...state, sectors }));
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Error loading sectors:', err);
-        this.showError(SERVICE_ORDER_MESSAGES.error.loadSectors);
-      },
-    });
-  }
+
 
   // Ações de OS
  
@@ -295,7 +286,23 @@ export class ServiceOrderListService {
   
 
 
+
   // Métodos auxiliares
+
+
+private loadSectors() {
+    // ✅ USAR: SectorService que já usa specifications otimizadas
+    this.sectorService.getAll().subscribe({
+      next: (sectors) => {
+        this.state.update(state => ({ ...state, sectors }));
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Error loading sectors:', err);
+        this.showError(SERVICE_ORDER_MESSAGES.error.loadSectors);
+      },
+    });
+  }
+  
   private showSuccess(message: string) {
     this.snackBar.open(message, SERVICE_ORDER_MESSAGES.actions.close, {
       duration: LOADING_CONFIG.snackBarDuration,

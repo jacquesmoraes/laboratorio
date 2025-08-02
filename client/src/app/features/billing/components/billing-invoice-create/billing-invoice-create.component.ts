@@ -87,6 +87,7 @@ export class BillingInvoiceCreateComponent implements OnInit {
     });
   }
 
+  
   onServiceOrderToggle(orderId: number, event: any): void {
     const checked = event.target.checked;
     if (checked) {
@@ -140,4 +141,5 @@ export class BillingInvoiceCreateComponent implements OnInit {
       .filter(order => this.selectedServiceOrders().includes(order.serviceOrderId))
       .reduce((total, order) => total + order.orderTotal, 0);
   }
+
 }

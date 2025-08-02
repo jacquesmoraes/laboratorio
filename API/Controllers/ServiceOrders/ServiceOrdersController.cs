@@ -3,85 +3,116 @@
 namespace API.Controllers.ServiceOrders
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class ServiceOrdersController(IMapper mapper,
+    [Route ( "api/[controller]" )]
+    public class ServiceOrdersController ( IMapper mapper,
         IServiceOrderService serviceOrderService,
         ITablePriceService tablePriceService
-        ) : BaseApiController
+,
+        IPerformanceLoggingService performanceLoggingService ) : BaseApiController
     {
         private readonly IServiceOrderService _serviceOrderService = serviceOrderService;
         private readonly ITablePriceService _tablePriceService = tablePriceService;
         private readonly IMapper _mapper = mapper;
+        private readonly IPerformanceLoggingService _performanceLoggingService = performanceLoggingService;
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateServiceOrderDto dto)
+        public async Task<IActionResult> Create ( [FromBody] CreateServiceOrderDto dto )
         {
-            var created = await _serviceOrderService.CreateOrderAsync(dto);
-            var response = _mapper.Map<ServiceOrderDetailsProjection>(created);
-            return CreatedAtAction(nameof(GetById), new { id = response.ServiceOrderId }, response);
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_CreateServiceOrder", new Dictionary<string, object>
+            {
+                ["ClientId"] = dto.ClientId,
+                ["PatientName"] = dto.PatientName,
+                ["WorksCount"] = dto.Works.Count
+            } ) )
+            {
+                var created = await _serviceOrderService.CreateOrderAsync(dto);
+                var response = _mapper.Map<ServiceOrderDetailsProjection>(created);
+                return CreatedAtAction ( nameof ( GetById ), new { id = response.ServiceOrderId }, response );
+            }
         }
+
 
         [HttpGet]
-        public async Task<ActionResult<Pagination<ServiceOrderListDto>>> GetAll([FromQuery] ServiceOrderParams parameters)
+        public async Task<ActionResult<Pagination<ServiceOrderListDto>>> GetAll ( [FromQuery] ServiceOrderParams parameters )
         {
-            var response = await _serviceOrderService.GetPaginatedAsync(parameters);
-            return Ok(response);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
-            var entity = await _serviceOrderService.GetEntityWithSpecAsync(spec);
-            if (entity == null) return NotFound();
-            var response = _mapper.Map<ServiceOrderDetailsProjection>(entity);
-            return Ok(response);
-        }
-
-        [HttpPost("moveto")]
-        public async Task<IActionResult> MoveToStage([FromBody] MoveToStageDto dto)
-        {
-            var updated = await _serviceOrderService.MoveToStageAsync(dto);
-            if (updated == null) return NotFound();
-            var response = _mapper.Map<ServiceOrderDetailsProjection>(updated);
-            return Ok(response);
-        }
-
-        [HttpPost("tryin")]
-        public async Task<IActionResult> SendToTryIn([FromBody] SendToTryInDto dto)
-        {
-            try
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_GetAllServiceOrders", new Dictionary<string, object>
             {
-                var updated = await _serviceOrderService.SendToTryInAsync(dto);
-                if (updated == null)
-                    return NotFound("Service order not found or already finished.");
+                ["PageNumber"] = parameters.PageNumber,
+                ["PageSize"] = parameters.PageSize,
+                ["HasFilters"] = !string.IsNullOrEmpty ( parameters.PatientName ) ||
+                                 parameters.ClientId.HasValue ||
+                                 parameters.Status.HasValue
+            } ) )
+            {
+                var response = await _serviceOrderService.GetPaginatedLightAsync(parameters);
+                return Ok ( response );
+            }
+        }
 
+
+        [HttpGet ( "{id}" )]
+        public async Task<IActionResult> GetById ( int id )
+        {
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_GetServiceOrderById", new Dictionary<string, object>
+            {
+                ["ServiceOrderId"] = id
+            } ) )
+            {
+                var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
+                var entity = await _serviceOrderService.GetEntityWithSpecAsync(spec);
+                if ( entity == null ) return NotFound ( );
+                var response = _mapper.Map<ServiceOrderDetailsProjection>(entity);
+                return Ok ( response );
+            }
+        }
+
+        [HttpPost ( "moveto" )]
+        public async Task<IActionResult> MoveToStage ( [FromBody] MoveToStageDto dto )
+        {
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_MoveToStage", new Dictionary<string, object>
+            {
+                ["ServiceOrderId"] = dto.ServiceOrderId,
+                ["SectorId"] = dto.SectorId
+            } ) )
+            {
+                var updated = await _serviceOrderService.MoveToStageAsync(dto);
+                if ( updated == null ) return NotFound ( );
                 var response = _mapper.Map<ServiceOrderDetailsProjection>(updated);
-                return Ok(response);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { error = ex.Message });
+                return Ok ( response );
             }
         }
 
-        [HttpPost("finish")]
-        public async Task<IActionResult> FinishOrders([FromBody] FinishOrderDto dto)
+        [HttpPost ( "tryin" )]
+        public async Task<IActionResult> SendToTryIn ( [FromBody] SendToTryInDto dto )
         {
-            try
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_SendToTryIn", new Dictionary<string, object>
+            {
+                ["ServiceOrderId"] = dto.ServiceOrderId
+            } ) )
+            {
+                var result = await _serviceOrderService.SendToTryInAsync(dto);
+                // ✅ CORRIGIDO: Usar mapper para evitar referência circular
+                var response = _mapper.Map<ServiceOrderDetailsProjection>(result);
+                return Ok ( response );
+            }
+        }
+
+        [HttpPost ( "finish" )]
+        public async Task<IActionResult> FinishOrders ( [FromBody] FinishOrderDto dto )
+        {
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_FinishOrders", new Dictionary<string, object>
+            {
+                ["ServiceOrderIdsCount"] = dto.ServiceOrderIds.Count
+            } ) )
             {
                 var result = await _serviceOrderService.FinishOrdersAsync(dto);
                 var response = _mapper.Map<List<ServiceOrderDetailsProjection>>(result);
-                return Ok(response);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { error = ex.Message });
+                return Ok ( response );
             }
         }
 
 
-        
+
         /// <summary>
         /// Returns the price of a specific work type for a given client.
         /// </summary>
@@ -96,51 +127,54 @@ namespace API.Controllers.ServiceOrders
             return Ok ( result );
         }
 
-        [HttpGet("alert/tryin")]
-        public async Task<IActionResult> GetWorksOutForTryin([FromQuery] int days = 30)
+        [HttpGet ( "alert/tryin" )]
+        public async Task<IActionResult> GetWorksOutForTryin ( [FromQuery] int days = 30 )
         {
             var orders = await _serviceOrderService.GetOutForTryInAsync(days);
             var response = _mapper.Map<List<ServiceOrderAlertRecord>>(orders);
-            return Ok(response);
+            return Ok ( response );
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] CreateServiceOrderDto dto)
+
+
+        [HttpPut ( "{id}" )]
+        public async Task<IActionResult> Update ( int id, [FromBody] CreateServiceOrderDto dto )
         {
-            try
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_UpdateServiceOrder", new Dictionary<string, object>
+            {
+                ["ServiceOrderId"] = id,
+                ["WorksCount"] = dto.Works?.Count ?? 0
+            } ) )
             {
                 var updated = await _serviceOrderService.UpdateOrderAsync(id, dto);
-                return updated == null
-                    ? NotFound()
-                    : Ok(_mapper.Map<ServiceOrderDetailsProjection>(updated));
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { error = ex.Message });
+                return Ok ( _mapper.Map<ServiceOrderDetailsProjection> ( updated ) );
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete ( "{id}" )]
+        public async Task<IActionResult> Delete ( int id )
         {
-            try
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_DeleteServiceOrder", new Dictionary<string, object>
+            {
+                ["ServiceOrderId"] = id
+            } ) )
             {
                 var deleted = await _serviceOrderService.DeleteOrderAsync(id);
-                return deleted == null ? NotFound() : NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { error = ex.Message });
+                return deleted == null ? NotFound ( ) : NoContent ( );
             }
         }
 
-        [HttpPost("{id}/reopen")]
-        public async Task<IActionResult> Reopen(int id)
+        [HttpPost ( "{id}/reopen" )]
+        public async Task<IActionResult> Reopen ( int id )
         {
-            var reopened = await _serviceOrderService.ReopenOrderAsync(id);
-            return reopened == null
-                ? BadRequest(new { error = "The order cannot be reopened (not found or already in production)." })
-                : Ok(_mapper.Map<ServiceOrderDetailsProjection>(reopened));
+            using ( _performanceLoggingService.MeasureOperation ( "Controller_ReopenServiceOrder", new Dictionary<string, object>
+            {
+                ["ServiceOrderId"] = id
+            } ) )
+            {
+                var reopened = await _serviceOrderService.ReopenOrderAsync(id);
+                return Ok ( _mapper.Map<ServiceOrderDetailsProjection> ( reopened ) );
+            }
         }
     }
 }

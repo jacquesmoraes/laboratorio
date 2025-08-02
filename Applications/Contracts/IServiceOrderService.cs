@@ -6,7 +6,7 @@ namespace Applications.Contracts
     {
         Task<ServiceOrder> CreateOrderAsync ( CreateServiceOrderDto dto );
         Task<ServiceOrder?> MoveToStageAsync ( MoveToStageDto dto );
-
+        Task<Pagination<ServiceOrderListDto>> GetPaginatedLightAsync (ServiceOrderParams p  );
         Task<ServiceOrder?> SendToTryInAsync ( SendToTryInDto dto );
         Task<List<ServiceOrder>> FinishOrdersAsync ( FinishOrderDto dto );
         Task<ServiceOrder?> UpdateOrderAsync ( int id, CreateServiceOrderDto dto );

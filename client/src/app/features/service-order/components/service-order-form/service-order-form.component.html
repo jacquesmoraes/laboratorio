@@ -59,7 +59,7 @@
               <mat-select formControlName="firstSectorId" [disabled]="loading()">
                 <mat-option value="">Selecione o setor</mat-option>
                 <mat-option *ngFor="let sector of sectors()" [value]="sector.sectorId">
-                  {{ sector.sectorName }}
+                  {{ sector.name }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="getErrorMessage('firstSectorId')">
@@ -103,8 +103,8 @@
                       <mat-label>Tipo de Trabalho</mat-label>
                       <mat-select formControlName="workTypeId" [disabled]="loading()">
                         <mat-option value="">Selecione o tipo</mat-option>
-                        <mat-option *ngFor="let workType of workTypes()" [value]="workType.workTypeId">
-                          {{ workType.workTypeName }}
+                        <mat-option *ngFor="let workType of workTypes()" [value]="workType.id">
+                          {{ workType.name }}
                         </mat-option>
                       </mat-select>
                       <mat-error *ngIf="getWorkErrorMessage(i, 'workTypeId')">
@@ -134,8 +134,8 @@
                       <mat-label>Escala</mat-label>
                       <mat-select formControlName="scaleId" [disabled]="loading()">
                         <mat-option value="">Nenhuma escala</mat-option>
-                        <mat-option *ngFor="let scale of scales()" [value]="scale.scaleId">
-                          {{ scale.scaleName }}
+                        <mat-option *ngFor="let scale of scales()" [value]="scale.id">
+                          {{ scale.name }}
                         </mat-option>
                       </mat-select>
                     </mat-form-field>
@@ -144,9 +144,10 @@
                       <mat-label>Cor</mat-label>
                       <mat-select formControlName="shadeId" [disabled]="loading()">
                         <mat-option value="">Nenhuma cor</mat-option>
-                        <mat-option *ngFor="let shade of shadesByWorkIndex()[i] || shades()" [value]="shade.shadeId">
-                          {{ shade.shadeColor }}
-                        </mat-option>
+                        <mat-option *ngFor="let shade of getShadesForWork(i); trackBy: trackByShadeId" 
+                        [value]="shade.shadeId">
+              {{ shade.shadeColor }}
+            </mat-option>
                       </mat-select>
                     </mat-form-field>
                   </div>

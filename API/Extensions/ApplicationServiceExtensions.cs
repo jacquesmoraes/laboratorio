@@ -69,7 +69,7 @@ namespace API.Extensions
             services.AddScoped<IGenericService<Payment>, GenericService<Payment>> ( );
             services.AddScoped<IIdentityService, IdentityService> ( );
             services.AddScoped<IGenericService<ServiceOrder>, GenericService<ServiceOrder>> ( );
-            
+            services.AddScoped<IPerformanceLoggingService, PerformanceLoggingService> ( );
             services.AddScoped<ITablePriceService, TablePriceService> ( );
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
             services.AddScoped<UpdateOverdueStatusFilter> ( );
