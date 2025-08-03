@@ -16,8 +16,11 @@ export const CLIENT_AREA_ROUTES: Routes = [
       { path: 'payments', component: ClientAreaPaymentsComponent },
       { path: 'invoices', component: ClientAreaInvoicesComponent },
       { path: 'orders', component: ClientAreaOrdersComponent },
-      { path: 'orders/:id', component: ClientAreaOrderDetailsComponent }
-
+      { path: 'orders/:id', component: ClientAreaOrderDetailsComponent },
+{ 
+        path: 'change-password', 
+        loadComponent: () => import('../../core/auth/change-password/change-password.component').then(m => m.ChangePasswordComponent) 
+      }
     ]
   }
 ];

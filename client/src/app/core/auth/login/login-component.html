@@ -1,7 +1,7 @@
 <div class="login-container">
   <mat-card class="login-card">
     <mat-card-header>
-      <mat-card-title>Login do Sistema</mat-card-title>
+      <mat-card-title>Sistema Laboratório</mat-card-title>
       <mat-card-subtitle>Entre com suas credenciais</mat-card-subtitle>
     </mat-card-header>
 
@@ -35,6 +35,28 @@
           <mat-icon matSuffix>lock</mat-icon>
         </mat-form-field>
 
+        <!-- Checkbox para primeiro acesso -->
+        <div class="first-access-section">
+          <mat-checkbox [(ngModel)]="isFirstAccess" name="isFirstAccess" (change)="onFirstAccessChange()">
+            Primeiro acesso? (Use código de acesso)
+          </mat-checkbox>
+        </div>
+
+        @if (isFirstAccess()) {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Código de Acesso</mat-label>
+            <input 
+              matInput 
+              [(ngModel)]="accessCode" 
+              name="accessCode"
+              required
+              [disabled]="loading()"
+              placeholder="Digite o código recebido por email"
+            />
+            <mat-icon matSuffix>key</mat-icon>
+          </mat-form-field>
+        }
+
         @if (error()) {
           <div class="error-message">
             <mat-icon>error</mat-icon>
@@ -47,16 +69,17 @@
           color="primary" 
           type="submit"
           class="full-width"
-          [disabled]="loading() || !credentials().email || !credentials().password"
+          [disabled]="loading() || !credentials().email || !credentials().password || (isFirstAccess() && !accessCode() )"
         >
           @if (loading()) {
             <mat-spinner diameter="20"></mat-spinner>
             <span>Entrando...</span>
           } @else {
-             <ng-container>
+            <ng-container>
               <mat-icon>login</mat-icon>
-              <span>Entrar</span>
+              <span>{{ isFirstAccess() ? 'Completar Primeiro Acesso' : 'Entrar' }}</span>
             </ng-container>
+            
           }
         </button>
       </form>

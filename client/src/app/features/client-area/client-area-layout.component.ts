@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
@@ -31,23 +31,24 @@ import { MatIconModule } from '@angular/material/icon';
           <li><a routerLink="/client-area/orders" routerLinkActive="active" (click)="closeMobileMenu()">Ordens de Serviço</a></li>
         </ul>
 
-        <div class="sidebar-footer">
-          <button class="logout-btn" (click)="logout()" title="Sair">
+        <div class="sidebar-actions">
+          <button class="sidebar-btn" title="Notificações">
+            <mat-icon>notification_important</mat-icon>
+          </button>
+          <button class="sidebar-btn" title="Alterar Senha" (click)="changePassword()">
+            <mat-icon>lock_reset</mat-icon>
+          </button>
+          <button class="sidebar-btn logout-btn" title="Sair" (click)="logout()">
             <mat-icon>logout</mat-icon>
-            <span>Sair</span>
           </button>
         </div>
       </nav>
+
+
       <main class="client-area-content">
-      <header class="client-area-header">
-          <div class="header-content">
-            <h1>Área do Cliente</h1>
-            <button class="header-logout-btn" (click)="logout()" title="Sair">
-              <mat-icon>logout</mat-icon>
-              <span>Sair</span>
-            </button>
-          </div>
-        </header>
+        <!-- Header principal -->
+       
+        
         <router-outlet></router-outlet>
       </main>
     </div>
@@ -58,7 +59,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class ClientAreaLayoutComponent {
   private authService = inject(AuthService);
   readonly mobileMenuOpen = signal(false);
-
+  private router = inject(Router);
   toggleMobileMenu() {
     this.mobileMenuOpen.update(open => !open);
   }
@@ -69,4 +70,7 @@ export class ClientAreaLayoutComponent {
   logout(): void {
     this.authService.logout();
   }
+ changePassword(): void {
+  this.router.navigate(['/client-area/change-password']);
+}
 }

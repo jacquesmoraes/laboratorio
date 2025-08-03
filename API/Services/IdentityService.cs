@@ -1,4 +1,6 @@
-﻿namespace API.Services
+﻿
+
+namespace API.Services
 {
     public class IdentityService (
         UserManager<ApplicationUser> userManager,
@@ -39,7 +41,7 @@
             return BuildAuthResponse ( user, "admin" );
         }
 
-        public async Task<AuthResponseRecord> RegisterClientUserAsync ( RegisterClientUserDto dto )
+        public async Task<ClientUserRegistrationResponseDto> RegisterClientUserAsync ( RegisterClientUserDto dto )
         {
             if ( await _userManager.FindByEmailAsync ( dto.Email ) is not null )
                 throw new ConflictException ( "This email is already in use." );
@@ -69,8 +71,131 @@
             await EnsureRoleExistsAsync ( "client" );
             await _userManager.AddToRoleAsync ( user, "client" );
 
-            // TODO: You can trigger a notification service here to send the access code
-            return BuildAuthResponse ( user, "client" );
+            return new ClientUserRegistrationResponseDto
+            {
+                ExpiresAt = user.AccessCodeExpiresAt.Value,
+                User = new ClientUserRecord
+                {
+                    UserId = user.Id,
+                    Email = user.Email ?? "",
+                    DisplayName = user.DisplayName,
+                    Role = "client",
+                    ClientId = user.ClientId.Value,
+                    IsFirstLogin = user.IsFirstLogin,
+                    AccessCode = user.AccessCode ?? ""
+                }
+            };
+        }
+
+
+        public async Task<Pagination<ClientUserListRecord>> GetClientUsersPaginatedAsync ( QueryParams parameters )
+        {
+            var query = _userManager.Users
+        .Where(u => u.ClientId.HasValue) // Apenas usuários client
+        .AsQueryable();
+
+            // Aplicar filtros
+            if ( !string.IsNullOrEmpty ( parameters.Search ) )
+            {
+                query = query.Where ( u =>
+                    u.Email.Contains ( parameters.Search ) ||
+                    u.DisplayName.Contains ( parameters.Search ) );
+            }
+
+            // Aplicar ordenação
+            query = parameters.Sort?.ToLower ( ) switch
+            {
+                "email" => query.OrderBy ( u => u.Email ),
+                "createdat" => query.OrderByDescending ( u => u.CreatedAt ),
+                "lastlogin" => query.OrderByDescending ( u => u.LastLoginAt ),
+                _ => query.OrderBy ( u => u.DisplayName )
+            };
+
+            var totalItems = await query.CountAsync();
+
+            // Aplicar paginação
+            var users = await query
+        .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+        .Take(parameters.PageSize)
+        .ToListAsync();
+
+            var records = users.Select(u => new ClientUserListRecord
+            {
+                UserId = u.Id,
+                ClientId = u.ClientId.Value,
+                ClientName = u.DisplayName, // Nome do cliente
+                Email = u.Email ?? "",
+                IsActive = u.IsActive,
+                CreatedAt = u.CreatedAt,
+                LastLoginAt = u.LastLoginAt,
+                HasValidAccessCode = u.AccessCodeExpiresAt.HasValue &&
+                           u.AccessCodeExpiresAt > DateTime.UtcNow
+            }).ToList();
+
+            return new Pagination<ClientUserListRecord> (
+                parameters.PageNumber,
+                parameters.PageSize,
+                totalItems,
+                records
+            );
+        }
+
+
+
+        public async Task<ClientUserDetailsRecord> GetClientUserDetailsByUserIdAsync ( string userId )
+        {
+            var user = await _userManager.FindByIdAsync(userId)
+        ?? throw new NotFoundException("Usuário não encontrado.");
+
+            if ( !user.ClientId.HasValue )
+                throw new BadRequestException ( "Usuário não é vinculado a um cliente." );
+
+            return new ClientUserDetailsRecord
+            {
+                UserId = user.Id,
+                ClientId = user.ClientId.Value,
+                ClientName = user.DisplayName,
+                Email = user.Email ?? "",
+                IsActive = user.IsActive,
+                CreatedAt = user.CreatedAt,
+                LastLoginAt = user.LastLoginAt,
+                IsFirstLogin = user.IsFirstLogin,
+                AccessCode = user.AccessCode,
+                AccessCodeExpiresAt = user.AccessCodeExpiresAt,
+                IsAccessCodeValid = user.AccessCodeExpiresAt.HasValue && user.AccessCodeExpiresAt > DateTime.UtcNow,
+                LoginHistory = null
+            };
+        }
+
+
+        public async Task BlockClientUserAsync ( string userId )
+        {
+            var user = await _userManager.FindByIdAsync(userId)
+        ?? throw new NotFoundException("User not found.");
+
+            if ( !user.ClientId.HasValue )
+                throw new BadRequestException ( "User is not a client user." );
+
+            user.IsActive = false;
+            var result = await _userManager.UpdateAsync(user);
+
+            if ( !result.Succeeded )
+                throw new BadRequestException ( "Failed to block user." );
+        }
+
+        public async Task UnblockClientUserAsync ( string userId )
+        {
+            var user = await _userManager.FindByIdAsync(userId)
+        ?? throw new NotFoundException("User not found.");
+
+            if ( !user.ClientId.HasValue )
+                throw new BadRequestException ( "User is not a client user." );
+
+            user.IsActive = true;
+            var result = await _userManager.UpdateAsync(user);
+
+            if ( !result.Succeeded )
+                throw new BadRequestException ( "Failed to unblock user." );
         }
 
         public async Task<AuthResponseRecord> LoginAsync ( LoginDto dto )
@@ -130,26 +255,45 @@
             return BuildAuthResponse ( user, roles.FirstOrDefault ( ) ?? "client" );
         }
 
-        public async Task<string> RegenerateAccessCodeByClientIdAsync ( int clientId )
+        public async Task ChangePasswordAsync ( string userId, ChangePasswordDto dto )
         {
-            var user = await _userManager.Users
-                .Where(u => u.ClientId == clientId && u.IsFirstLogin)
-                .FirstOrDefaultAsync();
+            var user = await _userManager.FindByIdAsync(userId)
+        ?? throw new UnauthorizedAccessException("User not found.");
 
-            if ( user is null )
-                throw new NotFoundException ( "Client user not found or has already completed first access." );
+            if ( dto.NewPassword != dto.ConfirmNewPassword )
+                throw new BadRequestException ( "Passwords do not match." );
 
-            user.AccessCode = GenerateAccessCode();
-            user.AccessCodeExpiresAt = DateTime.UtcNow.AddHours(24); // Always use UTC for consistency
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
 
-            var result = await _userManager.UpdateAsync(user);
             if ( !result.Succeeded )
-                throw new Exception ( "Failed to update access code." );
-
-            _logger.LogInformation ( "Access code regenerated for client {ClientId} ({Email})", clientId, user.Email );
-
-            return user.AccessCode;
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new BadRequestException ( $"Failed to change password: {errors}" );
+            }
         }
+
+       public async Task<string> RegenerateAccessCodeByUserIdAsync(string userId)
+{
+    var user = await _userManager.FindByIdAsync(userId)
+        ?? throw new NotFoundException("Usuário não encontrado.");
+
+    if (!user.IsFirstLogin)
+        throw new BadRequestException("Usuário já completou o primeiro acesso.");
+
+    user.AccessCode = GenerateAccessCode();
+    user.AccessCodeExpiresAt = DateTime.UtcNow.AddHours(24);
+
+    var result = await _userManager.UpdateAsync(user);
+    if (!result.Succeeded)
+        throw new Exception("Falha ao atualizar o código de acesso.");
+
+    _logger.LogInformation("Novo código de acesso gerado para o usuário {UserId} ({Email})", user.Id, user.Email);
+
+    return user.AccessCode;
+}
+
+
+
 
         // ---------- PRIVATE METHODS ----------
 
@@ -196,18 +340,18 @@
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtSecurityTokenHandler ( ).WriteToken ( token );
         }
 
-        private static string GenerateAccessCode()
+        private static string GenerateAccessCode ( )
         {
-            return Random.Shared.Next(100000, 999999).ToString();
+            return Random.Shared.Next ( 100000, 999999 ).ToString ( );
         }
 
-        private async Task EnsureRoleExistsAsync(string roleName)
+        private async Task EnsureRoleExistsAsync ( string roleName )
         {
-            if ( !await _roleManager.RoleExistsAsync(roleName) )
-                await _roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+            if ( !await _roleManager.RoleExistsAsync ( roleName ) )
+                await _roleManager.CreateAsync ( new ApplicationRole { Name = roleName } );
         }
     }
 }

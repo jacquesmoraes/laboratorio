@@ -74,8 +74,8 @@ export interface TableActionEvent {
             <td data-label="Status">
              
             <mat-chip [class]="getStatusColorClass(order.status)" class="status-chip">
-  {{ getStatusLabel(order.status) }}
-</mat-chip>
+                {{ getStatusLabel(order.status) }}
+              </mat-chip>
             </td>
             <td data-label="Setor Atual">{{ order.currentSectorName || '-' }}</td>
             <td data-label="Ações">
@@ -87,17 +87,17 @@ export interface TableActionEvent {
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button mat-icon-button class="action-btn" (click)="onAction('sendToTryIn', order.serviceOrderId)" matTooltip="Enviar para Prova" [disabled]="order.status === OrderStatus.TryIn || order.status === OrderStatus.Finished">
-  <mat-icon>send</mat-icon>
-</button>
-<button mat-icon-button class="action-btn" (click)="onAction('moveToStage', order.serviceOrderId)" matTooltip="Mudar de Setor" [disabled]="order.status === OrderStatus.Finished">
-  <mat-icon>swap_horiz</mat-icon>
-</button>
-<button mat-icon-button class="action-btn"
-        (click)="onAction('reopen', order.serviceOrderId)"
-        matTooltip="Reabrir OS"
-        [disabled]="!isFinished(order.status)">
-  <mat-icon>refresh</mat-icon>
-</button>
+                    <mat-icon>send</mat-icon>
+                  </button>
+                <button mat-icon-button class="action-btn" (click)="onAction('moveToStage', order.serviceOrderId)" matTooltip="Mudar de Setor" [disabled]="order.status === OrderStatus.Finished">
+                     <mat-icon>swap_horiz</mat-icon>
+                 </button>
+                 <button mat-icon-button class="action-btn"
+                       (click)="onAction('reopen', order.serviceOrderId)"
+                       matTooltip="Reabrir OS"
+                      [disabled]="!isFinished(order.status)">
+                 <mat-icon>refresh</mat-icon>
+               </button> 
               </div>
             </td>
           </tr>

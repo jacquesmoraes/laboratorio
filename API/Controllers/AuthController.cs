@@ -6,7 +6,7 @@
     {
         private readonly IIdentityService _identityService = identityService;
 
-        
+
 
         [HttpPost ( "register-admin" )]
         [Authorize ( Roles = "admin" )]
@@ -24,7 +24,7 @@
             return Ok ( result );
         }
 
-       
+
 
         [HttpPost ( "login" )]
         public async Task<IActionResult> Login ( [FromBody] LoginDto dto )
@@ -33,9 +33,9 @@
             return Ok ( result );
         }
 
-    
 
-       
+
+
 
         [HttpPost ( "complete-first-access" )]
         public async Task<IActionResult> CompleteFirstAccess ( [FromBody] FirstAccessPasswordResetDto dto )
@@ -44,13 +44,63 @@
             return Ok ( result );
         }
 
-        [HttpPost ( "resend-access-code/{clientId}" )]
-        [Authorize ( Roles = "admin" )]
-        public async Task<IActionResult> ResendAccessCodeByClientId ( [FromRoute] int clientId )
+        [HttpPost ( "change-password" )]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword ( [FromBody] ChangePasswordDto dto )
         {
-            var newCode = await _identityService.RegenerateAccessCodeByClientIdAsync(clientId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? throw new UnauthorizedAccessException("Token inválido.");
+
+            await _identityService.ChangePasswordAsync ( userId, dto );
+
+
+            return Ok ( new { message = "Senha alterada com sucesso." } );
+        }
+
+
+
+
+        [HttpGet ( "client-users" )]
+        [Authorize ( Roles = "admin" )]
+        public async Task<IActionResult> GetClientUsers ( [FromQuery] QueryParams parameters )
+        {
+            var result = await _identityService.GetClientUsersPaginatedAsync(parameters);
+            return Ok ( result );
+        }
+
+        // Mudar de userId para clientId
+        [HttpGet ( "client-users/{userId}" )]
+        public async Task<IActionResult> GetClientUserDetailsByUserId ( [FromRoute] string userId )
+        {
+            var result = await _identityService.GetClientUserDetailsByUserIdAsync(userId);
+            return Ok ( result );
+        }
+
+
+        [HttpPut ( "client-users/{userId}/block" )]
+        [Authorize ( Roles = "admin" )]
+        public async Task<IActionResult> BlockClientUser ( [FromRoute] string userId )
+        {
+            await _identityService.BlockClientUserAsync ( userId );
+            return Ok ( new { message = "Usuário bloqueado com sucesso." } );
+        }
+
+        [HttpPut ( "client-users/{userId}/unblock" )]
+        [Authorize ( Roles = "admin" )]
+        public async Task<IActionResult> UnblockClientUser ( [FromRoute] string userId )
+        {
+            await _identityService.UnblockClientUserAsync ( userId );
+            return Ok ( new { message = "Usuário desbloqueado com sucesso." } );
+        }
+
+        [HttpPost ( "client-users/{userId}/reset-access-code" )]
+        [Authorize ( Roles = "admin" )]
+        public async Task<IActionResult> ResetClientUserAccessCode ( [FromRoute] string userId )
+        {
+            var newCode = await _identityService.RegenerateAccessCodeByUserIdAsync(userId);
             return Ok ( new { accessCode = newCode } );
         }
+
 
 
     }

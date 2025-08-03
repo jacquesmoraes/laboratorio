@@ -1,0 +1,140 @@
+<div class="user-details-container">
+  @if (user()) {
+    <div class="header">
+      <div class="header-content">
+        <h1>{{ user()?.clientName }}</h1>
+        <div class="header-actions">
+          @if (user()?.isActive) {
+            <button class="btn btn-warn" (click)="onBlockUser()" [disabled]="loading()" matTooltip="Bloquear Usuário">
+              <mat-icon>block</mat-icon>
+              Bloquear
+            </button>
+          } @else {
+            <button class="btn btn-success" (click)="onUnblockUser()" [disabled]="loading()" matTooltip="Desbloquear Usuário">
+              <mat-icon>check_circle</mat-icon>
+              Desbloquear
+            </button>
+          }
+          <button class="btn btn-info" (click)="onResetAccessCode()" [disabled]="loading()" matTooltip="Resetar Código de Acesso">
+            <mat-icon>refresh</mat-icon>
+            Resetar Código
+          </button>
+          <button class="btn btn-secondary" (click)="editUser()" [disabled]="loading()">
+            Editar
+          </button>
+          <button class="btn btn-primary" (click)="goBack()" [disabled]="loading()">
+            Voltar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Informações Básicas -->
+      <div class="card">
+        <h2>Informações Básicas</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Cliente:</label>
+            <span>{{ user()?.clientName }}</span>
+          </div>
+          <div class="info-item">
+            <label>Email:</label>
+            <span>{{ user()?.email }}</span>
+          </div>
+          <div class="info-item">
+            <label>Status:</label>
+            <mat-chip [color]="getStatusColor(user()?.isActive ?? false)" selected>
+              {{ getStatusLabel(user()?.isActive ?? false) }}
+            </mat-chip>
+          </div>
+          <div class="info-item">
+            <label>Data de Criação:</label>
+            <span>{{ formatDate(user()?.createdAt) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Último Acesso:</label>
+            <span>{{ formatDate(user()?.lastLoginAt) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Código de Acesso -->
+      <div class="card">
+        <h2>Código de Acesso</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Status do Código:</label>
+            <mat-chip [color]="getAccessCodeStatusColor(user()?.isAccessCodeValid ?? false)" selected>
+              {{ getAccessCodeStatusLabel(user()?.isAccessCodeValid ?? false) }}
+            </mat-chip>
+          </div>
+          @if (user()?.accessCode) {
+            <div class="info-item">
+              <label>Código Atual:</label>
+              <span class="access-code">{{ user()?.accessCode }}</span>
+            </div>
+          }
+          @if (user()?.accessCodeExpiresAt) {
+            <div class="info-item">
+              <label>Expira em:</label>
+              <span>{{ formatAccessCodeExpiry(user()?.accessCodeExpiresAt) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Histórico de Logins -->
+      @if ((user()?.loginHistory?.length ?? 0) > 0) {
+        <div class="card">
+          <h2>Histórico de Logins</h2>
+          <div class="login-history">
+            @for (login of user()?.loginHistory; track login.loginAt) {
+              <div class="login-item">
+                <div class="login-info">
+                  <div class="login-date">
+                    <mat-icon>schedule</mat-icon>
+                    <span>{{ formatDate(login.loginAt) }}</span>
+                  </div>
+                  @if (login.ipAddress) {
+                    <div class="login-ip">
+                      <mat-icon>location_on</mat-icon>
+                      <span>{{ login.ipAddress }}</span>
+                    </div>
+                  }
+                  @if (login.userAgent) {
+                    <div class="login-device">
+                      <mat-icon>devices</mat-icon>
+                      <span>{{ login.userAgent }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="card">
+          <h2>Histórico de Logins</h2>
+          <div class="empty-history">
+            <mat-icon>history</mat-icon>
+            <p>Nenhum histórico de login disponível</p>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (loading()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Carregando detalhes do usuário...</p>
+    </div>
+  } @else {
+    <div class="error-container">
+      <mat-icon>error</mat-icon>
+      <p>Usuário não encontrado</p>
+      <button class="btn btn-primary" (click)="goBack()">
+        Voltar
+      </button>
+    </div>
+  }
+</div>

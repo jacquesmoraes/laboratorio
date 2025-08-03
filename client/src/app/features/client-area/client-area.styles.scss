@@ -133,10 +133,13 @@ $client-area-white: #ffffff;
   color: $client-area-white;
 }
 
-// Estilos globais para a client area
+// =========================
+// CLIENT AREA MAIN STYLES
+// =========================
+
 .client-area {
+  // Status badges
   &-status {
-    // Status das faturas
     &-open {
       @include status-badge(#ffc107);
     }
@@ -157,7 +160,6 @@ $client-area-white: #ffffff;
       @include status-badge(#17a2b8);
     }
     
-    // Status das ordens de serviço
     &-production {
       @include status-badge(#007bff);
     }
@@ -171,12 +173,14 @@ $client-area-white: #ffffff;
     }
   }
 
+  // Layout principal
   &-layout {
     display: flex;
     min-height: 100vh;
     background: linear-gradient(135deg, $client-area-background 0%, #e8e4e0 100%);
   }
   
+  // Sidebar
   &-sidebar {
     background: linear-gradient(180deg, $client-area-primary 0%, darken($client-area-primary, 10%) 100%);
     color: $client-area-white;
@@ -253,12 +257,11 @@ $client-area-white: #ffffff;
         color: $client-area-white;
         font-weight: 600;
         box-shadow: 0 4px 12px rgba(162, 136, 169, 0.3);
-        
-      
       }
     }
   }
   
+  // Conteúdo principal
   &-content {
     flex: 1;
     padding: 2rem;
@@ -283,6 +286,7 @@ $client-area-white: #ffffff;
     }
   }
   
+  // Seções
   &-section {
     @include card-styles;
     margin-bottom: 2rem;
@@ -297,9 +301,10 @@ $client-area-white: #ffffff;
     }
   }
   
+  // Dashboard
   &-dashboard {
     .client-info {
-      background:var(--accent);
+      background: var(--accent);
       color: $client-area-white;
       padding: 2rem;
       border-radius: 12px;
@@ -385,6 +390,7 @@ $client-area-white: #ffffff;
     }
   }
   
+  // Filtros
   &-filters {
     display: flex;
     flex-wrap: wrap;
@@ -424,6 +430,7 @@ $client-area-white: #ffffff;
     }
   }
   
+  // Tabelas
   &-table {
     @include table-styles;
     margin-bottom: 2rem;
@@ -442,6 +449,7 @@ $client-area-white: #ffffff;
     }
   }
   
+  // Paginação
   &-pagination {
     display: flex;
     justify-content: center;
@@ -469,18 +477,244 @@ $client-area-white: #ffffff;
   }
 }
 
-// Elementos mobile - sempre ocultos em desktop
-.mobile-menu-toggle {
-  display: none;
+// =========================
+// HEADER COMPONENTS
+// =========================
+
+.client-area-header {
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.mobile-overlay {
-  display: none;
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+  }
 }
 
-.sidebar-header {
-  display: none;
+.header-actions {
+  display: flex;
+  gap: 8px;
 }
+
+.header-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.header-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #f44336;
+  }
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+  
+  .hamburger-line {
+    width: 100%;
+    height: 3px;
+    background-color: #333;
+    border-radius: 10px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+  }
+  
+  &.active {
+    .hamburger-line {
+      &:first-child {
+        transform: rotate(45deg);
+      }
+      
+      &:nth-child(2) {
+        opacity: 0;
+      }
+      
+      &:nth-child(3) {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+}
+
+.header-title {
+  .page-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+// =========================
+// SIDEBAR COMPONENTS
+// =========================
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-actions {
+  margin-top: auto;
+  padding: 20px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #96afb8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: $client-area-secondary;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  
+  &:hover {
+    background-color: var(--accent);
+  }
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.change-password-btn {
+  color: #2196f3;
+  
+  &:hover {
+    background-color: rgba(33, 150, 243, 0.1);
+  }
+}
+
+// =========================
+// UTILITY CLASSES
+// =========================
+
 .clickable-row {
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -493,45 +727,26 @@ $client-area-white: #ffffff;
     background-color: rgba(39, 102, 120, 0.2) !important;
   }
 }
-// Responsividade para mobile
+
+// Elementos mobile - sempre ocultos em desktop
+.mobile-menu-toggle {
+  display: none;
+}
+
+.mobile-overlay {
+  display: none;
+}
+
+.sidebar-header {
+  display: none;
+}
+
+// =========================
+// RESPONSIVE STYLES
+// =========================
+
+// Mobile styles
 @media (max-width: 768px) {
-
-  .client-area-table {
-    border: 0;
-
-    thead {
-      display: none;
-    }
-
-    tbody {
-      display: block;
-
-      tr {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1rem;
-        background: $client-area-white;
-        border-radius: 6px;
-        padding: 0.75rem;
-        @include card-shadow;
-
-        td {
-          display: flex;
-          justify-content: space-between;
-          padding: 0.5rem 0;
-          font-size: 0.875rem;
-          color: $client-area-dark;
-
-          &::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: $client-area-accent;
-            flex: 1;
-          }
-        }
-      }
-    }
-  }
   .client-area {
     &-layout {
       flex-direction: column;
@@ -604,8 +819,15 @@ $client-area-white: #ffffff;
     }
 
     &-content {
-      padding: 1rem;
-      margin-top: 0px; // Espaço para o botão do menu
+      padding: 0;
+      margin-top: 60px;
+
+      .client-area-section {
+        margin: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
     }
 
     &-filters {
@@ -637,7 +859,41 @@ $client-area-white: #ffffff;
     }
 
     &-table {
+      border: 0;
       font-size: 0.85rem;
+      
+      thead {
+        display: none;
+      }
+
+      tbody {
+        display: block;
+
+        tr {
+          display: flex;
+          flex-direction: column;
+          margin-bottom: 1rem;
+          background: $client-area-white;
+          border-radius: 6px;
+          padding: 0.75rem;
+          @include card-shadow;
+
+          td {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+            color: $client-area-dark;
+
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: $client-area-accent;
+              flex: 1;
+            }
+          }
+        }
+      }
       
       th, td {
         padding: 0.75rem 0.5rem;
@@ -682,7 +938,7 @@ $client-area-white: #ffffff;
     }
   }
 
-  // Menu mobile toggle - só aparece em mobile
+  // Mobile menu toggle
   .mobile-menu-toggle {
     display: flex;
     position: fixed;
@@ -714,42 +970,38 @@ $client-area-white: #ffffff;
       border-radius: 1px;
       transition: all 0.3s ease;
     }
-
- 
   }
 
- 
-}
-@media (max-width: 768px) {
-  .client-area-content {
-    padding: 0;
-    margin-top: 60px;
-
-    .client-area-section {
-      margin: 0;
-      border-radius: 0;
-      border-left: none;
-      border-right: none;
+  // Header mobile adjustments
+  .hamburger-btn {
+    display: flex;
+  }
+  
+  .header-actions {
+    gap: 4px;
+  }
+  
+  .header-btn {
+    width: 36px;
+    height: 36px;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
     }
+  }
 
-    .client-area-table {
-      width: 100%;
-
-      tbody tr {
-        border-radius: 0;
-        margin: 0;
-        padding: 0.5rem;
-      }
-
-      tbody td {
-        padding: 0.5rem;
-      }
-    }
+  // Hide text on mobile
+  .header-btn span,
+  .action-btn span,
+  .header-logout-btn span,
+  .logout-btn span {
+    display: none;
   }
 }
 
-
-// Breakpoint para tablets
+// Tablet styles
 @media (max-width: 1024px) and (min-width: 769px) {
   .client-area {
     &-sidebar {

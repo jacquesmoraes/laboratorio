@@ -11,6 +11,7 @@ import {
   RegisterClientRequest,
   ResendAccessCodeResponse,
   UserInfo,
+  ChangePasswordRequest,
   
 } from '../models/auth.interface';
 
@@ -68,6 +69,10 @@ private authBaseUrl = 'https://localhost:7058';
     }
   }
 
+  async changePassword(request: ChangePasswordRequest): Promise<void> {
+  await firstValueFrom(this.http.post(`${this.authBaseUrl}/auth/change-password`, request));
+}
+
   async resendAccessCode(clientId: number): Promise<string | null> {
     try {
       const res = await firstValueFrom(this.http.post<ResendAccessCodeResponse>(`${this.authBaseUrl}/auth/resend-access-code/${clientId}`, {}));
@@ -84,6 +89,7 @@ private authBaseUrl = 'https://localhost:7058';
     this.tokenSignal.set(null);
     this.router.navigate(['/login']);
   }
+  
 
   isAdmin(): boolean {
     return this.userSignal()?.role === 'admin';

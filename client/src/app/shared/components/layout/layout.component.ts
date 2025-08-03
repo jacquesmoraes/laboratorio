@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from "@angular/core";
-import { RouterOutlet, RouterLink, RouterLinkActive } from "@angular/router";
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { MatIcon } from "@angular/material/icon";
 import { AuthService } from "../../../core/services/auth.service";
@@ -14,7 +14,11 @@ import { AuthService } from "../../../core/services/auth.service";
 })
 export class LayoutComponent {
   private authService = inject(AuthService);
+  private router = inject(Router);
+
   sidebarOpen = signal(false);
+  profileMenuOpen = signal(false);
+  user = this.authService.user;
 
   toggleSidebar() {
     this.sidebarOpen.update(value => !value);
@@ -23,7 +27,15 @@ export class LayoutComponent {
   closeSidebar() {
     this.sidebarOpen.set(false);
   }
-  logout(): void {
+  toggleProfileMenu() {
+    this.profileMenuOpen.update(open => !open);
+  }
+
+  closeProfileMenu() {
+    this.profileMenuOpen.set(false);
+  }
+
+  logout() {
     this.authService.logout();
   }
 }

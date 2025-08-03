@@ -39,7 +39,11 @@ export interface UserInfo {
   isFirstLogin: boolean;
   accessCode: string;
 }
-
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
 export interface AuthResponse {
   token: string;
   expiresAt: string;

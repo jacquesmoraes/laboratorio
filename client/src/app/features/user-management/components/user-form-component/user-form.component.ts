@@ -1,0 +1,266 @@
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
+import { ActivatedRoute, Router } from '@angular/router';
+import Swal from 'sweetalert2';
+
+import { UserManagementService } from '../../services/user-management.service';
+import { ClientService } from '../../../clients/services/clients.services';
+import { 
+  RegisterClientUserRequest, 
+  ClientUserRegistrationResponse,
+  ClientUserDetailsRecord 
+} from '../../models/user-management.interface';
+import { Client } from '../../../clients/models/client.interface';
+import { ErrorService } from '../../../../core/services/error.service';
+
+@Component({
+  selector: 'app-user-form',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatDividerModule
+  ],
+  templateUrl: './user-form.component.html',
+  styleUrl: './user-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class UserFormComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private userManagementService = inject(UserManagementService);
+  private clientService = inject(ClientService);
+  private errorService = inject(ErrorService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  
+  userForm!: any;
+  loading = signal(false);
+  isEditMode = signal(false);
+  userId = signal<string | null>(null);
+  clients = signal<Client[]>([]);
+  loadingClients = signal(false);
+  userToLoad = signal<ClientUserDetailsRecord | null>(null);
+  registrationResponse = signal<ClientUserRegistrationResponse | null>(null);
+
+  ngOnInit() {
+    this.initForm();
+    this.loadClients();
+    this.checkEditMode();
+  }
+
+  private initForm() {
+    this.userForm = this.fb.group({
+      clientId: [null, Validators.required],
+      displayName: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  private passwordMatchValidator(group: any) {
+    const password = group.get('password');
+    const confirmPassword = group.get('confirmPassword');
+    
+    if (password && confirmPassword && password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    } else {
+      confirmPassword?.setErrors(null);
+      return null;
+    }
+  }
+
+  private checkEditMode() {
+    const userId = this.route.snapshot.paramMap.get('userId');
+    if (userId) {
+      this.isEditMode.set(true);
+      this.userId.set(userId);
+      this.loadUser(userId);
+    }
+  }
+
+  private loadUser(userId: string) {
+    this.loading.set(true);
+    this.userManagementService.getClientUserDetails(userId).subscribe({
+      next: (user) => {
+        this.userToLoad.set(user);
+        this.populateForm(user);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        this.errorService.showError('Erro ao carregar usuário', error);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private loadClients() {
+    this.loadingClients.set(true);
+    this.clientService.getClients().subscribe({
+      next: (clients) => {
+        this.clients.set(clients);
+        this.loadingClients.set(false);
+      },
+      error: (error) => {
+        this.errorService.showError('Erro ao carregar clientes', error);
+        this.loadingClients.set(false);
+      }
+    });
+  }
+
+  private populateForm(user: ClientUserDetailsRecord) {
+    this.userForm.patchValue({
+      clientId: user.clientId,
+      displayName: user.clientName,
+      email: user.email,
+      password: '',
+      confirmPassword: ''
+    });
+
+    // Desabilitar campos que não devem ser editados
+    this.userForm.get('clientId')?.disable();
+    this.userForm.get('email')?.disable();
+  }
+
+  onClientChange() {
+    const clientId = this.userForm.get('clientId')?.value;
+    if (clientId) {
+      const selectedClient = this.clients().find(c => c.clientId === clientId);
+      if (selectedClient) {
+        this.userForm.patchValue({
+          displayName: selectedClient.clientName
+        });
+      }
+    }
+  }
+
+  onSubmit() {
+    if (this.userForm.invalid) {
+      this.markFormGroupTouched(this.userForm);
+      return;
+    }
+
+    this.loading.set(true);
+
+    if (this.isEditMode()) {
+      // TODO: Implementar edição quando necessário
+      this.errorService.showError('Edição de usuários ainda não implementada');
+      this.loading.set(false);
+    } else {
+      const formValue = this.userForm.value;
+      const request: RegisterClientUserRequest = {
+        clientId: formValue.clientId,
+        displayName: formValue.displayName,
+        email: formValue.email,
+        password: formValue.password,
+        confirmPassword: formValue.confirmPassword
+      };
+
+      this.userManagementService.registerClientUser(request).subscribe({
+        next: (response) => {
+          this.registrationResponse.set(response);
+          this.showSuccessDialog(response);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.errorService.showError('Erro ao registrar usuário', error);
+          this.loading.set(false);
+        }
+      });
+    }
+  }
+
+  private showSuccessDialog(response: ClientUserRegistrationResponse) {
+    Swal.fire({
+      title: 'Usuário Registrado com Sucesso!',
+      html: `
+        <div class="success-dialog">
+          <p><strong>Cliente:</strong> ${response.user.displayName}</p>
+          <p><strong>Email:</strong> ${response.user.email}</p>
+          <p><strong>Código de Acesso:</strong></p>
+          <div class="access-code-display">
+            <span class="access-code">${response.user.accessCode}</span>
+          </div>
+          <p class="access-code-info">
+            <small>Este código expira em: ${new Date(response.expiresAt).toLocaleString('pt-BR')}</small>
+          </p>
+          <p class="warning">
+            <strong>⚠️ Importante:</strong> Informe este código ao usuário para que ele possa completar o primeiro acesso.
+          </p>
+        </div>
+      `,
+      icon: 'success',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#276678'
+    }).then(() => {
+      this.router.navigate(['/user-management']);
+    });
+  }
+
+  onCancel() {
+    this.router.navigate(['/user-management']);
+  }
+
+  private markFormGroupTouched(formGroup: any) {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.controls[key];
+      control.markAsTouched();
+
+      if (control.controls) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.userForm.get(controlName);
+    
+    if (control?.hasError('required')) {
+      return `${this.getFieldLabel(controlName)} é obrigatório`;
+    }
+    
+    if (control?.hasError('email')) {
+      return 'Email inválido';
+    }
+    
+    if (control?.hasError('minlength')) {
+      const requiredLength = control.errors?.['minlength']?.requiredLength;
+      return `${this.getFieldLabel(controlName)} deve ter pelo menos ${requiredLength} caracteres`;
+    }
+    
+    if (control?.hasError('passwordMismatch')) {
+      return 'As senhas não coincidem';
+    }
+    
+    return '';
+  }
+
+  private getFieldLabel(fieldName: string): string {
+    const labels: { [key: string]: string } = {
+      clientId: 'Cliente',
+      displayName: 'Nome',
+      email: 'Email',
+      password: 'Senha',
+      confirmPassword: 'Confirmação de senha'
+    };
+    
+    return labels[fieldName] || fieldName;
+  }
+}

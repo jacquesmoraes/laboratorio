@@ -66,16 +66,19 @@
       
       <!-- Ações do usuário no final da sidebar -->
       <div class="sidebar-actions">
-        <button class="sidebar-btn" title="Notificações">
+        <a routerLink="/notifications" class="sidebar-btn" title="Notificações">
           <mat-icon>notification_important</mat-icon>
-        </button>
-        <button class="sidebar-btn" title="Perfil do Usuário">
-         <mat-icon>person_outline</mat-icon>
-        </button>
-        <button class="sidebar-btn logout-btn" title="Sair" (click)="logout()">
+        </a>
+      
+        <a routerLink="/user-management" class="sidebar-btn" title="Gerenciar Usuários">
+          <mat-icon>person_outline</mat-icon>
+        </a>
+        
+        <a class="sidebar-btn logout-btn" title="Sair" (click)="logout()">
           <mat-icon>logout</mat-icon>
-        </button>
+        </a>
       </div>
+
     </div>
   </nav>
 

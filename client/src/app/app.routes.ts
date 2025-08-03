@@ -34,6 +34,7 @@ export const routes: Routes = [
       { path: 'service-orders', loadChildren: () => import('./features/service-order/service-order.routes').then(m => m.SERVICE_ORDERS_ROUTES) },
       { path: 'billing', loadChildren: () => import('./features/billing/billing.routes').then(m => m.BILLING_ROUTES) },
       { path: 'payments', loadChildren: () => import('./features/payments/payment.routes').then(m => m.PAYMENT_ROUTES) },
+       { path: 'user-management', loadChildren: () => import('./features/user-management/user-management.routes').then(m => m.USER_MANAGEMENT_ROUTES) },
     ]
   },
   

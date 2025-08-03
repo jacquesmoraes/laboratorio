@@ -1,0 +1,104 @@
+<div class="container">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="title">Gerenciar Usuários</h1>
+    <button class="btn btn-primary" (click)="onNew()">
+      <mat-icon>add</mat-icon>
+      Novo Usuário
+    </button>
+  </div>
+
+  <div class="filters-container">
+    <div class="filters-grid">
+      <div class="filter-item">
+        <label class="filter-label" for="search">Buscar</label>
+        <input
+          id="search"
+          type="text"
+          class="filter-input"
+          [formControl]="searchControl"
+          placeholder="Digite o nome do cliente ou email..."
+        />
+      </div>
+    </div>
+  </div>
+
+  @if (users().length > 0) {
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Código de Acesso</th>
+            <th>Último Acesso</th>
+            <th style="width: 1%;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.userId) {
+            <tr>
+              <td data-label="Cliente">{{ user.clientName }}</td>
+              <td data-label="Email">{{ user.email }}</td>
+              <td data-label="Status">
+                <mat-chip [color]="getStatusColor(user.isActive)" selected>
+                  {{ getStatusLabel(user.isActive) }}
+                </mat-chip>
+              </td>
+              <td data-label="Código de Acesso">
+                <mat-chip [color]="getAccessCodeStatusColor(user.hasValidAccessCode)" selected>
+                  {{ getAccessCodeStatusLabel(user.hasValidAccessCode) }}
+                </mat-chip>
+              </td>
+              <td data-label="Último Acesso">{{ formatDate(user.lastLoginAt) }}</td>
+              <td class="no-label">
+                <div class="action-buttons">
+                  <button class="btn btn-primary btn-sm" (click)="onViewDetails(user)" matTooltip="Ver Detalhes">
+                    <mat-icon>visibility</mat-icon>
+                    Detalhes
+                  </button>
+                  @if (user.isActive) {
+                    <button class="btn btn-warn btn-sm" (click)="onBlock(user)" matTooltip="Bloquear Usuário">
+                      <mat-icon>block</mat-icon>
+                      Bloquear
+                    </button>
+                  } @else {
+                    <button class="btn btn-success btn-sm" (click)="onUnblock(user)" matTooltip="Desbloquear Usuário">
+                      <mat-icon>check_circle</mat-icon>
+                      Desbloquear
+                    </button>
+                  }
+                  <button class="btn btn-info btn-sm" (click)="onResetAccessCode(user)" matTooltip="Resetar Código de Acesso">
+                    <mat-icon>refresh</mat-icon>
+                    Resetar Código
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="pagination-container" *ngIf="pagination()">
+        <span class="pagination-info">
+          Página <span class="font-medium">{{ currentParams().pageNumber }}</span> de
+          <span class="font-medium">{{ pagination()?.totalPages }}</span>
+        </span>
+
+        <mat-paginator
+          [length]="pagination()!.totalItems"
+          [pageSize]="currentParams().pageSize"
+          [pageIndex]="currentParams().pageNumber - 1"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </div>
+  } @else if (!loading()) {
+    <div class="empty-state">
+      <mat-icon>people</mat-icon>
+      <p>Nenhum usuário encontrado</p>
+    </div>
+  }
+</div>

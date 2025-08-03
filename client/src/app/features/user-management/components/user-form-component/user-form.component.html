@@ -1,0 +1,141 @@
+<div class="form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="header-icon">person_add</mat-icon>
+        {{ isEditMode() ? 'Editar Usuário' : 'Novo Usuário' }}
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isEditMode() ? 'Atualize as informações do usuário' : 'Registre um novo usuário para acesso à client area' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <!-- Seleção do Cliente -->
+        <div class="section">
+          <h3 class="section-title">
+            <mat-icon>business</mat-icon>
+            Cliente
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Selecione o Cliente</mat-label>
+              <mat-select formControlName="clientId" (selectionChange)="onClientChange()" [disabled]="isEditMode()">
+                <mat-option [value]="null">Selecione um cliente</mat-option>
+                <mat-option *ngFor="let client of clients()" [value]="client.clientId">
+                  {{ client.clientName }} - {{ client.city || 'Cidade não informada' }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="userForm.get('clientId')?.hasError('required')">
+                Cliente é obrigatório
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Informações do Usuário -->
+        <div class="section">
+          <h3 class="section-title">
+            <mat-icon>person</mat-icon>
+            Informações do Usuário
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Nome do Cliente</mat-label>
+              <input matInput formControlName="displayName" placeholder="Nome será preenchido automaticamente" readonly />
+              <mat-error *ngIf="userForm.get('displayName')?.hasError('required')">
+                Nome é obrigatório
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" placeholder="email@exemplo.com" [readonly]="isEditMode()" />
+              <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+                Email é obrigatório
+              </mat-error>
+              <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+                Email inválido
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          @if (!isEditMode()) {
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Senha</mat-label>
+                <input matInput type="password" formControlName="password" placeholder="Mínimo 6 caracteres" />
+                <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+                  Senha é obrigatória
+                </mat-error>
+                <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+                  Senha deve ter pelo menos 6 caracteres
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-50">
+                <mat-label>Confirmar Senha</mat-label>
+                <input matInput type="password" formControlName="confirmPassword" placeholder="Confirme a senha" />
+                <mat-error *ngIf="userForm.get('confirmPassword')?.hasError('required')">
+                  Confirmação de senha é obrigatória
+                </mat-error>
+                <mat-error *ngIf="userForm.get('confirmPassword')?.hasError('passwordMismatch')">
+                  As senhas não coincidem
+                </mat-error>
+              </mat-form-field>
+            </div>
+          }
+        </div>
+
+        <!-- Informações Importantes -->
+        @if (!isEditMode()) {
+          <mat-divider></mat-divider>
+          
+          <div class="section">
+            <h3 class="section-title">
+              <mat-icon>info</mat-icon>
+              Informações Importantes
+            </h3>
+            
+            <div class="info-box">
+              <div class="info-item">
+                <mat-icon>warning</mat-icon>
+                <span>O usuário receberá um código de acesso por email</span>
+              </div>
+              <div class="info-item">
+                <mat-icon>schedule</mat-icon>
+                <span>O código de acesso expira em 24 horas</span>
+              </div>
+              <div class="info-item">
+                <mat-icon>lock</mat-icon>
+                <span>O usuário precisará completar o primeiro acesso para ativar a conta</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Ações -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading()">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid || loading()">
+            <mat-icon>save</mat-icon>
+            {{ isEditMode() ? 'Atualizar' : 'Registrar' }}
+            @if (loading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
