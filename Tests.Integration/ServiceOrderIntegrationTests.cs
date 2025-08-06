@@ -1,26 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
-using Infra.Data;
-using Tests.Integration;
-using Xunit;
+﻿using Applications.Identity;
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
+using Tests.Integration.Infrastructure;
 
 namespace Tests.Integration
 {
-    public class ServiceOrderIntegrationTests : IClassFixture<CustomWebApplicationFactory>
+    public class ServiceOrderIntegrationTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        private readonly CustomWebApplicationFactory _factory;
+        private readonly CustomWebApplicationFactory < Program > _factory;
         private readonly HttpClient _client;
 
-        public ServiceOrderIntegrationTests(CustomWebApplicationFactory factory)
+        public ServiceOrderIntegrationTests ( CustomWebApplicationFactory<Program> factory )
         {
             _factory = factory;
-            _client = factory.CreateClient();
+            _client = factory.CreateClient ( );
         }
 
         [Fact]
-        public async Task GetServiceOrders_ShouldReturnPaginatedResults()
+        public async Task GetServiceOrders_ShouldReturnPaginatedResults ( )
         {
             // Arrange
             var queryParams = "?pageNumber=1&pageSize=10&sort=dateIn";
@@ -29,17 +27,17 @@ namespace Tests.Integration
             var response = await _client.GetAsync($"/api/serviceorders{queryParams}");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode ( );
             var content = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<dynamic>(content);
-            
-            Assert.NotNull(result);
-            Assert.True(result.GetProperty("data").GetArrayLength() >= 0);
-            Assert.True(result.GetProperty("totalItems").GetInt32() >= 0);
+
+            Assert.NotNull ( result );
+            Assert.True ( result!.GetProperty ( "data" ).GetArrayLength ( ) >= 0 );
+            Assert.True ( result!.GetProperty ( "totalItems" ).GetInt32 ( ) >= 0 );
         }
 
         [Fact]
-        public async Task GetServiceOrders_WithFilters_ShouldReturnFilteredResults()
+        public async Task GetServiceOrders_WithFilters_ShouldReturnFilteredResults ( )
         {
             // Arrange
             var queryParams = "?pageNumber=1&pageSize=10&excludeFinished=true&search=test";
@@ -48,15 +46,15 @@ namespace Tests.Integration
             var response = await _client.GetAsync($"/api/serviceorders{queryParams}");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode ( );
             var content = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<dynamic>(content);
-            
-            Assert.NotNull(result);
+
+            Assert.NotNull ( result );
         }
 
         [Fact]
-        public async Task GetServiceOrderById_WithValidId_ShouldReturnOrder()
+        public async Task GetServiceOrderById_WithValidId_ShouldReturnOrder ( )
         {
             // Arrange - Assumindo que existe uma ordem com ID 1 no banco de teste
             var orderId = 1;
@@ -65,24 +63,24 @@ namespace Tests.Integration
             var response = await _client.GetAsync($"/api/serviceorders/{orderId}");
 
             // Assert
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            if ( response.StatusCode == HttpStatusCode.NotFound )
             {
                 // Se não encontrar, é aceitável para testes
-                Assert.True(true);
+                Assert.True ( true );
             }
             else
             {
-                response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode ( );
                 var content = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<dynamic>(content);
-                
-                Assert.NotNull(result);
-                Assert.Equal(orderId, result.GetProperty("serviceOrderId").GetInt32());
+
+                Assert.NotNull ( result );
+                Assert.Equal ( orderId, result!.GetProperty ( "serviceOrderId" ).GetInt32 ( ) );
             }
         }
 
         [Fact]
-        public async Task GetServiceOrderById_WithInvalidId_ShouldReturnNotFound()
+        public async Task GetServiceOrderById_WithInvalidId_ShouldReturnNotFound ( )
         {
             // Arrange
             var invalidOrderId = 99999;
@@ -91,11 +89,11 @@ namespace Tests.Integration
             var response = await _client.GetAsync($"/api/serviceorders/{invalidOrderId}");
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal ( HttpStatusCode.NotFound, response.StatusCode );
         }
 
         [Fact]
-        public async Task GetTryInAlerts_ShouldReturnAlerts()
+        public async Task GetTryInAlerts_ShouldReturnAlerts ( )
         {
             // Arrange
             var days = 5;
@@ -104,12 +102,27 @@ namespace Tests.Integration
             var response = await _client.GetAsync($"/api/serviceorders/alert/tryin?days={days}");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode ( );
             var content = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<dynamic>(content);
-            
-            Assert.NotNull(result);
-            Assert.True(result.GetArrayLength() >= 0);
+
+            Assert.NotNull ( result );
+            Assert.True ( result!.GetArrayLength ( ) >= 0 );
         }
+
+        private async Task<string> GetAuthTokenAsync ( )
+        {
+            var loginDto = new LoginDto
+            {
+                Email = "admin@sistema.com",
+                Password = "Pa$$w0rd"
+            };
+
+            var response = await _client.PostAsJsonAsync("/auth/login", loginDto);
+            var json = await response.Content.ReadFromJsonAsync<AuthResponseRecord>();
+
+            return json?.Token!;
+        }
+
     }
 }

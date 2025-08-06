@@ -107,8 +107,7 @@ export class ScheduleDeliveryModalComponent implements OnInit {
   request.subscribe({
     next: () => {
       this.loading = false;
-      const message = this.isEditMode ? 'Agendamento atualizado com sucesso!' : 'Entrega agendada com sucesso!';
-      this.snackBar.open(message, 'Fechar', { duration: 3000 });
+      
       this.dialogRef.close(true);
     },
     error: (err) => {

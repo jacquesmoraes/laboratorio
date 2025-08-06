@@ -133,10 +133,10 @@ export class ServiceOrderListService {
   // Ações de OS
  
   sendToTryIn(orderId: number): Observable<void> {
-    const today = new Date().toISOString().split('T')[0];
+    
     const sendToTryInDto: SendToTryInDto = {
       serviceOrderId: orderId,
-      dateOut: today,
+      dateOut: new Date().toISOString(),
     };
 
     this.setLoading(true);

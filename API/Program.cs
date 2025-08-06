@@ -31,6 +31,7 @@ var app = builder.Build();
 app.UseStaticFiles ( );
 app.UseMiddleware<ExceptionMiddleware> ( );
 app.UseMiddleware<PerformanceMiddleware>();
+app.UseAntiforgery();
 
 if ( !app.Environment.IsEnvironment ( "Test" ) )
 {

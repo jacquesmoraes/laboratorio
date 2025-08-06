@@ -148,8 +148,7 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
   moveToStage(orderId: number) {
     this.serviceOrderListService.moveToStage(orderId).subscribe({
       next: () => {
-        // Após mover para o setor com sucesso, abrir modal de agendamento
-        this.openScheduleModal(orderId);
+         this.openScheduleModal(orderId);
       }
     });
   }

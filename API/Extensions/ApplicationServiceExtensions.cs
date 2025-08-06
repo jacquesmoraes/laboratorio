@@ -50,18 +50,26 @@ namespace API.Extensions
                     options.UseNpgsql ( config.GetConnectionString ( "DefaultConnection" ),
                      o => o.UseQuerySplittingBehavior ( QuerySplittingBehavior.SplitQuery ) ) );
             }
-            services.AddCors(opt =>
-            {
-                opt.AddPolicy(
-                    name: "AllowOrigin",
-                    builder =>
-                    {
-                        builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-                    });
-            });
+            
+            services.AddCors ( opt =>
+            {    
+                opt.AddPolicy ( "AllowOrigin", builder =>
+                {
+                    builder  .WithOrigins ( "http://localhost:4200" )
+                    .AllowAnyMethod ( )
+                    .AllowAnyHeader ( )
+                    .AllowCredentials ( ); 
+                } );
+            } );
 
+            services.AddAntiforgery ( options =>
+            {
+                options.HeaderName = "X-CSRF-TOKEN";
+                options.Cookie.Name = "CSRF-TOKEN";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+            } );
 
 
             services.AddScoped ( typeof ( IGenericRepository<> ), typeof ( GenericRepository<> ) );

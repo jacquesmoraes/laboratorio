@@ -2,14 +2,15 @@
 using FluentAssertions;
 using System.Net;
 using System.Text.Json;
+using Tests.Integration.Infrastructure;
 
 namespace Tests.Integration;
 
-public class ExceptionMiddlewareTests : IClassFixture<CustomWebApplicationFactory>
+public class ExceptionMiddlewareTests : IClassFixture<CustomWebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
 
-    public ExceptionMiddlewareTests ( CustomWebApplicationFactory factory )
+    public ExceptionMiddlewareTests ( CustomWebApplicationFactory<Program> factory )
     {
         _client = factory.CreateClient ( );
     }

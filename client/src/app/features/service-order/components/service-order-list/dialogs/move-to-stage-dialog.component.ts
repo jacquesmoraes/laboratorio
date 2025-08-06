@@ -7,6 +7,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Sector } from '../../../../sectors/models/sector.interface';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 @Component({
   selector: 'app-move-to-stage-dialog',
@@ -19,6 +21,8 @@ import { Sector } from '../../../../sectors/models/sector.interface';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   template: `
     <h2 mat-dialog-title>Mover para Setor</h2>
@@ -34,9 +38,11 @@ import { Sector } from '../../../../sectors/models/sector.interface';
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Data de Entrada</mat-label>
-          <input matInput type="date" formControlName="dateIn" required />
-        </mat-form-field>
+  <mat-label>Data de Entrada</mat-label>
+  <input matInput [matDatepicker]="picker" formControlName="dateIn" required />
+  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+  <mat-datepicker #picker></mat-datepicker>
+</mat-form-field>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">

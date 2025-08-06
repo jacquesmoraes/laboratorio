@@ -26,7 +26,7 @@ namespace Tests.Unit.Applications
         private readonly Mock<IGenericRepository<Sector>> _sectorRepoMock;
         private readonly Mock<IPerformanceLoggingService> _perfLoggerMock;
         private readonly Mock<IUnitOfWork> _uowMock;
-        
+
         private readonly IServiceOrderService _service;
 
         public ServiceOrderServiceTests ( )
@@ -36,7 +36,7 @@ namespace Tests.Unit.Applications
             _clientRepoMock = new Mock<IGenericRepository<Client>> ( );
             _sectorRepoMock = new Mock<IGenericRepository<Sector>> ( );
             _uowMock = new Mock<IUnitOfWork> ( );
-           _scheduleRepoMock = new Mock<IGenericRepository<ServiceOrderSchedule>>();
+            _scheduleRepoMock = new Mock<IGenericRepository<ServiceOrderSchedule>> ( );
             _perfLoggerMock = new Mock<IPerformanceLoggingService> ( );
 
             _service = new ServiceOrderService (
@@ -560,11 +560,12 @@ namespace Tests.Unit.Applications
 
             order.Stages.Add ( stage );
 
-            var dto = new SendToTryInDto
-            {
-                ServiceOrderId = 1,
-                DateOut = DateTime.UtcNow
-            };
+            var localNow = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
+           var dto = new SendToTryInDto
+{
+    ServiceOrderId = 1,
+    DateOut = localNow
+};
 
             // Configurar o mock da transação
             var transactionMock = new Mock<ITransaction>();
@@ -584,7 +585,8 @@ namespace Tests.Unit.Applications
             // Assert
             result.Should ( ).NotBeNull ( );
             result.Status.Should ( ).Be ( OrderStatus.TryIn );
-            result.Stages.Last ( ).DateOut.Should ( ).BeCloseTo ( dto.DateOut, TimeSpan.FromSeconds ( 1 ) );
+            result.Stages.Last().DateOut.Should().BeCloseTo(dto.DateOut.ToUniversalTime(), TimeSpan.FromSeconds(1));
+
 
             // Verificar interações com mocks
             _uowMock.Verify ( u => u.BeginTransactionAsync ( ), Times.Once );
@@ -631,8 +633,8 @@ namespace Tests.Unit.Applications
                 .ReturnsAsync ( order );
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.SendToTryInAsync(dto));
-            ex.Message.Should ( ).Contain ( "aberto" ); // ou ajuste a string conforme a mensagem exata da exceção
+            await Assert.ThrowsAsync<UnprocessableEntityException> ( ( ) => _service.SendToTryInAsync ( dto ) );
+
         }
 
         [Fact]

@@ -14,6 +14,7 @@
         private readonly IPerformanceLoggingService _performanceLoggingService = performanceLoggingService;
 
         [HttpPost]
+        
         public async Task<IActionResult> Create ( [FromBody] CreateServiceOrderDto dto )
         {
             using ( _performanceLoggingService.MeasureOperation ( "Controller_CreateServiceOrder", new Dictionary<string, object>
@@ -89,7 +90,6 @@
             } ) )
             {
                 var result = await _serviceOrderService.SendToTryInAsync(dto);
-                // ✅ CORRIGIDO: Usar mapper para evitar referência circular
                 var response = _mapper.Map<ServiceOrderDetailsProjection>(result);
                 return Ok ( response );
             }
@@ -136,6 +136,7 @@
 
 
         [HttpPut ( "{id}" )]
+        
         public async Task<IActionResult> Update ( int id, [FromBody] CreateServiceOrderDto dto )
         {
             using ( _performanceLoggingService.MeasureOperation ( "Controller_UpdateServiceOrder", new Dictionary<string, object>
@@ -150,6 +151,7 @@
         }
 
         [HttpDelete ( "{id}" )]
+        
         public async Task<IActionResult> Delete ( int id )
         {
             using ( _performanceLoggingService.MeasureOperation ( "Controller_DeleteServiceOrder", new Dictionary<string, object>
@@ -163,6 +165,7 @@
         }
 
         [HttpPost ( "{id}/reopen" )]
+        
         public async Task<IActionResult> Reopen ( int id )
         {
             using ( _performanceLoggingService.MeasureOperation ( "Controller_ReopenServiceOrder", new Dictionary<string, object>

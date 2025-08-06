@@ -55,8 +55,9 @@ public class ClientAreaServiceTests
             }
         };
 
-        _clientRepoMock.Setup ( r => r.GetEntityWithSpec ( It.IsAny<ISpecification<Client>> ( ) ) )
-            .ReturnsAsync ( client );
+       _clientRepoMock
+    .Setup(r => r.GetEntityWithSpecWithoutTrackingAsync(It.IsAny<ISpecification<Client>>()))
+    .ReturnsAsync(client);
 
         _invoiceRepoMock.Setup ( r => r.SumAsync (
                 It.IsAny<Expression<Func<BillingInvoice, bool>>> ( ),
