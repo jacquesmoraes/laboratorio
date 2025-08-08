@@ -14,8 +14,11 @@ namespace Core.FactorySpecifications
         public static class ScheduleSpecs
         {
             public static ScheduleSpecification ById ( int id )
-                => new ( s => s.Id == id );
-
+            {
+                var spec = new ScheduleSpecification(s => s.Id == id);
+                AddIncludes ( spec );
+                return spec;
+            }
             public static ScheduleSpecification BySectorAndDate ( int sectorId, DateTime date )
             {
                 var spec = new ScheduleSpecification(s =>

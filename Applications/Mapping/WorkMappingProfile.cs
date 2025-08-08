@@ -16,14 +16,18 @@
             //works response for service order
 
             CreateMap<Work, WorkRecord> ( )
-                .ForMember ( dest => dest.WorkTypeId, opt => opt.MapFrom ( src => src.WorkTypeId ) )
-                .ForMember ( dest => dest.WorkTypeName, opt => opt.MapFrom ( src => src.WorkType.Name ) )
-                .ForMember ( dest => dest.Quantity, opt => opt.MapFrom ( src => src.Quantity ) )
-                .ForMember ( dest => dest.PriceUnit, opt => opt.MapFrom ( src => src.PriceUnit ) )
-                .ForMember ( dest => dest.PriceTotal, opt => opt.MapFrom ( src => src.PriceTotal ) )
-                .ForMember ( dest => dest.ShadeColor, opt => opt.MapFrom ( src => src.Shade!.color ) )
-                .ForMember ( dest => dest.ScaleName, opt => opt.MapFrom ( src => src.Scale != null ? src.Scale.Name : null ) )
-                .ForMember ( dest => dest.Notes, opt => opt.MapFrom ( src => src.Notes ) );
+                .ForMember ( d => d.WorkTypeId, opt => opt.MapFrom ( s => s.WorkTypeId ) )
+                .ForMember ( d => d.WorkTypeName, opt => opt.MapFrom ( s => s.WorkType.Name ) )
+                .ForMember ( d => d.Quantity, opt => opt.MapFrom ( s => s.Quantity ) )
+                .ForMember ( d => d.PriceUnit, opt => opt.MapFrom ( s => s.PriceUnit ) )
+                .ForMember ( d => d.PriceTotal, opt => opt.MapFrom ( s => s.PriceTotal ) )
+                .ForMember ( d => d.ShadeId, opt => opt.MapFrom ( s => s.ShadeId ) )         
+                .ForMember ( d => d.ShadeColor, opt => opt.MapFrom ( s => s.Shade != null ? s.Shade.color : null ) )
+                .ForMember ( d => d.ScaleId, opt => opt.MapFrom ( s => s.ScaleId ) )         
+                .ForMember ( d => d.ScaleName, opt => opt.MapFrom ( s => s.Scale != null ? s.Scale.Name : null ) )
+                .ForMember ( d => d.Notes, opt => opt.MapFrom ( s => s.Notes ) );
+
+
 
 
             // Applications/Mapping/WorkMappingProfile.cs

@@ -11,7 +11,7 @@ namespace Core.FactorySpecifications
         if (includeRelations)
         {
             AddInclude(x => x.Items);
-            AddInclude("Items.WorkType"); // ✅ necessário para o nome do serviço
+            AddInclude("Items.WorkType"); 
             AddInclude(x => x.Clients);
         }
     }
@@ -22,7 +22,7 @@ namespace Core.FactorySpecifications
         if (includeRelations)
         {
             AddInclude(x => x.Items);
-            AddInclude("Items.WorkType"); // ✅ aqui também
+            AddInclude("Items.WorkType"); 
             AddInclude(x => x.Clients);
         }
     }
@@ -33,7 +33,7 @@ namespace Core.FactorySpecifications
         if (includeRelations)
         {
             AddInclude(x => x.Items);
-            AddInclude("Items.WorkType"); // ✅ aqui também
+            AddInclude("Items.WorkType");
             AddInclude(x => x.Clients);
         }
     }

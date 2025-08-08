@@ -10,12 +10,16 @@
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Nome</mat-label>
         <input matInput formControlName="name" placeholder="Digite o nome do tipo de trabalho" />
-        <mat-error *ngIf="workTypeForm.get('name')?.hasError('required')">
-          Nome é obrigatório
-        </mat-error>
-        <mat-error *ngIf="workTypeForm.get('name')?.hasError('minlength')">
-          Nome deve ter pelo menos 2 caracteres
-        </mat-error>
+        @if (workTypeForm.get('name')?.hasError('required')) {
+          <mat-error>
+            Nome é obrigatório
+          </mat-error>
+        }
+        @if (workTypeForm.get('name')?.hasError('minlength')) {
+          <mat-error>
+            Nome deve ter pelo menos 2 caracteres
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-100">
@@ -26,13 +30,17 @@
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Seção de Trabalho</mat-label>
         <mat-select formControlName="workSectionId">
-          <mat-option *ngFor="let section of workSections" [value]="section.id">
-            {{ section.name }}
-          </mat-option>
+          @for (section of workSections; track section.id) {
+            <mat-option [value]="section.id">
+              {{ section.name }}
+            </mat-option>
+          }
         </mat-select>
-        <mat-error *ngIf="workTypeForm.get('workSectionId')?.hasError('required')">
-          Seção de trabalho é obrigatória
-        </mat-error>
+        @if (workTypeForm.get('workSectionId')?.hasError('required')) {
+          <mat-error>
+            Seção de trabalho é obrigatória
+          </mat-error>
+        }
       </mat-form-field>
 
       <div class="checkbox-container">

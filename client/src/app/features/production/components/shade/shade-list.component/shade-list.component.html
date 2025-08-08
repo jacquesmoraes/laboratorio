@@ -15,9 +15,11 @@
           <mat-form-field appearance="outline" class="filter-field">
             <mat-select formControlName="scaleId" (selectionChange)="onScaleFilterChange()">
               <mat-option [value]="undefined">Todas as escalas</mat-option>
-              <mat-option *ngFor="let scale of scales(); trackBy: trackByScaleId" [value]="scale.id">
-                {{ scale.name }}
-              </mat-option>
+              @for (scale of scales(); track scale.id) {
+                <mat-option [value]="scale.id">
+                  {{ scale.name }}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -29,34 +31,34 @@
     <table class="table">
       <thead>
         <tr>
-
           <th>Cor</th>
           <th>Escala</th>
           <th style="width: 1%;">Ações</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let shade of shades(); trackBy: trackByShadeId">
-
-          <td data-label="Cor" >
-            <div class="color-display">
-              {{ shade.color || '-' }}
-            </div>
-          </td>
-          <td data-label="Escala" >{{ getScaleName(shade.scaleId) }}</td>
-          <td >
-            <div class="action-buttons">
-              <button class="btn btn-primary btn-sm" (click)="onEdit(shade)">
-                <mat-icon>edit</mat-icon>
-                Editar
-              </button>
-              <button class="btn btn-danger btn-sm" (click)="deleteShade(shade.id)">
-                <mat-icon>delete</mat-icon>
-                Excluir
-              </button>
-            </div>
-          </td>
-        </tr>
+        @for (shade of shades(); track shade.id) {
+          <tr>
+            <td data-label="Cor">
+              <div class="color-display">
+                {{ shade.color || '-' }}
+              </div>
+            </td>
+            <td data-label="Escala">{{ getScaleName(shade.scaleId) }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-primary btn-sm" (click)="onEdit(shade)">
+                  <mat-icon>edit</mat-icon>
+                  Editar
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="deleteShade(shade.id)">
+                  <mat-icon>delete</mat-icon>
+                  Excluir
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>

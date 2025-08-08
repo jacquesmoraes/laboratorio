@@ -31,88 +31,90 @@ export interface TableActionEvent {
     MatCheckboxModule,
   ],
   template: `
-    <div class="table-container">
-      <table class="service-order-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Número</th>
-            <th>Cliente</th>
-            <th>Paciente</th>
-            <th>Data Entrada</th>
-            <th>Última Movimentação</th>
-            <th>Status</th>
-            <th>Setor Atual</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let order of serviceOrders()">
-            <td data-label="Seleção">
-              <mat-checkbox 
-                [checked]="selectedOrderIds().includes(order.serviceOrderId)"
-                (change)="onSelectionChange(order.serviceOrderId)"
-                color="primary">
-              </mat-checkbox>
-            </td>
-            <td data-label="Número">{{ order.orderNumber }}</td>
-            <td data-label="Cliente">
-              <a [routerLink]="['/clients', order.clientId]" class="client-link" (click)="$event.stopPropagation()">
-                {{ order.clientName }}
-              </a>
-            </td>
-            <td data-label="Paciente">{{ order.patientName }}</td>
-            <td data-label="Data Entrada">{{ order.dateIn | date: 'dd/MM/yyyy' }}</td>
-            <td data-label="Última Movimentação">
-            <span *ngIf="order.lastMovement; else noMovement">
-    {{ order.lastMovement | date: 'dd/MM/yyyy' }}
-  </span>
-              <ng-template #noMovement>
-                <span class="text-muted">-</span>
-              </ng-template>
-            </td>
-            <td data-label="Status">
-             
+   <div class="table-container">
+  <table class="service-order-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Número</th>
+        <th>Cliente</th>
+        <th>Paciente</th>
+        <th>Data Entrada</th>
+        <th>Última Movimentação</th>
+        <th>Status</th>
+        <th>Setor Atual</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (order of serviceOrders(); track order.serviceOrderId) {
+        <tr>
+          <td data-label="Seleção">
+            <mat-checkbox 
+              [checked]="selectedOrderIds().includes(order.serviceOrderId)"
+              (change)="onSelectionChange(order.serviceOrderId)"
+              color="primary">
+            </mat-checkbox>
+          </td>
+          <td data-label="Número">{{ order.orderNumber }}</td>
+          <td data-label="Cliente">
+            <a [routerLink]="['/clients', order.clientId]" class="client-link" (click)="$event.stopPropagation()">
+              {{ order.clientName }}
+            </a>
+          </td>
+          <td data-label="Paciente">{{ order.patientName }}</td>
+          <td data-label="Data Entrada">{{ order.dateIn | date: 'dd/MM/yyyy' }}</td>
+          <td data-label="Última Movimentação">
+            @if (order.lastMovement) {
+              <span>
+                {{ order.lastMovement | date: 'dd/MM/yyyy' }}
+              </span>
+            } @else {
+              <span class="text-muted">-</span>
+            }
+          </td>
+          <td data-label="Status">
             <mat-chip [class]="getStatusColorClass(order.status)" class="status-chip">
-                {{ getStatusLabel(order.status) }}
-              </mat-chip>
-            </td>
-            <td data-label="Setor Atual">{{ order.currentSectorName || '-' }}</td>
-            <td data-label="Ações">
-              <div class="action-buttons">
-                <button mat-icon-button class="action-btn" (click)="onAction('view', order.serviceOrderId)" matTooltip="Ver detalhes">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button class="action-btn" (click)="onAction('edit', order.serviceOrderId)" matTooltip="Editar">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button class="action-btn" (click)="onAction('sendToTryIn', order.serviceOrderId)" matTooltip="Enviar para Prova" [disabled]="order.status === OrderStatus.TryIn || order.status === OrderStatus.Finished">
-                    <mat-icon>send</mat-icon>
-                  </button>
-                <button mat-icon-button class="action-btn" (click)="onAction('moveToStage', order.serviceOrderId)" matTooltip="Mudar de Setor" [disabled]="order.status === OrderStatus.Finished">
-                     <mat-icon>swap_horiz</mat-icon>
-                 </button>
-                 <button mat-icon-button class="action-btn"
-                       (click)="onAction('reopen', order.serviceOrderId)"
-                       matTooltip="Reabrir OS"
-                      [disabled]="!isFinished(order.status)">
-                 <mat-icon>refresh</mat-icon>
-               </button> 
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              {{ getStatusLabel(order.status) }}
+            </mat-chip>
+          </td>
+          <td data-label="Setor Atual">{{ order.currentSectorName || '-' }}</td>
+          <td data-label="Ações">
+            <div class="action-buttons">
+              <button mat-icon-button class="action-btn" (click)="onAction('view', order.serviceOrderId)" matTooltip="Ver detalhes">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" (click)="onAction('edit', order.serviceOrderId)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" (click)="onAction('sendToTryIn', order.serviceOrderId)" matTooltip="Enviar para Prova" [disabled]="order.status === OrderStatus.TryIn || order.status === OrderStatus.Finished">
+                <mat-icon>send</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" (click)="onAction('moveToStage', order.serviceOrderId)" matTooltip="Mudar de Setor" [disabled]="order.status === OrderStatus.Finished">
+                <mat-icon>swap_horiz</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn"
+                (click)="onAction('reopen', order.serviceOrderId)"
+                matTooltip="Reabrir OS"
+                [disabled]="!isFinished(order.status)">
+                <mat-icon>refresh</mat-icon>
+              </button> 
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
 
-      <mat-paginator 
-        [length]="totalItems()" 
-        [pageSize]="pageSize()"
-        [pageIndex]="pageIndex()" 
-        [pageSizeOptions]="pageSizeOptions()" 
-        (page)="onPageChange($event)"
-        showFirstLastButtons>
-      </mat-paginator>
-    </div>
+  <mat-paginator 
+    [length]="totalItems()" 
+    [pageSize]="pageSize()"
+    [pageIndex]="pageIndex()" 
+    [pageSizeOptions]="pageSizeOptions()" 
+    (page)="onPageChange($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+</div>
   `,
   styleUrls: ['./service-order-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

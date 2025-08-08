@@ -13,12 +13,16 @@
           <mat-label>Nome da Escala</mat-label>
           <input matInput formControlName="name" placeholder="Digite o nome da escala">
           <mat-icon matSuffix>palette</mat-icon>
-          <mat-error *ngIf="scaleForm().get('name')?.hasError('required')">
-            Nome é obrigatório
-          </mat-error>
-          <mat-error *ngIf="scaleForm().get('name')?.hasError('minlength')">
-            Nome deve ter pelo menos 2 caracteres
-          </mat-error>
+          @if (scaleForm().get('name')?.hasError('required')) {
+            <mat-error>
+              Nome é obrigatório
+            </mat-error>
+          }
+          @if (scaleForm().get('name')?.hasError('minlength')) {
+            <mat-error>
+              Nome deve ter pelo menos 2 caracteres
+            </mat-error>
+          }
         </mat-form-field>
       </div>
     </mat-dialog-content>
@@ -28,7 +32,7 @@
         <mat-icon>close</mat-icon>
         Cancelar
       </button>
-      <button  type="submit" [disabled]="scaleForm().invalid" class="submit-btn">
+      <button type="submit" [disabled]="scaleForm().invalid" class="submit-btn">
         <mat-icon>{{ isEditMode() ? 'update' : 'add' }}</mat-icon>
         {{ isEditMode() ? 'Atualizar' : 'Criar' }}
       </button>

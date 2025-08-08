@@ -53,7 +53,9 @@ export interface Work {
   quantity: number;
   priceUnit: number;
   priceTotal: number;
+  shadeId?: number; 
   shadeColor?: string;
+  scaleId?: number; 
   scaleName?: string;
   notes?: string;
 }

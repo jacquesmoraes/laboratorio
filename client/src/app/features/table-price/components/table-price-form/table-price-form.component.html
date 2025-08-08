@@ -28,9 +28,11 @@
               matInput 
               formControlName="name"
               placeholder="Digite o nome da tabela">
-            <mat-error *ngIf="form.get('name')?.hasError('required')">
-              Nome é obrigatório
-            </mat-error>
+            @if (form.get('name')?.hasError('required')) {
+              <mat-error>
+                Nome é obrigatório
+              </mat-error>
+            }
           </mat-form-field>
         </div>
 
@@ -92,9 +94,11 @@
                     </mat-option>
                   }
                 </mat-select>
-                <mat-error *ngIf="item.get('workTypeId')?.hasError('required')">
-                  Tipo de trabalho é obrigatório
-                </mat-error>
+                @if (item.get('workTypeId')?.hasError('required')) {
+                  <mat-error>
+                    Tipo de trabalho é obrigatório
+                  </mat-error>
+                }
               </mat-form-field>
 
               <mat-form-field appearance="outline">
@@ -107,12 +111,16 @@
                   step="0.01"
                   min="0">
                 <span matTextSuffix>R$</span>
-                <mat-error *ngIf="item.get('price')?.hasError('required')">
-                  Preço é obrigatório
-                </mat-error>
-                <mat-error *ngIf="item.get('price')?.hasError('min')">
-                  Preço deve ser maior que zero
-                </mat-error>
+                @if (item.get('price')?.hasError('required')) {
+                  <mat-error>
+                    Preço é obrigatório
+                  </mat-error>
+                }
+                @if (item.get('price')?.hasError('min')) {
+                  <mat-error>
+                    Preço deve ser maior que zero
+                  </mat-error>
+                }
               </mat-form-field>
 
               <button 
@@ -130,7 +138,7 @@
         @if (itemsArray.length === 0) {
           <div class="empty-items">
             <mat-icon class="empty-icon">price_check</mat-icon>
-            <p>Nenhum item adicionado. Clique em \"Adicionar Item\" para começar.</p>
+            <p>Nenhum item adicionado. Clique em "Adicionar Item" para começar.</p>
           </div>
         }
       </mat-card-content>

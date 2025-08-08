@@ -13,12 +13,16 @@
         <input matInput formControlName="color" placeholder="Digite o nome da cor" />
         <mat-icon matSuffix>palette</mat-icon>
 
-        <mat-error *ngIf="shadeForm.get('color')?.hasError('required')">
-          Cor é obrigatória
-        </mat-error>
-        <mat-error *ngIf="shadeForm.get('color')?.hasError('minlength')">
-          Cor deve ter pelo menos 2 caracteres
-        </mat-error>
+        @if (shadeForm.get('color')?.hasError('required')) {
+          <mat-error>
+            Cor é obrigatória
+          </mat-error>
+        }
+        @if (shadeForm.get('color')?.hasError('minlength')) {
+          <mat-error>
+            Cor deve ter pelo menos 2 caracteres
+          </mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-100">
@@ -31,9 +35,11 @@
           }
         </mat-select>
 
-        <mat-error *ngIf="shadeForm.get('scaleId')?.hasError('required')">
-          Escala é obrigatória
-        </mat-error>
+        @if (shadeForm.get('scaleId')?.hasError('required')) {
+          <mat-error>
+            Escala é obrigatória
+          </mat-error>
+        }
       </mat-form-field>
     </mat-dialog-content>
 

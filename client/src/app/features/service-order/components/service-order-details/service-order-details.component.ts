@@ -114,67 +114,86 @@ private sectorService = inject(SectorService);
     });
   }
 
-   // ... existing code ...
+   
 
-updateSchedule() {
-  const order = this.serviceOrder();
-  if (!order) return;
-
-  // Primeiro, carregar os setores
-  this.sectorService.getAll().subscribe({
-    next: (sectors) => {
-      const sectorsData = sectors.map(s => ({ 
-        sectorId: s.id, 
-        sectorName: s.name 
-      }));
-
-      // Depois, buscar o agendamento ativo
-      this.scheduleService.getActiveScheduleByServiceOrder(order.serviceOrderId).subscribe({
-        next: (schedule: ScheduleItemRecord) => {
-          // Modo edição - passar o agendamento completo
-          const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
-            width: '400px',
-            data: {
-              serviceOrderId: order.serviceOrderId,
-              scheduleId: schedule.scheduleId,
-              existingSchedule: schedule, // Passar o agendamento completo
-              sectors: sectorsData
+   updateSchedule() {
+    const order = this.serviceOrder();
+    if (!order) return;
+  
+    // Primeiro, carregar os setores
+    this.sectorService.getAll().subscribe({
+      next: (sectors) => {
+        const sectorsData = sectors.map(s => ({ 
+          sectorId: s.id, 
+          sectorName: s.name 
+        }));
+  
+        // Depois, buscar o agendamento ativo
+        this.scheduleService.getActiveScheduleByServiceOrder(order.serviceOrderId).subscribe({
+          next: (schedule: ScheduleItemRecord) => {
+            // Verificar se o schedule tem ID válido
+            if (schedule && schedule.scheduleId && schedule.scheduleId > 0) {
+              // Modo edição - passar o agendamento completo
+              const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
+                width: '400px',
+                data: {
+                  serviceOrderId: order.serviceOrderId,
+                  scheduleId: schedule.scheduleId,
+                  existingSchedule: schedule, // Passar o agendamento completo
+                  sectors: sectorsData
+                }
+              });
+  
+              dialogRef.afterClosed().subscribe((success) => {
+                if (success) {
+                  this.snackBar.open('Agendamento atualizado!', 'Fechar', { duration: 3000 });
+                  this.reloadSchedule(order.serviceOrderId);
+                }
+              });
+            } else {
+              // Se não tem schedule válido, criar novo
+              const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
+                width: '400px',
+                data: {
+                  serviceOrderId: order.serviceOrderId,
+                  sectors: sectorsData
+                }
+              });
+  
+              dialogRef.afterClosed().subscribe((success) => {
+                if (success) {
+                  this.snackBar.open('Agendamento criado!', 'Fechar', { duration: 3000 });
+                  this.reloadSchedule(order.serviceOrderId);
+                }
+              });
             }
-          });
+          },
+          error: () => {
+            // Modo criação - não tem agendamento existente
+            const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
+              width: '400px',
+              data: {
+                serviceOrderId: order.serviceOrderId,
+                sectors: sectorsData
+              }
+            });
+  
+            dialogRef.afterClosed().subscribe((success) => {
+              if (success) {
+                this.snackBar.open('Agendamento criado!', 'Fechar', { duration: 3000 });
+                this.reloadSchedule(order.serviceOrderId);
+              }
+            });
+          }
+        });
+      },
+      error: () => {
+        this.snackBar.open('Erro ao carregar setores', 'Fechar', { duration: 3000 });
+      }
+    });
+  }
 
-          dialogRef.afterClosed().subscribe((success) => {
-            if (success) {
-              this.snackBar.open('Agendamento atualizado!', 'Fechar', { duration: 3000 });
-              this.reloadSchedule(order.serviceOrderId);
-            }
-          });
-        },
-        error: () => {
-          // Modo criação - não tem agendamento existente
-          const dialogRef = this.dialog.open(ScheduleDeliveryModalComponent, {
-            width: '400px',
-            data: {
-              serviceOrderId: order.serviceOrderId,
-              sectors: sectorsData
-            }
-          });
 
-          dialogRef.afterClosed().subscribe((success) => {
-            if (success) {
-              this.snackBar.open('Agendamento criado!', 'Fechar', { duration: 3000 });
-              this.reloadSchedule(order.serviceOrderId);
-            }
-          });
-        }
-      });
-    },
-    error: () => {
-      this.snackBar.open('Erro ao carregar setores', 'Fechar', { duration: 3000 });
-    }
-  });
-}
-
-// ... existing code ...
 
  getStatusColorClass(status: string | OrderStatus): string {
   const enumValue = typeof status === 'string'

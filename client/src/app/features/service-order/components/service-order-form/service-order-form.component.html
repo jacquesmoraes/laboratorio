@@ -23,23 +23,25 @@
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Cliente</mat-label>
-              <mat-select formControlName="clientId" [disabled]="loading()">
+              <mat-select formControlName="clientId">
                 <mat-option value="">Selecione um cliente</mat-option>
-                <mat-option *ngFor="let client of clients()" [value]="client.clientId">
-                  {{ client.clientName }}
-                </mat-option>
+                @for (client of clients(); track client.clientId) {
+                  <mat-option [value]="client.clientId">
+                    {{ client.clientName }}
+                  </mat-option>
+                }
               </mat-select>
-              <mat-error *ngIf="serviceOrderForm.get('clientId')?.hasError('required')">
-                Cliente é obrigatório
-              </mat-error>
+              @if (serviceOrderForm.get('clientId')?.hasError('required')) {
+                <mat-error>Cliente é obrigatório</mat-error>
+              }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Nome do Paciente</mat-label>
               <input matInput formControlName="patientName" placeholder="Digite o nome do paciente">
-              <mat-error *ngIf="getErrorMessage('patientName')">
-                {{ getErrorMessage('patientName') }}
-              </mat-error>
+              @if (getErrorMessage('patientName')) {
+                <mat-error>{{ getErrorMessage('patientName') }}</mat-error>
+              }
             </mat-form-field>
           </div>
 
@@ -49,22 +51,24 @@
               <input matInput [matDatepicker]="datePicker" formControlName="dateIn">
               <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
               <mat-datepicker #datePicker></mat-datepicker>
-              <mat-error *ngIf="getErrorMessage('dateIn')">
-                {{ getErrorMessage('dateIn') }}
-              </mat-error>
+              @if (getErrorMessage('dateIn')) {
+                <mat-error>{{ getErrorMessage('dateIn') }}</mat-error>
+              }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Primeiro Setor</mat-label>
-              <mat-select formControlName="firstSectorId" [disabled]="loading()">
+              <mat-select formControlName="firstSectorId">
                 <mat-option value="">Selecione o setor</mat-option>
-                <mat-option *ngFor="let sector of sectors()" [value]="sector.sectorId">
-                  {{ sector.name }}
-                </mat-option>
+                @for (sector of sectors(); track sector.sectorId) {
+                  <mat-option [value]="sector.sectorId">
+                    {{ sector.name }}
+                  </mat-option>
+                }
               </mat-select>
-              <mat-error *ngIf="getErrorMessage('firstSectorId')">
-                {{ getErrorMessage('firstSectorId') }}
-              </mat-error>
+              @if (getErrorMessage('firstSectorId')) {
+                <mat-error>{{ getErrorMessage('firstSectorId') }}</mat-error>
+              }
             </mat-form-field>
           </div>
         </div>
@@ -76,108 +80,113 @@
               <mat-icon>work</mat-icon>
               Trabalhos
             </h3>
-            <button type="button"  (click)="addWork()"
-              [disabled]="loading() || !serviceOrderForm.get('clientId')?.value" class="add-work-btn">
+            <button type="button"
+              (click)="addWork()"
+              class="add-work-btn">
               <mat-icon>add</mat-icon>
             </button>
           </div>
 
-          <div class="works-container" formArrayName="works">
-            <div *ngFor="let workGroup of worksArray.controls; let i = index; trackBy: trackByIndex" class="work-item"
-              [formGroupName]="i">
+          <div class="works-container" formArrayName="works"
+          *ngIf="isEditMode() || worksDataLoaded()">
+       @for (workGroup of worksArray.controls; track workGroup) {
+         <div class="work-item" [formGroupName]="$index">
+           <mat-card class="work-card">
+             <mat-card-header>
+               <mat-card-title class="work-title">
+                 Trabalho {{ $index + 1 }}
+               </mat-card-title>
+               <button type="button" mat-icon-button color="warn" (click)="removeWork($index)" class="remove-work-btn">
+                 <mat-icon>delete</mat-icon>
+               </button>
+             </mat-card-header>
+     
+             <mat-card-content>
+               <div class="work-form-row">
+                 <mat-form-field appearance="outline" class="work-field">
+                   <mat-label>Tipo de Trabalho</mat-label>
+                   <mat-select formControlName="workTypeId">
+                     <mat-option value="">Selecione o tipo</mat-option>
+                     @for (workType of workTypes(); track workType.id) {
+                       <mat-option [value]="workType.id">{{ workType.name }}</mat-option>
+                     }
+                   </mat-select>
+                   @if (getWorkErrorMessage($index, 'workTypeId')) {
+                     <mat-error>{{ getWorkErrorMessage($index, 'workTypeId') }}</mat-error>
+                   }
+                 </mat-form-field>
 
-              <mat-card class="work-card">
-                <mat-card-header>
-                  <mat-card-title class="work-title">
-                    Trabalho {{ i + 1 }}
-                  </mat-card-title>
-                  <button type="button" mat-icon-button color="warn" (click)="removeWork(i)" [disabled]="loading()"
-                    class="remove-work-btn">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </mat-card-header>
+                      <mat-form-field appearance="outline" class="work-field">
+                        <mat-label>Quantidade</mat-label>
+                        <input matInput type="number" formControlName="quantity" min="1">
+                        @if (getWorkErrorMessage($index, 'quantity')) {
+                          <mat-error>{{ getWorkErrorMessage($index, 'quantity') }}</mat-error>
+                        }
+                      </mat-form-field>
 
-                <mat-card-content>
-                  <div class="work-form-row">
-                    <mat-form-field appearance="outline" class="work-field">
-                      <mat-label>Tipo de Trabalho</mat-label>
-                      <mat-select formControlName="workTypeId" [disabled]="loading()">
-                        <mat-option value="">Selecione o tipo</mat-option>
-                        <mat-option *ngFor="let workType of workTypes()" [value]="workType.id">
-                          {{ workType.name }}
-                        </mat-option>
-                      </mat-select>
-                      <mat-error *ngIf="getWorkErrorMessage(i, 'workTypeId')">
-                        {{ getWorkErrorMessage(i, 'workTypeId') }}
-                      </mat-error>
+                      <mat-form-field appearance="outline" class="work-field">
+                        <mat-label>Preço Unitário</mat-label>
+                        <input matInput type="number" formControlName="priceUnit" min="0" step="0.01">
+                        @if (getWorkErrorMessage($index, 'priceUnit')) {
+                          <mat-error>{{ getWorkErrorMessage($index, 'priceUnit') }}</mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+
+                    <div class="work-form-row">
+                      <mat-form-field appearance="outline" class="work-field">
+                        <mat-label>Escala</mat-label>
+                        <mat-select formControlName="scaleId">
+                          <mat-option value="">Nenhuma escala</mat-option>
+                          @for (scale of scales(); track scale.id) {
+                            <mat-option [value]="scale.id">{{ scale.name }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+          
+                      <mat-form-field appearance="outline" class="work-field">
+                        <mat-label>Cor</mat-label>
+                        <mat-select formControlName="shadeId">
+                          <mat-option value="">Nenhuma cor</mat-option>
+                          @for (shade of getShadesForWork($index); track shade.shadeId || shade.shadeColor) {
+                            <mat-option [value]="shade.shadeId">{{ shade.shadeColor }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="work-notes-field">
+                      <mat-label>Observações</mat-label>
+                      <textarea matInput formControlName="notes" rows="2" placeholder="Observações sobre o trabalho"></textarea>
                     </mat-form-field>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            }
 
-                    <mat-form-field appearance="outline" class="work-field">
-                      <mat-label>Quantidade</mat-label>
-                      <input matInput type="number" formControlName="quantity" min="1">
-                      <mat-error *ngIf="getWorkErrorMessage(i, 'quantity')">
-                        {{ getWorkErrorMessage(i, 'quantity') }}
-                      </mat-error>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="work-field">
-                      <mat-label>Preço Unitário</mat-label>
-                      <input matInput type="number" formControlName="priceUnit" min="0" step="0.01">
-                      <mat-error *ngIf="getWorkErrorMessage(i, 'priceUnit')">
-                        {{ getWorkErrorMessage(i, 'priceUnit') }}
-                      </mat-error>
-                    </mat-form-field>
-                  </div>
-
-                  <div class="work-form-row">
-                    <mat-form-field appearance="outline" class="work-field">
-                      <mat-label>Escala</mat-label>
-                      <mat-select formControlName="scaleId" [disabled]="loading()">
-                        <mat-option value="">Nenhuma escala</mat-option>
-                        <mat-option *ngFor="let scale of scales()" [value]="scale.id">
-                          {{ scale.name }}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="work-field">
-                      <mat-label>Cor</mat-label>
-                      <mat-select formControlName="shadeId" [disabled]="loading()">
-                        <mat-option value="">Nenhuma cor</mat-option>
-                        <mat-option *ngFor="let shade of getShadesForWork(i); trackBy: trackByShadeId" 
-                        [value]="shade.shadeId">
-              {{ shade.shadeColor }}
-            </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-
-                  <mat-form-field appearance="outline" class="work-notes-field">
-                    <mat-label>Observações</mat-label>
-                    <textarea matInput formControlName="notes" rows="2"
-                      placeholder="Observações sobre o trabalho"></textarea>
-                  </mat-form-field>
-                </mat-card-content>
-              </mat-card>
-            </div>
-
-            <div *ngIf="worksArray.length === 0" class="no-works-message">
-              <mat-icon>info</mat-icon>
-              <p>Nenhum trabalho adicionado. Clique no botão + para adicionar um trabalho.</p>
-            </div>
+            @if (worksArray.length === 0 && (isEditMode() || worksDataLoaded())) {
+              <div class="no-works-message">
+                <mat-icon>info</mat-icon>
+                <p>Nenhum trabalho adicionado. Clique no botão + para adicionar um trabalho.</p>
+              </div>
+            }
           </div>
         </div>
 
         <!-- Botões dentro do formulário -->
         <div class="form-actions">
-          <button type="button" class="cancel-btn" (click)="cancel()" [disabled]="loading()">
+          <button type="button" class="cancel-btn" (click)="cancel()">
             <mat-icon>cancel</mat-icon>
             Cancelar
           </button>
 
           <button type="submit" class="submit-btn" [disabled]="serviceOrderForm.invalid || loading()">
-            <mat-icon *ngIf="!loading()">{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
-            <mat-spinner *ngIf="loading()" diameter="20"></mat-spinner>
+            @if (!loading()) {
+              <mat-icon>{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
+            }
+            @if (loading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
             {{ isEditMode() ? 'Atualizar' : 'Criar' }} Ordem
           </button>
         </div>

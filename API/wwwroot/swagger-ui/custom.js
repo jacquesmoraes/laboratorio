@@ -1,4 +1,4 @@
-﻿// Intercepta chamadas ao endpoint de login e injeta o token no Swagger UI
+﻿
 (function () {
      const originalFetch = window.fetch;
 

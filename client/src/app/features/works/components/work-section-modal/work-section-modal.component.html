@@ -11,12 +11,16 @@
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Nome</mat-label>
         <input matInput formControlName="name" placeholder="Digite o nome da seção" />
-        <mat-error *ngIf="workSectionForm.get('name')?.hasError('required')">
-          Nome é obrigatório
-        </mat-error>
-        <mat-error *ngIf="workSectionForm.get('name')?.hasError('minlength')">
-          Nome deve ter pelo menos 2 caracteres
-        </mat-error>
+        @if (workSectionForm.get('name')?.hasError('required')) {
+          <mat-error>
+            Nome é obrigatório
+          </mat-error>
+        }
+        @if (workSectionForm.get('name')?.hasError('minlength')) {
+          <mat-error>
+            Nome deve ter pelo menos 2 caracteres
+          </mat-error>
+        }
       </mat-form-field>
     </mat-dialog-content>
 

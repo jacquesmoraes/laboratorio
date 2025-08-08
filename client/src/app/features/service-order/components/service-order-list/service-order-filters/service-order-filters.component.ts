@@ -34,57 +34,56 @@ export interface FilterChangeEvent {
     MatIconModule,
   ],
   template: `
-    <div class="filters-section">
-      <!-- Busca -->
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Buscar</mat-label>
-        <input 
-          matInput 
-          [formControl]="searchControl" 
-          placeholder="Buscar por cliente ou paciente..." />
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
+   <div class="filters-section">
+  <!-- Busca -->
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Buscar</mat-label>
+    <input 
+      matInput 
+      [formControl]="searchControl" 
+      placeholder="Buscar por cliente ou paciente..." />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
 
-      <!-- Filtro por Status -->
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Status</mat-label>
-        <mat-select 
-          [formControl]="statusControl" 
-          (selectionChange)="onStatusChange()">
-          <mat-option value="">Todos</mat-option>
-          <mat-option 
-            *ngFor="let status of orderStatuses" 
-            [value]="status.value">
-            {{ status.label }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- Filtro por Status -->
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Status</mat-label>
+    <mat-select 
+      [formControl]="statusControl" 
+      (selectionChange)="onStatusChange()">
+      <mat-option value="">Todos</mat-option>
+      @for (status of orderStatuses; track status.value) {
+        <mat-option [value]="status.value">
+          {{ status.label }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Ordenação -->
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Ordenar por</mat-label>
-        <mat-select 
-          [formControl]="sortByControl" 
-          (selectionChange)="onSortChange()">
-          <mat-option 
-            *ngFor="let option of sortOptions" 
-            [value]="option.value">
-            {{ option.label }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- Ordenação -->
+  <mat-form-field appearance="outline" class="filter-field">
+    <mat-label>Ordenar por</mat-label>
+    <mat-select 
+      [formControl]="sortByControl" 
+      (selectionChange)="onSortChange()">
+      @for (option of sortOptions; track option.value) {
+        <mat-option [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Checkbox para mostrar OS finalizadas -->
-      <div class="checkbox-container">
-        <mat-checkbox 
-          [formControl]="showFinishedOrdersControl" 
-          (change)="onShowFinishedOrdersChange()" 
-          color="primary">
-          Mostrar OS Finalizadas
-        </mat-checkbox>
-      </div>
-
-          </div>
+  <!-- Checkbox para mostrar OS finalizadas -->
+  <div class="checkbox-container">
+    <mat-checkbox 
+      [formControl]="showFinishedOrdersControl" 
+      (change)="onShowFinishedOrdersChange()" 
+      color="primary">
+      Mostrar OS Finalizadas
+    </mat-checkbox>
+  </div>
+</div>
   `,
   styleUrls: ['./service-order-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
