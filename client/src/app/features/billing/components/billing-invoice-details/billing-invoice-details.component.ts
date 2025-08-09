@@ -1,40 +1,45 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BillingInvoiceService } from '../../services/billing-invoice.service';
 import { BillingInvoice } from '../../models/billing-invoice.interface';
+import { Subject, takeUntil } from 'rxjs';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-billing-invoice-details',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DatePipe, CurrencyPipe],
   templateUrl: './billing-invoice-details.component.html',
   styleUrls: ['./billing-invoice-details.component.scss']
 })
-export class BillingInvoiceDetailsComponent implements OnInit {
+export class BillingInvoiceDetailsComponent implements OnInit, OnDestroy {
   private billingService = inject(BillingInvoiceService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroy$ = new Subject<void>();
 
   loading = signal(false);
   invoice = signal<BillingInvoice | null>(null);
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadInvoice(parseInt(id));
-    }
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const id = Number(params.get('id'));
+        if (id) this.loadInvoice(id);
+      });
   }
 
   loadInvoice(id: number): void {
     this.loading.set(true);
     this.billingService.getInvoiceById(id).subscribe({
-      next: (invoice) => {
+      next: invoice => {
         this.invoice.set(invoice);
         this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Erro ao carregar fatura:', error);
+      error: err => {
+        console.error('Erro ao carregar fatura:', err);
         this.loading.set(false);
       }
     });
@@ -45,48 +50,55 @@ export class BillingInvoiceDetailsComponent implements OnInit {
   }
 
   printInvoice(): void {
-    if (this.invoice()) {
-      this.billingService.downloadInvoicePdf(this.invoice()!.billingInvoiceId).subscribe({
-        next: (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `fatura-${this.invoice()!.invoiceNumber}.pdf`;
-          link.click();
-          window.URL.revokeObjectURL(url);
-        },
-        error: (error) => {
-          console.error('Erro ao baixar PDF:', error);
-          alert('Erro ao gerar PDF');
-        }
-      });
-    }
+    const inv = this.invoice();
+    if (!inv) return;
+
+    this.billingService.downloadInvoicePdf(inv.billingInvoiceId).subscribe({
+      next: blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `fatura-${inv.invoiceNumber}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: err => {
+        console.error('Erro ao baixar PDF:', err);
+        alert('Erro ao gerar PDF');
+      }
+    });
   }
 
-  cancelInvoice(): void {
-    if (this.invoice() && confirm('Tem certeza que deseja cancelar esta fatura?')) {
-      this.billingService.cancelInvoice(this.invoice()!.billingInvoiceId).subscribe({
+ 
+
+cancelInvoice(id: number): void {
+  Swal.fire({
+    title: 'Cancelar fatura?',
+    text: 'Esta ação não poderá ser desfeita.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sim, cancelar',
+    cancelButtonText: 'Não'
+  }).then(result => {
+    if (result.isConfirmed) {
+      this.billingService.cancelInvoice(id).subscribe({
         next: () => {
-          this.loadInvoice(this.invoice()!.billingInvoiceId);
+          Swal.fire('Cancelada!', 'A fatura foi cancelada com sucesso.', 'success');
+          this.loadInvoice(id); // ou reload da fatura no caso de details
         },
-        error: (error) => {
-          console.error('Erro ao cancelar fatura:', error);
-          alert('Erro ao cancelar fatura');
+        error: () => {
+          Swal.fire('Erro!', 'Não foi possível cancelar a fatura.', 'error');
         }
       });
     }
-  }
+  });
+}
 
-  formatDate(date?: string): string {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('pt-BR');
-  }
 
-  formatCurrency(value?: number): string {
-    if (value === undefined || value === null) return 'R$ 0,00';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

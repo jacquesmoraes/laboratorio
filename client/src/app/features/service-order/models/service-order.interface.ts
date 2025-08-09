@@ -107,7 +107,9 @@ export interface ServiceOrderParams {
   search?: string;
   excludeFinished?: boolean;
   clientId?: number;
-  status?: OrderStatus;
+  endDate?: string;
+  startDate: string;
+    status?: OrderStatus;
   excludeInvoiced?: boolean;
   
 }

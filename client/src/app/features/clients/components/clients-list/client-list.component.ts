@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -13,10 +13,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 import { Client, BillingMode, BillingModeLabels, Pagination, QueryParams } from '../../models/client.interface';
 import { ErrorService } from '../../../../core/services/error.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ClientService } from '../../services/clients.services';
 
 @Component({
@@ -37,29 +38,30 @@ import { ClientService } from '../../services/clients.services';
     ReactiveFormsModule
   ],
   templateUrl: './client-list.component.html',
-  styleUrl: './client-list.component.scss',
+  styleUrls: ['./client-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClientListComponent implements OnInit {
+export class ClientListComponent implements OnInit, OnDestroy {
   private clientService = inject(ClientService);
   private errorService = inject(ErrorService);
   private router = inject(Router);
-  
+  private destroy$ = new Subject<void>();
+
   clients = signal<Client[]>([]);
   loading = signal(false);
-  searchControl = new FormControl('');
-  
-  // Pagination
-  pagination = signal<Pagination<Client> | null>(null);
-  currentParams = signal<QueryParams>({
+
+  searchControl = new FormControl<string>('', { nonNullable: true });
+
+  private readonly defaultParams: QueryParams = {
     pageNumber: 1,
     pageSize: 10,
     sort: 'clientName',
     search: ''
-  });
-  
-  displayedColumns = ['clientName', 'city', 'billingMode', 'isInactive', 'actions'];
+  };
+  currentParams = signal<QueryParams>({ ...this.defaultParams });
 
+  pagination = signal<Pagination<Client> | null>(null);
+  displayedColumns = ['clientName', 'city', 'billingMode', 'isInactive', 'actions'];
   billingModeLabels = BillingModeLabels;
 
   ngOnInit() {
@@ -71,12 +73,12 @@ export class ClientListComponent implements OnInit {
     this.loading.set(true);
     this.clientService.getPaginatedClients(this.currentParams())
       .subscribe({
-        next: (pagination) => {
+        next: pagination => {
           this.pagination.set(pagination);
           this.clients.set(pagination.data);
           this.loading.set(false);
         },
-        error: (error) => {
+        error: error => {
           this.errorService.showError('Erro ao carregar clientes', error);
           this.loading.set(false);
         }
@@ -84,13 +86,12 @@ export class ClientListComponent implements OnInit {
   }
 
   private setupSearch() {
-    this.searchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(search => {
-      this.currentParams.update(params => ({ ...params, search: search || '', pageNumber: 1 }));
-      this.loadClients();
-    });
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(search => {
+        this.currentParams.update(params => ({ ...params, search, pageNumber: 1 }));
+        this.loadClients();
+      });
   }
 
   onPageChange(event: PageEvent) {
@@ -104,14 +105,7 @@ export class ClientListComponent implements OnInit {
 
   clearFilters() {
     this.searchControl.setValue('');
-    
-    this.currentParams.set({
-      pageNumber: 1,
-      pageSize: 10,
-      sort: 'clientName',
-      search: ''
-    });
-    
+    this.currentParams.set({ ...this.defaultParams });
     this.loadClients();
   }
 
@@ -133,26 +127,25 @@ export class ClientListComponent implements OnInit {
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sim, excluir!',
       cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then(result => {
       if (result.isConfirmed) {
         this.loading.set(true);
-        this.clientService.deleteClient(client.clientId)
-          .subscribe({
-            next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Sucesso!',
-                text: 'Cliente excluído com sucesso',
-                timer: 1000,
-                showConfirmButton: false
-              });
-              this.loadClients();
-            },
-            error: (error) => {
-              this.errorService.showError('Erro ao excluir cliente', error);
-              this.loading.set(false);
-            }
-          });
+        this.clientService.deleteClient(client.clientId).subscribe({
+          next: () => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Sucesso!',
+              text: 'Cliente excluído com sucesso',
+              timer: 1000,
+              showConfirmButton: false
+            });
+            this.loadClients();
+          },
+          error: error => {
+            this.errorService.showError('Erro ao excluir cliente', error);
+            this.loading.set(false);
+          }
+        });
       }
     });
   }
@@ -163,5 +156,10 @@ export class ClientListComponent implements OnInit {
 
   getBillingModeLabel(mode: BillingMode): string {
     return this.billingModeLabels[mode] || 'Desconhecido';
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

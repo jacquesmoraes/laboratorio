@@ -1,7 +1,8 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, FormControl, FormGroup } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { BillingInvoiceService } from '../../services/billing-invoice.service';
 import { CreateBillingInvoiceDto } from '../../models/billing-invoice.interface';
 import { OrderStatus, ServiceOrder, ServiceOrderParams } from '../../../service-order/models/service-order.interface';
@@ -12,51 +13,55 @@ import { Client } from '../../../clients/models/client.interface';
 @Component({
   selector: 'app-billing-invoice-create',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DatePipe, CurrencyPipe],
   templateUrl: './billing-invoice-create.component.html',
   styleUrls: ['./billing-invoice-create.component.scss']
 })
-export class BillingInvoiceCreateComponent implements OnInit {
+export class BillingInvoiceCreateComponent implements OnInit, OnDestroy {
   private billingService = inject(BillingInvoiceService);
   private serviceOrderService = inject(ServiceOrdersService);
   private clientService = inject(ClientService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private destroy$ = new Subject<void>();
 
   loading = signal(false);
   clients = signal<Client[]>([]);
   serviceOrders = signal<ServiceOrder[]>([]);
   selectedServiceOrders = signal<number[]>([]);
 
-
-
-  invoiceForm: FormGroup = this.fb.group({
-    clientId: ['', Validators.required],
-    description: ['']
+  invoiceForm: FormGroup<{
+    clientId: FormControl<number | null>;
+    description: FormControl<string | null>;
+  }> = this.fb.group({
+    clientId: this.fb.control<number | null>(null, Validators.required),
+    description: this.fb.control<string | null>(null)
   });
 
   ngOnInit(): void {
     this.loadClients();
 
-    this.invoiceForm.get('clientId')?.valueChanges.subscribe(clientId => {
-      if (clientId) {
-        this.loadServiceOrders(clientId);
-      } else {
-        this.serviceOrders.set([]);
-        this.selectedServiceOrders.set([]);
-      }
-    });
+    this.invoiceForm.controls.clientId.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(clientId => {
+        if (clientId !== null) {
+          this.loadServiceOrders(clientId);
+        } else {
+          this.serviceOrders.set([]);
+          this.selectedServiceOrders.set([]);
+        }
+      });
   }
 
   loadClients(): void {
     this.loading.set(true);
     this.clientService.getClients().subscribe({
-      next: (clients) => {
+      next: clients => {
         this.clients.set(clients);
         this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Erro ao carregar clientes:', error);
+      error: err => {
+        console.error('Erro ao carregar clientes:', err);
         this.loading.set(false);
       }
     });
@@ -68,33 +73,32 @@ export class BillingInvoiceCreateComponent implements OnInit {
     const params: ServiceOrderParams = {
       pageNumber: 1,
       pageSize: 1000,
-      clientId: clientId,
+      clientId,
       status: OrderStatus.Finished,
       excludeFinished: false,
-       excludeInvoiced: true //
+      excludeInvoiced: true,
+      startDate: '',
+      endDate: '',
     };
 
     this.serviceOrderService.getServiceOrders(params).subscribe({
-      next: (response) => {
+      next: response => {
         this.serviceOrders.set(response.data);
         this.selectedServiceOrders.set([]);
         this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Erro ao carregar ordens de serviço:', error);
+      error: err => {
+        console.error('Erro ao carregar ordens de serviço:', err);
         this.loading.set(false);
       }
     });
   }
 
-  
-  onServiceOrderToggle(orderId: number, event: any): void {
-    const checked = event.target.checked;
-    if (checked) {
-      this.selectedServiceOrders.update(orders => [...orders, orderId]);
-    } else {
-      this.selectedServiceOrders.update(orders => orders.filter(id => id !== orderId));
-    }
+  onServiceOrderToggle(orderId: number, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedServiceOrders.update(orders =>
+      checked ? [...orders, orderId] : orders.filter(id => id !== orderId)
+    );
   }
 
   onSubmit(): void {
@@ -102,18 +106,18 @@ export class BillingInvoiceCreateComponent implements OnInit {
       this.loading.set(true);
 
       const dto: CreateBillingInvoiceDto = {
-        clientId: this.invoiceForm.value.clientId,
+        clientId: this.invoiceForm.controls.clientId.value!, // aqui já é number
         serviceOrderIds: this.selectedServiceOrders(),
-        description: this.invoiceForm.value.description
+        description: this.invoiceForm.controls.description.value ?? ''
       };
 
       this.billingService.createInvoice(dto).subscribe({
-        next: (invoice) => {
+        next: invoice => {
           this.loading.set(false);
           this.router.navigate(['/billing', invoice.billingInvoiceId]);
         },
-        error: (error) => {
-          console.error('Erro ao criar fatura:', error);
+        error: err => {
+          console.error('Erro ao criar fatura:', err);
           this.loading.set(false);
           alert('Erro ao criar fatura');
         }
@@ -125,21 +129,14 @@ export class BillingInvoiceCreateComponent implements OnInit {
     this.router.navigate(['/billing']);
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('pt-BR');
-  }
-
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  }
-
   getSelectedTotal(): number {
     return this.serviceOrders()
       .filter(order => this.selectedServiceOrders().includes(order.serviceOrderId))
       .reduce((total, order) => total + order.orderTotal, 0);
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

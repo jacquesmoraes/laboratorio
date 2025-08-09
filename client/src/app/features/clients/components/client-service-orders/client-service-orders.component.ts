@@ -120,45 +120,50 @@ export class ClientServiceOrdersComponent implements OnInit, OnDestroy {
     }).format(value);
   }
 
-  getStatusClass(status?: any): string {
+  getStatusClass(status?: OrderStatus | string | null): string {
     if (!status) return 'status-unknown';
     
-    const statusString = String(status);
-    
-    switch (statusString) {
-      case 'Open':
-      case 'open':
-        return 'status-open';
-      case 'Production':
-      case 'production':
-        return 'status-production';
-      case 'TryIn':
-      case 'tryin':
-        return 'status-tryin';
-      case 'Finished':
-      case 'finished':
-        return 'status-finished';
-      default:
-        return 'status-unknown';
+    // Se for string, tenta converter para OrderStatus
+    if (typeof status === 'string') {
+      const statusKey = status as keyof typeof OrderStatus;
+      if (statusKey in OrderStatus) {
+        status = OrderStatus[statusKey];
+      }
     }
+    
+    // Se for OrderStatus enum
+    if (typeof status === 'number') {
+      switch (status) {
+        case OrderStatus.Production:
+          return 'status-production';
+        case OrderStatus.TryIn:
+          return 'status-tryin';
+        case OrderStatus.Finished:
+          return 'status-finished';
+        default:
+          return 'status-unknown';
+      }
+    }
+    
+    return 'status-unknown';
   }
   
-  getStatusLabel(status?: any): string {
+  getStatusLabel(status?: OrderStatus | string | null): string {
     if (!status) return 'N/A';
     
-    const statusString = String(status);
-    
-    switch (statusString) {
-      case 'Open':
-        return 'Aberto';
-      case 'Production':
-        return 'Produção';
-      case 'TryIn':
-        return 'Prova';
-      case 'Finished':
-        return 'Finalizado';
-      default:
-        return statusString;
+    // Se for string, tenta converter para OrderStatus
+    if (typeof status === 'string') {
+      const statusKey = status as keyof typeof OrderStatus;
+      if (statusKey in OrderStatus) {
+        status = OrderStatus[statusKey];
+      }
     }
+    
+    // Se for OrderStatus enum
+    if (typeof status === 'number') {
+      return OrderStatusLabels[status as OrderStatus] || 'N/A';
+    }
+    
+    return String(status);
   }
 }

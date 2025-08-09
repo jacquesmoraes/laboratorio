@@ -18,7 +18,9 @@ export class ClientPaymentsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
-Math = Math;
+
+  Math = Math;
+
   // Input para receber o clientId do componente pai
   clientId = input.required<number>();
 
@@ -26,7 +28,6 @@ Math = Math;
   payments = signal<Payment[]>([]);
   pagination = signal<Pagination<Payment> | null>(null);
   
-  // ✅ CORREÇÃO: Usar computed para garantir que clientId esteja disponível
   filters = computed(() => ({
     pageNumber: 1,
     pageSize: 5,
@@ -77,8 +78,9 @@ Math = Math;
     });
   }
 
-  onSearchChange(value: string): void {
-    this.searchSubject.next(value);
+  onSearchChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchSubject.next(input.value);
   }
 
   onPageChange(page: number): void {

@@ -12,14 +12,18 @@
       <div class="filter-item">
         <label class="filter-label">Buscar</label>
         <mat-form-field appearance="outline" class="w-full">
-          <input matInput placeholder="Número da fatura, cliente..." [ngModel]="filters().search" (ngModelChange)="onSearchChange($event)">
+          <input matInput placeholder="Número da fatura, cliente..."
+            [ngModel]="filters().search"
+            (ngModelChange)="updateFilter('search', $event)">
         </mat-form-field>
       </div>
 
       <div class="filter-item">
         <label class="filter-label">Data Início</label>
         <mat-form-field appearance="outline" class="w-full">
-          <input matInput [matDatepicker]="startPicker" [(ngModel)]="filters().startDate" (dateChange)="loadInvoices()">
+          <input matInput [matDatepicker]="startPicker"
+            [ngModel]="filters().startDate"
+            (ngModelChange)="updateFilter('startDate', $event)">
           <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
           <mat-datepicker #startPicker></mat-datepicker>
         </mat-form-field>
@@ -28,7 +32,9 @@
       <div class="filter-item">
         <label class="filter-label">Data Fim</label>
         <mat-form-field appearance="outline" class="w-full">
-          <input matInput [matDatepicker]="endPicker" [(ngModel)]="filters().endDate" (dateChange)="loadInvoices()">
+          <input matInput [matDatepicker]="endPicker"
+            [ngModel]="filters().endDate"
+            (ngModelChange)="updateFilter('endDate', $event)">
           <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
           <mat-datepicker #endPicker></mat-datepicker>
         </mat-form-field>
@@ -61,13 +67,13 @@
             <tr>
               <td data-label="Fat" class="invoice-number">{{ invoice.invoiceNumber }}</td>
               <td data-label="Name" class="client-name">{{ invoice.client.clientName }}</td>
-              <td data-label="Date" class="payment-date">{{ formatDate(invoice.createdAt) }}</td>
+              <td data-label="Date">{{ invoice.createdAt | date:'dd/MM/yyyy' }}</td>
               <td data-label="Status">
                 <span [class]="'status-badge ' + getStatusClass(invoice.status)">
                   {{ invoice.status }}
                 </span>
               </td>
-              <td data-label="Total" class="payment-amount">{{ formatCurrency(invoice.totalInvoiceAmount) }}</td>
+              <td data-label="Total">{{ invoice.totalInvoiceAmount | currency:'BRL':'symbol':'1.2-2' }}</td>
               <td class="actions">
                 <div class="action-buttons">
                   <button class="btn btn-primary btn-sm" (click)="viewInvoice(invoice.billingInvoiceId)">
@@ -75,7 +81,7 @@
                     Ver
                   </button>
                   <button class="btn btn-danger btn-sm" (click)="cancelInvoice(invoice.billingInvoiceId)">
-                   <mat-icon>cancel</mat-icon>
+                    <mat-icon>cancel</mat-icon>
                     Cancelar
                   </button>
                 </div>
@@ -94,10 +100,14 @@
           <span class="font-medium">{{ pagination()?.totalPages }}</span>
         </div>
         <div class="pagination-nav">
-          <button class="pagination-button pagination-prev" (click)="onPageChange((pagination()?.pageNumber ?? 1) - 1)" [disabled]="(pagination()?.pageNumber ?? 1) <= 1">
+          <button class="pagination-button pagination-prev"
+            (click)="updateFilter('pageNumber', (pagination()?.pageNumber ?? 1) - 1)"
+            [disabled]="(pagination()?.pageNumber ?? 1) <= 1">
             Anterior
           </button>
-          <button class="pagination-button pagination-next" (click)="onPageChange((pagination()?.pageNumber ?? 1) + 1)" [disabled]="(pagination()?.pageNumber ?? 1) >= (pagination()?.totalPages ?? 1)">
+          <button class="pagination-button pagination-next"
+            (click)="updateFilter('pageNumber', (pagination()?.pageNumber ?? 1) + 1)"
+            [disabled]="(pagination()?.pageNumber ?? 1) >= (pagination()?.totalPages ?? 1)">
             Próxima
           </button>
         </div>

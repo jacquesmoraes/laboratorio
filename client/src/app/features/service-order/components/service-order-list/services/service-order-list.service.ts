@@ -54,6 +54,8 @@ export class ServiceOrderListService {
       sort: 'DateIn',
       search: '',
       excludeFinished: true,
+      startDate: '',
+      endDate: '',
     }
   });
 

@@ -14,43 +14,65 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
+import { MatTableModule } from '@angular/material/table';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-billing-invoice-list',
   standalone: true,
   imports: [
-      CommonModule,
-  FormsModule,
-  MatButtonModule,
-  MatFormFieldModule,
-  MatInputModule,
-  MatDatepickerModule,
-  MatNativeDateModule,
-  MatTableModule,
-  MatProgressSpinnerModule,
-  MatIconModule,
-  MatPaginatorModule,
-  MatCardModule,
-  MatSelectModule
-    ],
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatTableModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatPaginatorModule,
+    MatCardModule,
+    MatSelectModule
+  ],
   templateUrl: './billing-invoice-list.component.html',
   styleUrls: ['./billing-invoice-list.component.scss']
 })
-export class BillingInvoiceListComponent implements OnInit, OnDestroy  {
+export class BillingInvoiceListComponent implements OnInit, OnDestroy {
   private billingService = inject(BillingInvoiceService);
   private router = inject(Router);
   private destroy$ = new Subject<void>();
-  private searchSubject = new Subject<string>();
+  private refreshSubject = new Subject<void>();
+
   loading = signal(false);
   invoices = signal<BillingInvoice[]>([]);
   pagination = signal<Pagination<BillingInvoice> | null>(null);
-  filters = signal<InvoiceParams>(this.resetFilters());
-displayedColumns = ['invoiceNumber', 'clientName', 'createdAt', 'status', 'total', 'actions'];
+
+  private readonly defaultFilters: InvoiceParams = {
+    pageNumber: 1,
+    pageSize: 10,
+    search: '',
+    startDate: '',
+    endDate: ''
+  };
+  filters = signal<InvoiceParams>({ ...this.defaultFilters });
+
+  private readonly statusClassMap: Record<InvoiceStatus, string> = {
+    Open: 'status-open',
+    PartiallyPaid: 'status-partially',
+    Paid: 'status-paid',
+    Cancelled: 'status-cancelled',
+    Closed: 'status-closed'
+  };
+
+  displayedColumns = ['invoiceNumber', 'clientName', 'createdAt', 'status', 'total', 'actions'];
 
   ngOnInit(): void {
-    this.setupSearchDebounce();
+    this.refreshSubject
+      .pipe(debounceTime(300), takeUntil(this.destroy$))
+      .subscribe(() => this.loadInvoices());
+
     this.loadInvoices();
   }
 
@@ -69,43 +91,14 @@ displayedColumns = ['invoiceNumber', 'clientName', 'createdAt', 'status', 'total
     });
   }
 
-  onSearchChange(value: string): void {
-    this.searchSubject.next(value);
-  }
-
-private setupSearchDebounce(): void {
-  this.searchSubject.pipe(
-    debounceTime(500),
-    takeUntil(this.destroy$)
-  ).subscribe(searchTerm => {
-    this.filters.update(f => ({
-      ...f,
-      pageNumber: 1,
-      search: searchTerm
-    }));
-    this.loadInvoices();
-  });
-}
-
-
-  onPageChange(page: number): void {
-    this.filters.update(f => ({ ...f, pageNumber: page }));
-    this.loadInvoices();
+  updateFilter<K extends keyof InvoiceParams>(key: K, value: InvoiceParams[K]): void {
+    this.filters.update(f => ({ ...f, [key]: value, pageNumber: 1 }));
+    this.refreshSubject.next();
   }
 
   clearFilters(): void {
-    this.filters.set(this.resetFilters());
-    this.loadInvoices();
-  }
-
-  resetFilters(): InvoiceParams {
-    return {
-      pageNumber: 1,
-      pageSize: 10,
-      search: '',
-      startDate: '',
-      endDate: ''
-    };
+    this.filters.set({ ...this.defaultFilters });
+    this.refreshSubject.next();
   }
 
   navigateToCreate(): void {
@@ -116,46 +109,33 @@ private setupSearchDebounce(): void {
     this.router.navigate(['/billing', id]);
   }
 
-  cancelInvoice(id: number): void {
-    if (confirm('Tem certeza que deseja cancelar esta fatura?')) {
+ cancelInvoice(id: number): void {
+  Swal.fire({
+    title: 'Cancelar fatura?',
+    text: 'Esta ação não poderá ser desfeita.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sim, cancelar',
+    cancelButtonText: 'Não'
+  }).then(result => {
+    if (result.isConfirmed) {
       this.billingService.cancelInvoice(id).subscribe({
         next: () => {
-          this.loadInvoices();
+          Swal.fire('Cancelada!', 'A fatura foi cancelada com sucesso.', 'success');
+          this.loadInvoices(); // ou reload da fatura no caso de details
         },
-        error: (error) => {
-          console.error('Erro ao cancelar fatura:', error);
-          alert('Erro ao cancelar fatura');
+        error: () => {
+          Swal.fire('Erro!', 'Não foi possível cancelar a fatura.', 'error');
         }
       });
     }
-  }
-
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('pt-BR');
-  }
-
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  }
+  });
+}
 
   getStatusClass(status: InvoiceStatus): string {
-    switch (status) {
-      case 'Open':
-        return 'status-open';
-      case 'PartiallyPaid':
-        return 'status-partially';
-      case 'Paid':
-        return 'status-paid';
-      case 'Cancelled':
-        return 'status-cancelled';
-      case 'Closed':
-        return 'status-closed';
-      default:
-        return '';
-    }
+    return this.statusClassMap[status] ?? '';
   }
 
   ngOnDestroy(): void {

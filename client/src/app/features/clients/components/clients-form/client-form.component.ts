@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +13,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Client, CreateClientDto, UpdateClientDto, BillingMode, BillingModeLabels } from '../../models/client.interface';
 
 import { ClientService } from '../../services/clients.services';
-
 import { ErrorService } from '../../../../core/services/error.service';
 import { TablePriceService } from '../../../table-price/services/table-price.services';
 import { TablePriceOption } from '../../../table-price/table-price.interface';
@@ -46,7 +45,7 @@ export class ClientFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   
-  clientForm!: any;
+  clientForm!: FormGroup;
   loading = signal(false);
   isEditMode = signal(false);
   clientId = signal<number | null>(null);
@@ -67,7 +66,6 @@ export class ClientFormComponent implements OnInit {
 
   private initForm() {
     this.clientForm = this.fb.group({
-      // Basic info
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.email]],
       phoneNumber: [''],
@@ -76,12 +74,8 @@ export class ClientFormComponent implements OnInit {
       cro: [''],
       birthDate: [''],
       notes: [''],
-      
-      // Billing
       billingMode: [BillingMode.PerServiceOrder, Validators.required],
       tablePriceId: [null],
-      
-      // Address
       address: this.fb.group({
         street: ['', Validators.required],
         number: ['', [Validators.required, Validators.min(1)]],
@@ -104,74 +98,81 @@ export class ClientFormComponent implements OnInit {
 
   private loadClient(id: number) {
     this.loading.set(true);
-    this.clientService.getClientById(id)
-      .subscribe({
-        next: (client) => {
-          this.clientToLoad.set(client);
-          this.tryPopulateForm();
-          this.loading.set(false);
-        },
-        error: (error) => {
-          this.errorService.showError('Erro ao carregar cliente', error);
-          this.loading.set(false);
-        }
-      });
+    this.clientService.getClientById(id).subscribe({
+      next: (client) => {
+        this.clientToLoad.set(client);
+        this.tryPopulateForm();
+        this.loading.set(false);
+      },
+      error: (error) => {
+        this.errorService.showError('Erro ao carregar cliente', error);
+        this.loading.set(false);
+      }
+    });
   }
 
   private loadTablePrices() {
     this.loadingTablePrices.set(true);
-    this.tablePriceService.getTablePriceOptions()
-      .subscribe({
-        next: (options) => {
-          this.tablePriceOptions.set(options);
-          this.loadingTablePrices.set(false);
-          this.tryPopulateForm();
-        },
-        error: (error) => {
-          this.errorService.showError('Erro ao carregar tabelas de preços', error);
-          this.loadingTablePrices.set(false);
-        }
-      });
+    this.tablePriceService.getTablePriceOptions().subscribe({
+      next: (options) => {
+        this.tablePriceOptions.set(options);
+        this.loadingTablePrices.set(false);
+        this.tryPopulateForm();
+      },
+      error: (error) => {
+        this.errorService.showError('Erro ao carregar tabelas de preços', error);
+        this.loadingTablePrices.set(false);
+      }
+    });
   }
 
   private tryPopulateForm() {
-    // Só preenche o formulário se tanto o cliente quanto as tabelas de preços estiverem carregados
     if (this.clientToLoad() && !this.loadingTablePrices()) {
       this.populateForm(this.clientToLoad()!);
     }
   }
 
   private populateForm(client: Client) {
-    
-    
-   this.clientForm.patchValue({
-  name: client.clientName,
-  email: client.clientEmail || '',
-  phoneNumber: client.clientPhoneNumber || '',
-  cpf: client.clientCpf || '',
-  cnpj: client.cnpj || '',
-  cro: client.cro || '',
-  birthDate: client.birthDate ? client.birthDate.substring(0, 10) : '',
-  notes: client.notes || '',
-  billingMode: client.billingMode,
-  tablePriceId: client.tablePriceId ?? null,
-  address: {
-    street: client.address.street,
-    number: client.address.number,
-    complement: client.address.complement,
-    cep: client.address.cep || '',
-    neighborhood: client.address.neighborhood,
-    city: client.address.city
+    this.clientForm.patchValue({
+      name: client.clientName,
+      email: client.clientEmail || '',
+      phoneNumber: client.clientPhoneNumber || '',
+      cpf: client.clientCpf || '',
+      cnpj: client.cnpj || '',
+      cro: client.cro || '',
+      birthDate: client.birthDate ? new Date(client.birthDate).toISOString().substring(0, 10) : '',
+      notes: client.notes || '',
+      billingMode: client.billingMode,
+      tablePriceId: client.tablePriceId ?? null,
+      address: {
+        street: client.address.street,
+        number: client.address.number,
+        complement: client.address.complement,
+        cep: client.address.cep || '',
+        neighborhood: client.address.neighborhood,
+        city: client.address.city
+      }
+    });
   }
-});
+
+  private showSuccess(message: string) {
+    Swal.fire({
+      icon: 'success',
+      title: 'Sucesso!',
+      text: message,
+      timer: 1000,
+      showConfirmButton: false
+    }).then(() => {
+      this.router.navigate(['/clients']);
+    });
   }
 
   onSubmit() {
-  if (this.clientForm.valid) {
+    if (!this.clientForm.valid) return;
+
     this.loading.set(true);
-    
     const formValue = this.clientForm.value;
-    
+
     if (this.isEditMode() && this.clientId()) {
       const updateDto: UpdateClientDto = {
         clientId: this.clientId()!,
@@ -188,25 +189,16 @@ export class ClientFormComponent implements OnInit {
         address: formValue.address
       };
       
-      this.clientService.updateClient(this.clientId()!, updateDto)
-        .subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Cliente atualizado com sucesso',
-              timer: 1000,
-              showConfirmButton: false
-            }).then(() => {
-              this.router.navigate(['/clients']);
-            });
-            this.loading.set(false);
-          },
-          error: (error) => {
-            this.errorService.showError('Erro ao atualizar cliente', error);
-            this.loading.set(false);
-          }
-        });
+      this.clientService.updateClient(this.clientId()!, updateDto).subscribe({
+        next: () => {
+          this.showSuccess('Cliente atualizado com sucesso');
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.errorService.showError('Erro ao atualizar cliente', error);
+          this.loading.set(false);
+        }
+      });
     } else {
       const createDto: CreateClientDto = {
         name: formValue.name,
@@ -221,30 +213,37 @@ export class ClientFormComponent implements OnInit {
         address: formValue.address
       };
       
-      this.clientService.createClient(createDto)
-        .subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Cliente criado com sucesso',
-              timer: 1000,
-              showConfirmButton: false
-            }).then(() => {
-              this.router.navigate(['/clients']);
-            });
-            this.loading.set(false);
-          },
-          error: (error) => {
-            this.errorService.showError('Erro ao criar cliente', error);
-            this.loading.set(false);
-          }
-        });
+      this.clientService.createClient(createDto).subscribe({
+        next: () => {
+          this.showSuccess('Cliente criado com sucesso');
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.errorService.showError('Erro ao criar cliente', error);
+          this.loading.set(false);
+        }
+      });
     }
   }
-}
 
   onCancel() {
-    this.router.navigate(['/clients']);
+    if (this.clientForm.dirty) {
+      Swal.fire({
+        title: 'Tem certeza?',
+        text: 'Você tem alterações não salvas. Deseja realmente sair?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sim, sair',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.router.navigate(['/clients']);
+        }
+      });
+    } else {
+      this.router.navigate(['/clients']);
+    }
   }
 }

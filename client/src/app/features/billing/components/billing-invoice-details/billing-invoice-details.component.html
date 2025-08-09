@@ -3,10 +3,7 @@
     <!-- Header -->
     <div class="header">
       <div class="header-left">
-        <button 
-          (click)="goBack()"
-          class="btn btn-secondary back-btn"
-        >
+        <button (click)="goBack()" class="btn btn-secondary back-btn">
           ←
         </button>
         <div class="header-info">
@@ -14,21 +11,15 @@
             Fatura {{ invoice()?.invoiceNumber }}
           </h1>
           <p class="subtitle">
-            Criada em {{ formatDate(invoice()?.createdAt) }}
+            Criada em {{ invoice()?.createdAt | date:'dd/MM/yyyy' }}
           </p>
         </div>
       </div>
       <div class="header-actions">
-        <button 
-          (click)="printInvoice()"
-          class="btn btn-primary"
-        >
+        <button (click)="printInvoice()" class="btn btn-primary">
           Imprimir
         </button>
-        <button 
-          (click)="cancelInvoice()"
-          class="btn btn-danger"
-        >
+        <button (click)="cancelInvoice(invoice()?.billingInvoiceId!)" class="btn btn-danger">
           Cancelar Fatura
         </button>
       </div>
@@ -46,7 +37,7 @@
             </div>
             <div class="info-item">
               <label class="info-label">Data de Criação</label>
-              <p class="info-value">{{ formatDate(invoice()?.createdAt) }}</p>
+              <p class="info-value">{{ invoice()?.createdAt | date:'dd/MM/yyyy' }}</p>
             </div>
             @if (invoice()?.description) {
               <div class="info-item full-width">
@@ -80,7 +71,7 @@
                 }
               </p>
               <p class="info-value">
-                  {{ invoice()?.client?.address?.neighborhood }} - {{ invoice()?.client?.address?.city }}
+                {{ invoice()?.client?.address?.neighborhood }} - {{ invoice()?.client?.address?.city }}
               </p>
               <p class="info-value">CEP: {{ invoice()?.client?.address?.cep }}</p>
             </div>
@@ -99,15 +90,15 @@
                       {{ order.orderCode }} - {{ order.patientName }}
                     </h3>
                     <p class="order-dates">
-                      Data de entrada: {{ formatDate(order.dateIn) }}
+                      Data de entrada: {{ order.dateIn | date:'dd/MM/yyyy' }}
                       @if (order.finishedAt) {
-                        | Finalizada: {{ formatDate(order.finishedAt) }}
+                        | Finalizada: {{ order.finishedAt | date:'dd/MM/yyyy' }}
                       }
                     </p>
                   </div>
                   <div class="order-total">
                     <p class="total-amount">
-                      {{ formatCurrency(order.subtotal) }}
+                      {{ order.subtotal | currency:'BRL':'symbol':'1.2-2' }}
                     </p>
                   </div>
                 </div>
@@ -129,8 +120,8 @@
                           <tr>
                             <td>{{ work.workTypeName }}</td>
                             <td>{{ work.quantity }}</td>
-                            <td>{{ formatCurrency(work.priceUnit) }}</td>
-                            <td class="work-total">{{ formatCurrency(work.priceTotal) }}</td>
+                            <td>{{ work.priceUnit | currency:'BRL':'symbol':'1.2-2' }}</td>
+                            <td class="work-total">{{ work.priceTotal | currency:'BRL':'symbol':'1.2-2' }}</td>
                           </tr>
                         }
                       </tbody>
@@ -148,19 +139,19 @@
           <div class="financial-summary">
             <div class="summary-item">
               <span class="summary-label">Total das Ordens de Serviço:</span>
-              <span class="summary-value">{{ formatCurrency(invoice()?.totalServiceOrdersAmount || 0) }}</span>
+              <span class="summary-value">{{ invoice()?.totalServiceOrdersAmount || 0 | currency:'BRL':'symbol':'1.2-2' }}</span>
             </div>
             <div class="summary-item">
               <span class="summary-label">Crédito Anterior:</span>
-              <span class="summary-value">{{ formatCurrency(invoice()?.previousCredit || 0) }}</span>
+              <span class="summary-value">{{ invoice()?.previousCredit || 0 | currency:'BRL':'symbol':'1.2-2' }}</span>
             </div>
             <div class="summary-item">
               <span class="summary-label">Débito Anterior:</span>
-              <span class="summary-value">{{ formatCurrency(invoice()?.previousDebit || 0) }}</span>
+              <span class="summary-value">{{ invoice()?.previousDebit || 0 | currency:'BRL':'symbol':'1.2-2' }}</span>
             </div>
             <div class="summary-item total">
               <span class="summary-label">Valor Total da Fatura:</span>
-              <span class="summary-value">{{ formatCurrency(invoice()?.totalInvoiceAmount || 0) }}</span>
+              <span class="summary-value">{{ invoice()?.totalInvoiceAmount || 0 | currency:'BRL':'symbol':'1.2-2' }}</span>
             </div>
           </div>
         </div>

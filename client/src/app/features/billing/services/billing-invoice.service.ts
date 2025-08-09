@@ -16,17 +16,27 @@ export class BillingInvoiceService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/billingInvoices`;
 
- getInvoices(params: InvoiceParams): Observable<Pagination<BillingInvoice>> {
-  let httpParams = new HttpParams();
+  private serializeParams(params: InvoiceParams): HttpParams {
+    let httpParams = new HttpParams();
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      httpParams = httpParams.set(key, value.toString());
-    }
-  });
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (value instanceof Date) {
+          httpParams = httpParams.set(key, value.toISOString());
+        } else {
+          httpParams = httpParams.set(key, String(value));
+        }
+      }
+    });
 
-  return this.http.get<Pagination<BillingInvoice>>(this.apiUrl, { params: httpParams });
-}
+    return httpParams;
+  }
+
+  getInvoices(params: InvoiceParams): Observable<Pagination<BillingInvoice>> {
+    return this.http.get<Pagination<BillingInvoice>>(this.apiUrl, { 
+      params: this.serializeParams(params) 
+    });
+  }
 
   getInvoiceById(id: number): Observable<BillingInvoice> {
     return this.http.get<BillingInvoice>(`${this.apiUrl}/${id}`);
@@ -41,7 +51,8 @@ export class BillingInvoiceService {
   }
 
   downloadInvoicePdf(id: number): Observable<Blob> {
-    return this.http.get(`${environment.apiUrl}/invoices/${id}/pdf`, { 
+    // Alinhar rota com backend — mantive dentro de billingInvoices
+    return this.http.get(`${this.apiUrl}/${id}/pdf`, { 
       responseType: 'blob' 
     });
   }
