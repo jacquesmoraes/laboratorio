@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,6 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ErrorService } from '../../../core/services/error.service';
 import { SystemSettings, UpdateSystemSettingsDto } from '../models/system.interface';
 import { SettingsService } from '../services/system-settings.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import Swal from 'sweetalert2';
 
 
 @Component({
@@ -33,8 +35,8 @@ import { SettingsService } from '../services/system-settings.service';
 })
 export class SystemSettingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
-  private readonly errorService = inject(ErrorService);
-  private readonly fb = inject(FormBuilder);
+    private readonly fb = inject(FormBuilder);
+    private readonly destroyRef = inject(DestroyRef);
 
   protected readonly settings = signal<SystemSettings | null>(null);
   protected readonly isLoading = signal<boolean>(false);
@@ -63,7 +65,9 @@ export class SystemSettingsComponent implements OnInit {
   private loadSettings(): void {
     this.isLoading.set(true);
     
-    this.settingsService.getSettings().subscribe({
+    this.settingsService.getSettings()
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: (settings) => {
         this.settings.set(settings);
         this.settingsForm.patchValue({
@@ -76,8 +80,8 @@ export class SystemSettingsComponent implements OnInit {
         });
         this.isLoading.set(false);
       },
-      error: (err) => {
-        this.errorService.showError('Erro ao carregar configurações', err);
+      error: () => {
+       
         this.isLoading.set(false);
       }
     });
@@ -103,15 +107,24 @@ export class SystemSettingsComponent implements OnInit {
       }
     };
 
-    this.settingsService.updateSettings(dto).subscribe({
-      next: () => {
-        this.errorService.showSuccess('Configurações atualizadas com sucesso');
-        this.loadSettings(); // Recarrega para pegar a data de atualização
-      },
-      error: (err) => {
-        this.errorService.showError('Erro ao atualizar configurações', err);
-      }
-    });
+    this.settingsService.updateSettings(dto)
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
+        next: () => {
+         
+          Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: 'Configurações atualizadas com sucesso',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          this.loadSettings(); // Recarrega para pegar a data de atualização
+        },
+        error: () => {
+         
+        }
+      });
   }
 
   protected onLogoUpload(event: Event): void {
@@ -122,17 +135,26 @@ export class SystemSettingsComponent implements OnInit {
 
     this.isUploadingLogo.set(true);
     
-    this.settingsService.uploadLogo(file).subscribe({
+    this.settingsService.uploadLogo(file)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: (response) => {
-        this.errorService.showSuccess('Logo atualizada com sucesso');
+       
+        Swal.fire({
+          icon: 'success',
+          title: 'Sucesso!',
+          text: 'Logo atualizada com sucesso',
+          timer: 2000,
+          showConfirmButton: false
+        });
         this.loadSettings(); // Recarrega para pegar a nova logo
         this.isUploadingLogo.set(false);
         
         // Limpa o input para permitir upload do mesmo arquivo novamente
         input.value = '';
       },
-      error: (err) => {
-        this.errorService.showError('Erro ao fazer upload da logo', err);
+      error: () => {
+       
         this.isUploadingLogo.set(false);
         input.value = '';
       }

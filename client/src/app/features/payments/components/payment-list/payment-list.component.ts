@@ -1,10 +1,11 @@
-import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
-import { Payment, PaymentParams } from '../../models/payment.interface';
-import { debounceTime, Subject, takeUntil } from 'rxjs';
+import { Payment, PaymentParams, Pagination } from '../../models/payment.interface';
+import { debounceTime, Subject } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-payment-list',
@@ -14,58 +15,54 @@ import { debounceTime, Subject, takeUntil } from 'rxjs';
   styleUrls: ['./payment-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PaymentListComponent implements OnInit, OnDestroy {
+export class PaymentListComponent implements OnInit {
   private paymentService = inject(PaymentService);
   private router = inject(Router);
-  private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
-  
-  loading = signal(false);
-  payments = signal<Payment[]>([]);
-  pagination = signal<any>(null);
-  filters = signal<PaymentParams>({
+  private readonly destroyRef = inject(DestroyRef);
+ 
+  readonly defaultFilters: PaymentParams = {
     pageNumber: 1,
     pageSize: 10,
     search: '',
     startDate: '',
     endDate: ''
-  });
+  };
 
-  // Computed signals for form binding
-  searchFilter = computed(() => this.filters().search);
-  startDateFilter = computed(() => this.filters().startDate);
-  endDateFilter = computed(() => this.filters().endDate);
-
-  Math = Math;
+  loading = signal(false);
+  payments = signal<Payment[]>([]);
+  pagination = signal<Pagination<Payment> | null>(null);
+  filters = signal<PaymentParams>({ ...this.defaultFilters });
 
   ngOnInit(): void {
     this.setupSearchDebounce();
     this.loadPayments();
   }
 
-  loadPayments(): void {
-    this.loading.set(true);
-    this.paymentService.getPayments(this.filters()).subscribe({
-      next: (response) => {
-        this.payments.set(response.data);
-        this.pagination.set(response);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Erro ao carregar pagamentos:', error);
-        this.loading.set(false);
-      }
-    });
-  }
-
   private setupSearchDebounce(): void {
     this.searchSubject.pipe(
-      debounceTime(500),
-      takeUntil(this.destroy$)
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(searchTerm => {
       this.filters.update(f => ({ ...f, search: searchTerm, pageNumber: 1 }));
       this.loadPayments();
     });
+  }
+
+  loadPayments(): void {
+    this.loading.set(true);
+    this.paymentService.getPayments(this.filters())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.payments.set(response.data);
+          this.pagination.set(response);
+          this.loading.set(false);
+        },
+        error: (error) => {
+            this.loading.set(false);
+        }
+      });
   }
 
   onFilterChange(): void {
@@ -74,26 +71,15 @@ export class PaymentListComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.filters.set({
-      pageNumber: 1,
-      pageSize: 10,
-      search: '',
-      startDate: '',
-      endDate: ''
-    });
+    this.filters.set({ ...this.defaultFilters });
     this.loadPayments();
   }
 
-  previousPage(): void {
-    if (this.pagination() && this.pagination().pageNumber > 1) {
-      this.filters.update(f => ({ ...f, pageNumber: f.pageNumber - 1 }));
-      this.loadPayments();
-    }
-  }
-
-  nextPage(): void {
-    if (this.pagination() && this.pagination().pageNumber < this.pagination().totalPages) {
-      this.filters.update(f => ({ ...f, pageNumber: f.pageNumber + 1 }));
+  changePage(delta: number): void {
+    if (!this.pagination()) return;
+    const newPage = this.pagination()!.pageNumber + delta;
+    if (newPage >= 1 && newPage <= this.pagination()!.totalPages) {
+      this.filters.update(f => ({ ...f, pageNumber: newPage }));
       this.loadPayments();
     }
   }
@@ -114,21 +100,20 @@ export class PaymentListComponent implements OnInit, OnDestroy {
     return value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
   }
 
-  // Setters for form binding
   setSearchFilter(value: string): void {
     this.searchSubject.next(value);
   }
 
-  setStartDateFilter(value: string): void {
-    this.filters.update(f => ({ ...f, startDate: value }));
-  }
+  
+  protected readonly paginationInfo = computed(() => {
+    const p = this.pagination();
+    if (!p) return null;
+    
+    return {
+      start: (p.pageNumber - 1) * p.pageSize + 1,
+      end: Math.min(p.pageNumber * p.pageSize, p.totalItems),
+      total: p.totalItems
+    };
+  });
 
-  setEndDateFilter(value: string): void {
-    this.filters.update(f => ({ ...f, endDate: value }));
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 }

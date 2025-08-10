@@ -8,11 +8,12 @@
         </button>
         <div class="header-info">
           <h1 class="title">
-            Fatura {{ invoice()?.invoiceNumber }}
+            Fatura {{ invoiceInfo()?.number }}
           </h1>
           <p class="subtitle">
-            Criada em {{ invoice()?.createdAt | date:'dd/MM/yyyy' }}
+            Criada em {{ invoiceInfo()?.createdAt | date:'dd/MM/yyyy' }}
           </p>
+          
         </div>
       </div>
       <div class="header-actions">

@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -10,6 +10,7 @@ import { ServiceOrderAlert } from '../../../features/service-order/models/servic
 import { ServiceOrdersService } from '../../../features/service-order/services/service-order.service';
 import { MatFormField, MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-try-in-alerts',
@@ -32,7 +33,7 @@ import { FormsModule } from '@angular/forms';
 export class TryInAlertsComponent implements OnInit {
   private serviceOrdersService = inject(ServiceOrdersService);
   private router = inject(Router);
-
+  private readonly destroyRef = inject(DestroyRef);
   alerts = signal<ServiceOrderAlert[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
@@ -48,15 +49,15 @@ export class TryInAlertsComponent implements OnInit {
     this.error.set(null);
 
     this.serviceOrdersService.getWorksOutForTryIn(this.daysThreshold())
+    .pipe(takeUntilDestroyed(this.destroyRef)) 
       .subscribe({
         next: (data) => {
           this.alerts.set(data);
           this.loading.set(false);
         },
         error: (err) => {
-          this.error.set('Erro ao carregar alertas');
-          this.loading.set(false);
-          console.error('Erro ao carregar alertas:', err);
+                    this.loading.set(false);
+          
         }
       });
   }

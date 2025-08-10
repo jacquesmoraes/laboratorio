@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,14 +7,15 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 
 import { Shade } from '../../../models/shade.interface';
 import { Scale } from '../../../models/scale.interface';
 import { ShadeService } from '../../../services/shade.service';
 import { ScaleService } from '../../../services/scale.service';
 import { ShadeModalComponent, ShadeModalData } from '../shade-modal.component/shade-modal.component';
-import { ErrorService } from '../../../../../core/services/error.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-shade-list',
@@ -39,40 +40,53 @@ export class ShadeListComponent implements OnInit {
   private readonly scaleService = inject(ScaleService);
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
-  private readonly errorService = inject(ErrorService);
-
+  
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly shades = signal<Shade[]>([]);
   protected readonly scales = signal<Scale[]>([]);
-  protected readonly displayedColumns = [ 'scaleId', 'color', 'actions'];
-  
-  protected readonly filterForm = this.fb.group({
-    scaleId: [undefined]
-  });
-  trackByShadeId = (_: number, shade: { id: number }) => shade.id;
-trackByScaleId = (_: number, scale: { id: number }) => scale.id;
+  protected readonly displayedColumns = ['scaleId', 'color', 'actions'];
 
+  protected filterForm!: FormGroup<{
+    scaleId: FormControl<number | null | undefined>;
+  }>;
+
+
+  trackByShadeId = (_: number, shade: Shade) => shade.id;
+  trackByScaleId = (_: number, scale: Scale) => scale.id;
 
   ngOnInit(): void {
+    this.filterForm = this.fb.group({
+      scaleId: this.fb.control<number | null | undefined>(null)
+    });
+
     this.loadScales();
     this.loadShades();
   }
 
   private loadScales(): void {
-    this.scaleService.getAll().subscribe({
-      next: (data) => this.scales.set(data),
-      error: (error) => this.errorService.showError('Erro ao carregar escalas', error)
-    });
+    this.scaleService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => this.scales.set(data),
+        error: () => {
+        
+        }
+      });
   }
 
   private loadShades(scaleId?: number): void {
-    this.shadeService.getAll(scaleId).subscribe({
-      next: (data) => this.shades.set(data),
-      error: (error) => this.errorService.showError('Erro ao carregar cores', error)
-    });
+    this.shadeService.getAll(scaleId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => this.shades.set(data),
+        error: () => {
+          
+        }
+      });
   }
 
   protected onScaleFilterChange(): void {
-    const scaleId = this.filterForm.get('scaleId')?.value ?? undefined;
+    const scaleId = this.filterForm.value.scaleId ?? undefined;
     this.loadShades(scaleId);
   }
 
@@ -82,7 +96,7 @@ trackByScaleId = (_: number, scale: { id: number }) => scale.id;
       width: '550px'
     }).afterClosed().subscribe((result) => {
       if (result) {
-        const scaleId = this.filterForm.get('scaleId')?.value ?? undefined;
+        const scaleId = this.filterForm.value.scaleId ?? undefined;
         this.loadShades(scaleId);
       }
     });
@@ -94,29 +108,44 @@ trackByScaleId = (_: number, scale: { id: number }) => scale.id;
       width: '550px'
     }).afterClosed().subscribe((result) => {
       if (result) {
-        const scaleId = this.filterForm.get('scaleId')?.value ?? undefined;
+        const scaleId = this.filterForm.value.scaleId ?? undefined;
         this.loadShades(scaleId);
       }
     });
   }
 
   protected deleteShade(id: number): void {
-    this.errorService.confirm('Tem certeza?', 'Esta ação não pode ser desfeita!').then((result) => {
+    Swal.fire({
+      title: 'Tem certeza?',
+      text: 'Esta ação não pode ser desfeita!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
       if (result.isConfirmed) {
-        this.shadeService.delete(id).subscribe({
-          next: () => {
-            this.errorService.showSuccess('Cor excluída com sucesso');
-            const scaleId = this.filterForm.get('scaleId')?.value ?? undefined;
-            this.loadShades(scaleId);
-          },
-          error: (error) => this.errorService.showError('Erro ao excluir cor', error)
-        });
+        this.shadeService.delete(id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              Swal.fire('Sucesso!', 'Cor excluída com sucesso', 'success');
+              const scaleId = this.filterForm.value.scaleId ?? undefined;
+              this.loadShades(scaleId);
+            },
+            error: () => {
+             
+            }
+          });
       }
     });
   }
 
-  protected getScaleName(scaleId: number): string {
-    const scale = this.scales().find(s => s.id === scaleId);
-    return scale ? scale.name : 'N/A';
-  }
+  protected readonly getScaleName = computed(() => {
+    return (scaleId: number): string => {
+      const scale = this.scales().find(s => s.id === scaleId);
+      return scale ? scale.name : 'N/A';
+    };
+  });
 }

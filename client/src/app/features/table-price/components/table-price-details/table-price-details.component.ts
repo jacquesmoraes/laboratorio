@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +12,7 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { TablePriceService } from '../../services/table-price.services';
 import { TablePrice } from '../../table-price.interface';
 import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-table-price-details',
@@ -32,11 +33,11 @@ import Swal from 'sweetalert2';
   styleUrls: ['./table-price-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TablePriceDetailsComponent {
+export class TablePriceDetailsComponent  implements OnInit {
   private tablePriceService = inject(TablePriceService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
+  private readonly destroyRef = inject(DestroyRef);
   tablePrice = signal<TablePrice | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
@@ -45,7 +46,7 @@ export class TablePriceDetailsComponent {
   hasItems = computed(() => (this.tablePrice()?.items.length ?? 0) > 0);
   hasClients = computed(() => (this.tablePrice()?.clients.length ?? 0) > 0);
 
-  constructor() {
+  ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? Number(idParam) : null;
     if (id !== null && !isNaN(id)) {
@@ -57,17 +58,19 @@ export class TablePriceDetailsComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    this.tablePriceService.getTablePriceById(id).subscribe({
-      next: (data) => {
-        this.tablePrice.set(data);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.error.set('Erro ao carregar tabela de preço');
-        this.loading.set(false);
-        console.error('Error loading table price:', err);
-      }
-    });
+    this.tablePriceService.getTablePriceById(id)
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
+        next: (data) => {
+          this.tablePrice.set(data);
+          this.loading.set(false);
+        },
+        error: () => {
+         
+          this.loading.set(false);
+         
+        }
+      });
   }
 
   onEdit(): void {
@@ -86,17 +89,18 @@ export class TablePriceDetailsComponent {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.tablePriceService.deleteTablePrice(this.tablePrice()!.id).subscribe({
-          next: () => {
-            Swal.fire('Excluído!', 'A tabela de preço foi excluída com sucesso.', 'success').then(() => {
-              this.router.navigate(['/table-price']);
-            });
-          },
-          error: (err) => {
-            Swal.fire('Erro!', 'Erro ao excluir tabela de preço.', 'error');
-            console.error('Error deleting table price:', err);
-          }
-        });
+        this.tablePriceService.deleteTablePrice(this.tablePrice()!.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              Swal.fire('Excluído!', 'A tabela de preço foi excluída com sucesso.', 'success').then(() => {
+                this.router.navigate(['/table-price']);
+              });
+            },
+            error: () => {
+             
+            }
+          });
       }
     });
   }

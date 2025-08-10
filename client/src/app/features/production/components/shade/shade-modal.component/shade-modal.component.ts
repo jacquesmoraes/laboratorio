@@ -1,18 +1,21 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import Swal from 'sweetalert2';
+
 import { Scale } from '../../../models/scale.interface';
 import { Shade, UpdateShadeDto, CreateShadeDto } from '../../../models/shade.interface';
 import { ScaleService } from '../../../services/scale.service';
 import { ShadeService } from '../../../services/shade.service';
 
+import { tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import Swal from 'sweetalert2';
 
 export interface ShadeModalData {
   shade?: Shade;
@@ -32,6 +35,7 @@ export interface ShadeModalData {
     MatSelectModule,
     MatDialogModule
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shade-modal.component.html',
   styleUrls: ['./shade-modal.component.scss']
 })
@@ -39,12 +43,13 @@ export class ShadeModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly shadeService = inject(ShadeService);
   private readonly scaleService = inject(ScaleService);
+  
   private readonly dialogRef = inject(MatDialogRef<ShadeModalComponent>);
   private readonly data = inject<ShadeModalData>(MAT_DIALOG_DATA);
-
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly shadeForm = this.fb.group({
-    color: ['', [Validators.required, Validators.minLength(2)]],
-    scaleId: [null as number | null, Validators.required]
+    color: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
+    scaleId: this.fb.control<number | undefined>(undefined, { nonNullable: true, validators: [Validators.required] })
   });
 
   protected readonly isEditMode = signal(this.data.isEditMode);
@@ -53,106 +58,60 @@ export class ShadeModalComponent implements OnInit {
   private shadeId?: number;
 
   ngOnInit(): void {
-    this.loadScales();
+    this.loadScales()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.patchFormIfEdit(),
+        error: () => {
+         
+        }
+      });
   }
 
-  private loadScales(): void {
-    this.scaleService.getAll().subscribe({
-      next: (scales) => {
-        this.scales.set(scales);
-        
-        // Preencher o formulário após carregar as escalas (se for edição)
-        if (this.isEditMode() && this.data.shade) {
-          this.shadeId = this.data.shade.id;
-          this.shadeForm.patchValue({
-            color: this.data.shade.color || '',
-            scaleId: this.data.shade.scaleId
-          });
-        }
-      },
-      error: (error) => {
-        console.error('Erro ao carregar escalas:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Erro ao carregar escalas',
-          confirmButtonText: 'OK'
-        });
-      }
-    });
+ private loadScales() {
+  return this.scaleService.getAll().pipe(
+    tap((scales: Scale[]) => this.scales.set(scales))
+  );
+}
+
+
+  private patchFormIfEdit(): void {
+    if (this.isEditMode() && this.data.shade) {
+      this.shadeId = this.data.shade.id;
+      this.shadeForm.patchValue({
+        color: this.data.shade.color,
+        scaleId: this.data.shade.scaleId
+      });
+    }
   }
 
   protected onSubmit(): void {
-    if (this.shadeForm.valid) {
-      const formData = this.shadeForm.value;
-      
-      // Verificar se scaleId é válido
-      if (!formData.scaleId || formData.scaleId === 0) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Selecione uma escala',
-          confirmButtonText: 'OK'
-        });
-        return;
-      }
+    if (this.shadeForm.invalid) return;
 
-      if (this.isEditMode() && this.shadeId) {
-        const updateData: UpdateShadeDto = {
-          color: formData.color || undefined,
-          scaleId: formData.scaleId
-        };
+    const dto: CreateShadeDto | UpdateShadeDto = {
+      color: this.shadeForm.value.color!,
+      scaleId: this.shadeForm.value.scaleId!
+    };
 
-        this.shadeService.update(this.shadeId, updateData).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Cor atualizada com sucesso',
-              timer: 1000,
-              showConfirmButton: false
-            });
-            this.dialogRef.close(true);
-          },
-          error: (error) => {
-            console.error('Erro ao atualizar cor:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erro!',
-              text: 'Erro ao atualizar cor',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
-      } else {
-        const createData: CreateShadeDto = {
-          color: formData.color || undefined,
-          scaleId: formData.scaleId
-        };
+    const request$ = this.isEditMode() && this.shadeId
+      ? this.shadeService.update(this.shadeId, dto)
+      : this.shadeService.create(dto);
 
-        this.shadeService.create(createData).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Cor criada com sucesso',
-              timer: 1000,
-              showConfirmButton: false
-            });
-            this.dialogRef.close(true);
-          },
-          error: (error) => {
-            console.error('Erro ao criar cor:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erro!',
-              text: 'Erro ao criar cor',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
-      }
-    }
+    request$.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+         
+          Swal.fire(
+            'Sucesso!',
+            this.isEditMode() ? 'Cor atualizada com sucesso' : 'Cor criada com sucesso',
+            'success'
+          );
+          this.dialogRef.close(true);
+        },
+        error: () => {
+         
+        }
+      });
   }
 
   protected onCancel(): void {

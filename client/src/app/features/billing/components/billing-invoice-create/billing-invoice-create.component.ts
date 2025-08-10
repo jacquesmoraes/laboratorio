@@ -1,14 +1,14 @@
-import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, DestroyRef } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, FormControl, FormGroup } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
 import { BillingInvoiceService } from '../../services/billing-invoice.service';
 import { CreateBillingInvoiceDto } from '../../models/billing-invoice.interface';
 import { OrderStatus, ServiceOrder, ServiceOrderParams } from '../../../service-order/models/service-order.interface';
 import { ServiceOrdersService } from '../../../service-order/services/service-order.service';
 import { ClientService } from '../../../clients/services/clients.services';
 import { Client } from '../../../clients/models/client.interface';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-billing-invoice-create',
@@ -17,13 +17,13 @@ import { Client } from '../../../clients/models/client.interface';
   templateUrl: './billing-invoice-create.component.html',
   styleUrls: ['./billing-invoice-create.component.scss']
 })
-export class BillingInvoiceCreateComponent implements OnInit, OnDestroy {
+export class BillingInvoiceCreateComponent implements OnInit {
   private billingService = inject(BillingInvoiceService);
   private serviceOrderService = inject(ServiceOrdersService);
   private clientService = inject(ClientService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private destroy$ = new Subject<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   loading = signal(false);
   clients = signal<Client[]>([]);
@@ -42,7 +42,7 @@ export class BillingInvoiceCreateComponent implements OnInit, OnDestroy {
     this.loadClients();
 
     this.invoiceForm.controls.clientId.valueChanges
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(clientId => {
         if (clientId !== null) {
           this.loadServiceOrders(clientId);
@@ -55,13 +55,14 @@ export class BillingInvoiceCreateComponent implements OnInit, OnDestroy {
 
   loadClients(): void {
     this.loading.set(true);
-    this.clientService.getClients().subscribe({
+    this.clientService.getClients()
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: clients => {
         this.clients.set(clients);
         this.loading.set(false);
       },
       error: err => {
-        console.error('Erro ao carregar clientes:', err);
         this.loading.set(false);
       }
     });
@@ -81,14 +82,15 @@ export class BillingInvoiceCreateComponent implements OnInit, OnDestroy {
       endDate: '',
     };
 
-    this.serviceOrderService.getServiceOrders(params).subscribe({
+    this.serviceOrderService.getServiceOrders(params)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: response => {
         this.serviceOrders.set(response.data);
         this.selectedServiceOrders.set([]);
         this.loading.set(false);
       },
       error: err => {
-        console.error('Erro ao carregar ordens de serviço:', err);
         this.loading.set(false);
       }
     });
@@ -111,15 +113,17 @@ export class BillingInvoiceCreateComponent implements OnInit, OnDestroy {
         description: this.invoiceForm.controls.description.value ?? ''
       };
 
-      this.billingService.createInvoice(dto).subscribe({
+      this.billingService.createInvoice(dto)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: invoice => {
           this.loading.set(false);
           this.router.navigate(['/billing', invoice.billingInvoiceId]);
         },
         error: err => {
-          console.error('Erro ao criar fatura:', err);
+
           this.loading.set(false);
-          alert('Erro ao criar fatura');
+          
         }
       });
     }
@@ -135,8 +139,5 @@ export class BillingInvoiceCreateComponent implements OnInit, OnDestroy {
       .reduce((total, order) => total + order.orderTotal, 0);
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+
 }

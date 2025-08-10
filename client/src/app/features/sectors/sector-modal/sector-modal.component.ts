@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,7 +9,9 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 
 import { Sector } from '../models/sector.interface';
 import { SectorService } from '../service/sector.service';
-import { ErrorService } from '../../../core/services/error.service';
+
+import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface SectorModalData {
   sector?: Sector;
@@ -28,6 +30,7 @@ export interface SectorModalData {
     MatIconModule,
     MatDialogModule
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sector-modal.component.html',
   styleUrls: ['./sector-modal.component.scss']
 })
@@ -35,9 +38,8 @@ export class SectorModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private sectorService = inject(SectorService);
   private dialogRef = inject(MatDialogRef<SectorModalComponent>);
-  private errorService = inject(ErrorService);
   private data = inject<SectorModalData>(MAT_DIALOG_DATA);
-
+  private readonly destroyRef = inject(DestroyRef);
   readonly isEditMode = this.data.isEditMode;
   private sectorId = this.data.sector?.id;
 
@@ -62,27 +64,28 @@ export class SectorModalComponent implements OnInit {
 
     const payload = {
       name: name!
-      
     };
 
     const request$ = this.isEditMode && this.sectorId
       ? this.sectorService.update(this.sectorId, payload)
       : this.sectorService.create(payload);
 
-    request$.subscribe({
-      next: () => {
-        this.errorService.showSuccess(
-          this.isEditMode ? 'Setor atualizado com sucesso' : 'Setor criado com sucesso'
-        );
-        this.dialogRef.close(true);
-      },
-      error: (err) => {
-        this.errorService.showError(
-          this.isEditMode ? 'Erro ao atualizar setor' : 'Erro ao criar setor',
-          err
-        );
-      }
-    });
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
+        next: () => {
+         
+          Swal.fire(
+            'Sucesso!',
+            this.isEditMode ? 'Setor atualizado com sucesso' : 'Setor criado com sucesso',
+            'success'
+          );
+          this.dialogRef.close(true);
+        },
+        error: () => {
+         
+        }
+      });
   }
 
   onCancel(): void {

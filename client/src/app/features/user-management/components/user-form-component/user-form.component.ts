@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,7 +20,7 @@ import {
   ClientUserDetailsRecord 
 } from '../../models/user-management.interface';
 import { Client } from '../../../clients/models/client.interface';
-import { ErrorService } from '../../../../core/services/error.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-user-form',
@@ -45,7 +45,7 @@ export class UserFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private userManagementService = inject(UserManagementService);
   private clientService = inject(ClientService);
-  private errorService = inject(ErrorService);
+  private readonly destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   
@@ -98,31 +98,33 @@ export class UserFormComponent implements OnInit {
 
   private loadUser(userId: string) {
     this.loading.set(true);
-    this.userManagementService.getClientUserDetails(userId).subscribe({
-      next: (user) => {
-        this.userToLoad.set(user);
-        this.populateForm(user);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        this.errorService.showError('Erro ao carregar usuário', error);
-        this.loading.set(false);
-      }
-    });
+    this.userManagementService.getClientUserDetails(userId)
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
+        next: (user) => {
+          this.userToLoad.set(user);
+          this.populateForm(user);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.loading.set(false);
+        }
+      });
   }
 
   private loadClients() {
     this.loadingClients.set(true);
-    this.clientService.getClients().subscribe({
-      next: (clients) => {
-        this.clients.set(clients);
-        this.loadingClients.set(false);
-      },
-      error: (error) => {
-        this.errorService.showError('Erro ao carregar clientes', error);
-        this.loadingClients.set(false);
-      }
-    });
+    this.clientService.getClients()
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
+        next: (clients) => {
+          this.clients.set(clients);
+          this.loadingClients.set(false);
+        },
+        error: (error) => {
+          this.loadingClients.set(false);
+        }
+      });
   }
 
   private populateForm(user: ClientUserDetailsRecord) {
@@ -161,7 +163,14 @@ export class UserFormComponent implements OnInit {
 
     if (this.isEditMode()) {
       // TODO: Implementar edição quando necessário
-      this.errorService.showError('Edição de usuários ainda não implementada');
+     
+      // this.errorService.showError('Edição de usuários ainda não implementada');
+      Swal.fire({
+        icon: 'info',
+        title: 'Funcionalidade em Desenvolvimento',
+        text: 'Edição de usuários ainda não implementada',
+        confirmButtonText: 'OK'
+      });
       this.loading.set(false);
     } else {
       const formValue = this.userForm.value;
@@ -173,17 +182,18 @@ export class UserFormComponent implements OnInit {
         confirmPassword: formValue.confirmPassword
       };
 
-      this.userManagementService.registerClientUser(request).subscribe({
-        next: (response) => {
-          this.registrationResponse.set(response);
-          this.showSuccessDialog(response);
-          this.loading.set(false);
-        },
-        error: (error) => {
-          this.errorService.showError('Erro ao registrar usuário', error);
-          this.loading.set(false);
-        }
-      });
+      this.userManagementService.registerClientUser(request)
+        .pipe(takeUntilDestroyed(this.destroyRef)) 
+        .subscribe({
+          next: (response) => {
+            this.registrationResponse.set(response);
+            this.showSuccessDialog(response);
+            this.loading.set(false);
+          },
+          error: (error) => {
+            this.loading.set(false);
+          }
+        });
     }
   }
 

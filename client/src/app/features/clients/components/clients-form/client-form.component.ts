@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,10 +13,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Client, CreateClientDto, UpdateClientDto, BillingMode, BillingModeLabels } from '../../models/client.interface';
 
 import { ClientService } from '../../services/clients.services';
-import { ErrorService } from '../../../../core/services/error.service';
+
 import { TablePriceService } from '../../../table-price/services/table-price.services';
 import { TablePriceOption } from '../../../table-price/table-price.interface';
 import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-client-form',
@@ -41,10 +42,10 @@ export class ClientFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private clientService = inject(ClientService);
   private tablePriceService = inject(TablePriceService);
-  private errorService = inject(ErrorService);
+  
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  
+  private readonly destroyRef = inject(DestroyRef);
   clientForm!: FormGroup;
   loading = signal(false);
   isEditMode = signal(false);
@@ -98,14 +99,16 @@ export class ClientFormComponent implements OnInit {
 
   private loadClient(id: number) {
     this.loading.set(true);
-    this.clientService.getClientById(id).subscribe({
+    this.clientService.getClientById(id)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: (client) => {
         this.clientToLoad.set(client);
         this.tryPopulateForm();
         this.loading.set(false);
       },
       error: (error) => {
-        this.errorService.showError('Erro ao carregar cliente', error);
+        
         this.loading.set(false);
       }
     });
@@ -113,14 +116,16 @@ export class ClientFormComponent implements OnInit {
 
   private loadTablePrices() {
     this.loadingTablePrices.set(true);
-    this.tablePriceService.getTablePriceOptions().subscribe({
+    this.tablePriceService.getTablePriceOptions()
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: (options) => {
         this.tablePriceOptions.set(options);
         this.loadingTablePrices.set(false);
         this.tryPopulateForm();
       },
       error: (error) => {
-        this.errorService.showError('Erro ao carregar tabelas de preços', error);
+        
         this.loadingTablePrices.set(false);
       }
     });
@@ -195,7 +200,7 @@ export class ClientFormComponent implements OnInit {
           this.loading.set(false);
         },
         error: (error) => {
-          this.errorService.showError('Erro ao atualizar cliente', error);
+          
           this.loading.set(false);
         }
       });
@@ -219,7 +224,7 @@ export class ClientFormComponent implements OnInit {
           this.loading.set(false);
         },
         error: (error) => {
-          this.errorService.showError('Erro ao criar cliente', error);
+          
           this.loading.set(false);
         }
       });

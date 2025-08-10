@@ -1,9 +1,7 @@
 <div class="container">
   <div class="flex justify-between items-center mb-6">
     <h1 class="title">Pagamentos</h1>
-    <button 
-      (click)="navigateToCreate()"
-      class="btn btn-primary">
+    <button (click)="navigateToCreate()" class="btn btn-primary">
       Novo Pagamento
     </button>
   </div>
@@ -14,35 +12,30 @@
       <div class="filter-item">
         <label class="filter-label">Buscar</label>
         <input 
-          type="text" 
-          [ngModel]="searchFilter()"
+          type="text"
+          [(ngModel)]="filters().search"
           (ngModelChange)="setSearchFilter($event)"
-          
-          placeholder="Descrição do pagamento"
+          placeholder="Cliente ou descrição do pagamento"
           class="filter-input">
       </div>
       <div class="filter-item">
         <label class="filter-label">Data Início</label>
         <input 
-          type="date" 
-          [ngModel]="startDateFilter()"
-          (ngModelChange)="setStartDateFilter($event)"
+          type="date"
+          [(ngModel)]="filters().startDate"
           (change)="onFilterChange()"
           class="filter-input">
       </div>
       <div class="filter-item">
         <label class="filter-label">Data Fim</label>
         <input 
-          type="date" 
-          [ngModel]="endDateFilter()"
-          (ngModelChange)="setEndDateFilter($event)"
+          type="date"
+          [(ngModel)]="filters().endDate"
           (change)="onFilterChange()"
           class="filter-input">
       </div>
       <div class="filter-item">
-        <button 
-          (click)="clearFilters()"
-          class="btn btn-secondary w-full">
+        <button (click)="clearFilters()" class="btn btn-secondary w-full">
           Limpar Filtros
         </button>
       </div>
@@ -64,7 +57,7 @@
         </thead>
         <tbody>
           @for (payment of payments(); track payment.id) {
-            <tr (click)="viewPayment(payment.id)"  class="payment-row">
+            <tr (click)="viewPayment(payment.id)" class="payment-row">
               <td class="client-name">{{ payment.clientName }}</td>
               <td class="payment-date">{{ formatDate(payment.paymentDate) }}</td>
               <td class="payment-amount">R$ {{ formatCurrency(payment.amountPaid) }}</td>
@@ -77,32 +70,33 @@
     </div>
 
     <!-- Paginação -->
-    @if (pagination()) {
+    @if (paginationInfo()) {
       <div class="pagination-container">
         <div class="pagination-info">
           Mostrando 
-          <span class="font-medium">{{ (pagination()!.pageNumber - 1) * pagination()!.pageSize + 1 }}</span>
+          <span class="font-medium">{{ paginationInfo()!.start }}</span>
           a 
-          <span class="font-medium">{{ Math.min(pagination()!.pageNumber * pagination()!.pageSize, pagination()!.totalItems) }}</span>
+          <span class="font-medium">{{ paginationInfo()!.end }}</span>
           de 
-          <span class="font-medium">{{ pagination()!.totalItems }}</span>
+          <span class="font-medium">{{ paginationInfo()!.total }}</span>
           resultados
         </div>
         <nav class="pagination-nav">
           <button 
-            (click)="previousPage()"
-            [disabled]="pagination()!.pageNumber <= 1"
-            class="pagination-button pagination-prev">
-            Anterior
-          </button>
-          <button 
-            (click)="nextPage()"
-            [disabled]="pagination()!.pageNumber >= pagination()!.totalPages"
-            class="pagination-button pagination-next">
-            Próxima
-          </button>
+          (click)="changePage(-1)"
+          [disabled]="(pagination()?.pageNumber ?? 0) <= 1"
+          class="pagination-button pagination-prev">
+          Anterior
+        </button>
+        <button 
+          (click)="changePage(1)"
+          [disabled]="(pagination()?.pageNumber ?? 0) >= (pagination()?.totalPages ?? 0)"
+          class="pagination-button pagination-next">
+          Próxima
+        </button>
         </nav>
       </div>
     }
+
   </div>
 </div>

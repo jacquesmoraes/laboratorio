@@ -20,7 +20,7 @@ namespace Infra.Data.Config
                 .HasOne(i => i.WorkType)
                 .WithMany()
                 .HasForeignKey(i => i.WorkTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(i => i.Price)
                 .HasColumnType("decimal(10,2)")

@@ -14,7 +14,7 @@ import { AuthService } from "../../../core/services/auth.service";
 })
 export class LayoutComponent {
   private authService = inject(AuthService);
-  private router = inject(Router);
+  
 
   sidebarOpen = signal(false);
   profileMenuOpen = signal(false);

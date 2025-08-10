@@ -1,25 +1,20 @@
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { Scale } from '../../../models/scale.interface';
 import { ScaleService } from '../../../services/scale.service';
 import { ScaleModalComponent, ScaleModalData } from '../scale-modal.component/scale-modal.component';
-import { ErrorService } from '../../../../../core/services/error.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-scale-list',
   standalone: true,
   imports: [
     CommonModule,
-    MatTableModule,
-    MatButtonModule,
     MatIconModule,
-    MatCardModule,
     MatDialogModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,51 +24,69 @@ import { ErrorService } from '../../../../../core/services/error.service';
 export class ScaleListComponent implements OnInit {
   private readonly scaleService = inject(ScaleService);
   private readonly dialog = inject(MatDialog);
-  private readonly errorService = inject(ErrorService);
+ 
+  private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly scales = signal<Scale[]>([]);
-  protected readonly displayedColumns: string[] = [ 'name', 'actions'];
+  scales = signal<Scale[]>([]);
 
   ngOnInit(): void {
     this.loadScales();
   }
 
   private loadScales(): void {
-    this.scaleService.getAll().subscribe({
-      next: (data) => this.scales.set(data),
-      error: (error) => this.errorService.showError('Erro ao carregar escalas', error)
-    });
+    this.scaleService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => this.scales.set(data),
+        error: () => {
+       
+        }
+      });
   }
 
-  protected onNew(): void {
+  private openModal(data: ScaleModalData): void {
     this.dialog.open(ScaleModalComponent, {
-      data: { isEditMode: false } as ScaleModalData,
+      data,
       width: '500px'
-    }).afterClosed().subscribe((result) => {
-      if (result) this.loadScales();
-    });
+    }).afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (result) this.loadScales();
+      });
   }
 
-  protected onEdit(scale: Scale): void {
-    this.dialog.open(ScaleModalComponent, {
-      data: { scale, isEditMode: true } as ScaleModalData,
-      width: '500px'
-    }).afterClosed().subscribe((result) => {
-      if (result) this.loadScales();
-    });
+  onNew(): void {
+    this.openModal({ isEditMode: false });
   }
 
-  protected deleteScale(id: number): void {
-    this.errorService.confirm('Tem certeza?', 'Esta ação não pode ser desfeita!').then((result) => {
+  onEdit(scale: Scale): void {
+    this.openModal({ scale, isEditMode: true });
+  }
+
+  deleteScale(id: number): void {
+    Swal.fire({
+      title: 'Tem certeza?',
+      text: 'Esta ação não pode ser desfeita!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
       if (result.isConfirmed) {
-        this.scaleService.delete(id).subscribe({
-          next: () => {
-            this.errorService.showSuccess('Escala excluída com sucesso');
-            this.loadScales();
-          },
-          error: (error) => this.errorService.showError('Erro ao excluir escala', error)
-        });
+        this.scaleService.delete(id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              Swal.fire('Sucesso!', 'Escala excluída com sucesso', 'success');
+              this.loadScales();
+            },
+            error: () => {
+             
+            }
+          });
       }
     });
   }
-} 
+}

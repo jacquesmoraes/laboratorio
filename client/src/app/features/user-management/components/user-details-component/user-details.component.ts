@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,7 +11,7 @@ import Swal from 'sweetalert2';
 
 import { UserManagementService } from '../../services/user-management.service';
 import { ClientUserDetailsRecord, LoginHistoryRecord } from '../../models/user-management.interface';
-import { ErrorService } from '../../../../core/services/error.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-user-details',
@@ -33,7 +33,7 @@ export class UserDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private userManagementService = inject(UserManagementService);
-  private errorService = inject(ErrorService);
+  private readonly destroyRef = inject(DestroyRef);
 
   user = signal<ClientUserDetailsRecord | null>(null);
   loading = signal(true);
@@ -49,20 +49,22 @@ export class UserDetailsComponent implements OnInit {
   }
 }
 
- private loadUser(userId: string) {
+private loadUser(userId: string) {
   this.loading.set(true);
-  this.userManagementService.getClientUserDetails(userId).subscribe({
-    next: (user) => {
-      this.user.set(user);
-      this.loading.set(false);
-    },
-    error: (error) => {
-      this.errorService.showError('Erro ao carregar detalhes do usuário', error);
-      this.user.set(null);
-      this.loading.set(false);
-    }
-  });
+  this.userManagementService.getClientUserDetails(userId)
+    .pipe(takeUntilDestroyed(this.destroyRef)) 
+    .subscribe({
+      next: (user) => {
+        this.user.set(user);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        this.user.set(null);
+        this.loading.set(false);
+      }
+    });
 }
+
 
   getStatusLabel(isActive: boolean): string {
     return isActive ? 'Ativo' : 'Bloqueado';
@@ -119,13 +121,13 @@ export class UserDetailsComponent implements OnInit {
     if (result.isConfirmed) {
       this.loading.set(true);
       this.userManagementService.blockClientUser(this.user()!.userId.toString())
+          .pipe(takeUntilDestroyed(this.destroyRef)) 
         .subscribe({
           next: () => {
             Swal.fire('Sucesso!', 'Usuário bloqueado com sucesso.', 'success');
             this.loadUser(this.user()!.userId);
           },
           error: (error) => {
-            this.errorService.showError('Erro ao bloquear usuário', error);
             this.loading.set(false);
           }
         });
@@ -145,17 +147,16 @@ export class UserDetailsComponent implements OnInit {
       confirmButtonText: 'Sim, desbloquear',
       cancelButtonText: 'Cancelar'
     });
-
     if (result.isConfirmed) {
       this.loading.set(true);
       this.userManagementService.unblockClientUser(this.user()!.userId.toString())
+        .pipe(takeUntilDestroyed(this.destroyRef)) 
         .subscribe({
           next: () => {
             Swal.fire('Sucesso!', 'Usuário desbloqueado com sucesso.', 'success');
             this.loadUser(this.user()!.userId);
           },
           error: (error) => {
-            this.errorService.showError('Erro ao desbloquear usuário', error);
             this.loading.set(false);
           }
         });
@@ -179,7 +180,7 @@ export class UserDetailsComponent implements OnInit {
     if (result.isConfirmed) {
       this.loading.set(true);
       this.userManagementService.resetClientUserAccessCode(this.user()!.userId)
-
+        .pipe(takeUntilDestroyed(this.destroyRef)) 
         .subscribe({
           next: (response) => {
             Swal.fire({
@@ -191,7 +192,6 @@ export class UserDetailsComponent implements OnInit {
             this.loadUser(this.user()!.userId);
           },
           error: (error) => {
-            this.errorService.showError('Erro ao resetar código de acesso', error);
             this.loading.set(false);
           }
         });

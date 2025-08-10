@@ -1,16 +1,31 @@
-import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
 import { CreatePaymentDto } from '../../models/payment.interface';
 import { ClientService } from '../../../clients/services/clients.services';
 import { Client } from '../../../clients/models/client.interface';
 
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 @Component({
   selector: 'app-payment-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './payment-create.component.html',
   styleUrls: ['./payment-create.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,11 +35,17 @@ export class PaymentCreateComponent implements OnInit {
   private clientService = inject(ClientService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-
+  private readonly destroyRef = inject(DestroyRef);
   loading = signal(false);
   loadingClients = signal(false);
-  paymentForm!: FormGroup;
   clients = signal<Client[]>([]);
+
+  paymentForm!: FormGroup<{
+    clientId: FormControl<number | null>;
+    amountPaid: FormControl<number | null>;
+    description: FormControl<string | null>;
+    paymentDate: FormControl<string>;
+  }>;
 
   ngOnInit(): void {
     this.initForm();
@@ -33,22 +54,30 @@ export class PaymentCreateComponent implements OnInit {
 
   private initForm(): void {
     this.paymentForm = this.fb.group({
-      clientId: ['', [Validators.required, Validators.min(1)]],
-      amountPaid: ['', [Validators.required, Validators.min(0.01)]],
-      description: [''],
-      paymentDate: [this.formatDateTimeLocal(new Date()), [Validators.required]]
+      clientId: this.fb.control<number | null>(null, {
+        validators: [Validators.required, Validators.min(1)]
+      }),
+      amountPaid: this.fb.control<number | null>(null, {
+        validators: [Validators.required, Validators.min(0.01)]
+      }),
+      description: this.fb.control<string | null>(null),
+      paymentDate: this.fb.control<string>(
+        this.formatDateTimeLocal(new Date()),
+        { validators: [Validators.required], nonNullable: true }
+      )
     });
   }
 
   private loadClients(): void {
     this.loadingClients.set(true);
-    this.clientService.getClients().subscribe({
+    this.clientService.getClients()
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: (clients) => {
         this.clients.set(clients);
         this.loadingClients.set(false);
       },
-      error: (error) => {
-        console.error('Erro ao carregar clientes:', error);
+      error: () => {
         this.loadingClients.set(false);
       }
     });
@@ -57,20 +86,20 @@ export class PaymentCreateComponent implements OnInit {
   onSubmit(): void {
     if (this.paymentForm.valid) {
       this.loading.set(true);
-      
+
+      const formValue = this.paymentForm.getRawValue();
       const paymentData: CreatePaymentDto = {
-        clientId: this.paymentForm.value.clientId,
-        amountPaid: this.paymentForm.value.amountPaid,
-        description: this.paymentForm.value.description,
-        paymentDate: this.formatDateForApi(this.paymentForm.value.paymentDate)
+        clientId: formValue.clientId!,
+        amountPaid: formValue.amountPaid!,
+        description: formValue.description || undefined,
+        paymentDate: this.formatDateForApi(formValue.paymentDate)
       };
 
-      this.paymentService.createPayment(paymentData).subscribe({
-        next: () => {
-          this.router.navigate(['/payments']);
-        },
-        error: (error) => {
-          console.error('Erro ao criar pagamento:', error);
+      this.paymentService.createPayment(paymentData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.router.navigate(['/payments']),
+        error: () => {
           this.loading.set(false);
         }
       });
@@ -87,7 +116,6 @@ export class PaymentCreateComponent implements OnInit {
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 

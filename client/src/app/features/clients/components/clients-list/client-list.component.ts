@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -13,12 +13,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { Client, BillingMode, BillingModeLabels, Pagination, QueryParams } from '../../models/client.interface';
 import { ErrorService } from '../../../../core/services/error.service';
 import { ClientService } from '../../services/clients.services';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-client-list',
@@ -41,12 +41,11 @@ import { ClientService } from '../../services/clients.services';
   styleUrls: ['./client-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClientListComponent implements OnInit, OnDestroy {
+export class ClientListComponent implements OnInit {
   private clientService = inject(ClientService);
-  private errorService = inject(ErrorService);
+  
   private router = inject(Router);
-  private destroy$ = new Subject<void>();
-
+  private readonly destroyRef = inject(DestroyRef);
   clients = signal<Client[]>([]);
   loading = signal(false);
 
@@ -72,6 +71,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
   private loadClients() {
     this.loading.set(true);
     this.clientService.getPaginatedClients(this.currentParams())
+    .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: pagination => {
           this.pagination.set(pagination);
@@ -79,7 +79,6 @@ export class ClientListComponent implements OnInit, OnDestroy {
           this.loading.set(false);
         },
         error: error => {
-          this.errorService.showError('Erro ao carregar clientes', error);
           this.loading.set(false);
         }
       });
@@ -87,7 +86,7 @@ export class ClientListComponent implements OnInit, OnDestroy {
 
   private setupSearch() {
     this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(search => {
         this.currentParams.update(params => ({ ...params, search, pageNumber: 1 }));
         this.loadClients();
@@ -142,7 +141,6 @@ export class ClientListComponent implements OnInit, OnDestroy {
             this.loadClients();
           },
           error: error => {
-            this.errorService.showError('Erro ao excluir cliente', error);
             this.loading.set(false);
           }
         });
@@ -154,12 +152,11 @@ export class ClientListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/clients', client.clientId]);
   }
 
-  getBillingModeLabel(mode: BillingMode): string {
-    return this.billingModeLabels[mode] || 'Desconhecido';
-  }
+  protected readonly getBillingModeLabel = computed(() => {
+    return (mode: BillingMode): string => {
+      return this.billingModeLabels[mode] || 'Desconhecido';
+    };
+  });
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+
 }

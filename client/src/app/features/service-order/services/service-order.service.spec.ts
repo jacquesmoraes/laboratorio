@@ -40,7 +40,9 @@ describe('ServiceOrdersService', () => {
         sort: 'dateIn',
         search: 'test',
         excludeFinished: true,
-        excludeInvoiced: false
+        excludeInvoiced: false,
+        startDate: '', 
+  endDate: ''
       };
   
       const mockResponse = {
@@ -166,7 +168,14 @@ describe('ServiceOrdersService', () => {
     it('should handle HTTP errors gracefully', () => {
       const mockParams: ServiceOrderParams = {
         pageNumber: 1,
-        pageSize: 10
+        pageSize: 10,
+        sort: 'dateIn',
+        search: 'test',
+        excludeFinished: true,
+        excludeInvoiced: false,
+        startDate: '', 
+  endDate: ''
+
       };
 
       service.getServiceOrders(mockParams).subscribe({

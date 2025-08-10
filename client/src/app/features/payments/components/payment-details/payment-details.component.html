@@ -9,43 +9,43 @@
       </button>
     </div>
 
-   @if (payment()) {
+    @if (p) {
       <div class="details-card">
         <div class="details-grid">
           <div class="details-section">
             <div class="detail-item">
               <label class="detail-label">ID do Pagamento</label>
-              <p class="detail-value">{{ payment()!.id }}</p>
+              <p class="detail-value">{{ p.id }}</p>
             </div>
             
             <div class="detail-item">
               <label class="detail-label">Cliente</label>
-              <p class="detail-value client-name">{{ payment()!.clientName }}</p>
+              <p class="detail-value client-name">{{ p.clientName }}</p>
             </div>
             
             <div class="detail-item">
               <label class="detail-label">Valor Pago</label>
-              <p class="detail-value amount">{{ formatCurrency(payment()!.amountPaid) }}</p>
+              <p class="detail-value amount">{{ formatCurrency(p.amountPaid) }}</p>
             </div>
           </div>
           
           <div class="details-section">
             <div class="detail-item">
               <label class="detail-label">Data do Pagamento</label>
-              <p class="detail-value">{{ formatDate(payment()!.paymentDate) }}</p>
+              <p class="detail-value">{{ formatDate(p.paymentDate) }}</p>
             </div>
             
             <div class="detail-item">
               <label class="detail-label">Fatura</label>
               <p class="detail-value invoice">
-                {{ payment()!.invoiceNumber || 'Não associado' }}
+                {{ p.invoiceNumber || 'Não associado' }}
               </p>
             </div>
             
-            @if (payment()!.description) {
+            @if (p.description) {
               <div class="detail-item">
                 <label class="detail-label">Descrição</label>
-                <p class="detail-value description">{{ payment()!.description }}</p>
+                <p class="detail-value description">{{ p.description }}</p>
               </div>
             }
           </div>
@@ -55,15 +55,15 @@
           <div class="info-header">
             <h3 class="info-title">Informações Adicionais</h3>
             <div class="info-meta">
-              ID do Cliente: {{ payment()!.clientId }}
-              @if (payment()!.billingInvoiceId) {
-                | Fatura ID: {{ payment()!.billingInvoiceId }}
+              ID do Cliente: {{ p.clientId }}
+              @if (p.billingInvoiceId) {
+                | Fatura ID: {{ p.billingInvoiceId }}
               }
             </div>
           </div>
         </div>
       </div>
-    } @else if(!loading()) {
+    } @else if (!loading()) {
       <div class="not-found">
         <div class="not-found-icon">⚠️</div>
         <h2 class="not-found-title">Pagamento não encontrado</h2>

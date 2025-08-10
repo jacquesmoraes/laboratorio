@@ -32,7 +32,9 @@ namespace Core.FactorySpecifications.PaymentSpecifications
             {
                 Expression<Func<Payment, bool>> criteria = x =>
                     (!p.ClientId.HasValue || x.ClientId == p.ClientId) &&
-                    (string.IsNullOrEmpty(p.Search) || x.Description!.ToLower().Contains(p.Search.ToLower())) &&
+                    (string.IsNullOrEmpty(p.Search) ||
+                    x.Description!.ToLower().Contains(p.Search.ToLower()) ||
+                    x.Client.ClientName.ToLower().Contains(p.Search.ToLower())) &&
                     (!p.StartDate.HasValue || x.PaymentDate >= p.StartDate.Value) &&
                     (!p.EndDate.HasValue || x.PaymentDate <= p.EndDate.Value);
 

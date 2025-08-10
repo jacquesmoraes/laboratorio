@@ -3,10 +3,10 @@
     <h2>Pedidos de Serviço</h2>
     <div class="search-container">
       <input 
-        type="text" 
-        placeholder="Buscar por paciente..."
-        (input)="onSearchChange($any($event.target).value)"
-        class="search-input">
+  type="text"
+  placeholder="Buscar por paciente..."
+  [formControl]="searchControl"
+  class="search-input">
       <button 
         type="button" 
         (click)="clearFilters()"
@@ -36,8 +36,8 @@
               <td>{{ formatDate(order.dateIn) }}</td>
               <td>{{ order.patientName }}</td>
               <td>
-                <span class="status-badge {{ getStatusClass(order.status) }}">
-                  {{ getStatusLabel(order.status) }}
+                <span class="status-badge {{ getStatusClass()(order.status) }}">
+                  {{ getStatusLabel()(order.status) }}
                 </span>
               </td>
               <td>{{ formatCurrency(order.orderTotal) }}</td>
@@ -62,7 +62,7 @@
           Mostrando 
           <span class="font-medium">{{ (pagination()!.pageNumber - 1) * pagination()!.pageSize + 1 }}</span>
           a 
-          <span class="font-medium">{{ Math.min(pagination()!.pageNumber * pagination()!.pageSize, pagination()!.totalItems) }}</span>
+          <span class="font-medium">{{ paginationInfo()?.end }}</span>
           de 
           <span class="font-medium">{{ pagination()!.totalItems }}</span>
           resultados

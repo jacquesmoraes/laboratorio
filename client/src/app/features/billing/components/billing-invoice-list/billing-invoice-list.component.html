@@ -69,7 +69,7 @@
               <td data-label="Name" class="client-name">{{ invoice.client.clientName }}</td>
               <td data-label="Date">{{ invoice.createdAt | date:'dd/MM/yyyy' }}</td>
               <td data-label="Status">
-                <span [class]="'status-badge ' + getStatusClass(invoice.status)">
+                <span [class]="'status-badge ' + getStatusClass()(invoice.status)">
                   {{ invoice.status }}
                 </span>
               </td>
@@ -93,23 +93,23 @@
     </div>
 
     <!-- Paginação -->
-    @if (pagination()) {
+    @if (paginationInfo()) {
       <div class="pagination-container">
         <div class="pagination-info">
-          Página <span class="font-medium">{{ pagination()?.pageNumber }}</span> de
-          <span class="font-medium">{{ pagination()?.totalPages }}</span>
+          Página <span class="font-medium">{{ paginationInfo()!.currentPage }}</span> de
+          <span class="font-medium">{{ paginationInfo()!.totalPages }}</span>
         </div>
         <div class="pagination-nav">
           <button class="pagination-button pagination-prev"
-            (click)="updateFilter('pageNumber', (pagination()?.pageNumber ?? 1) - 1)"
-            [disabled]="(pagination()?.pageNumber ?? 1) <= 1">
-            Anterior
-          </button>
-          <button class="pagination-button pagination-next"
-            (click)="updateFilter('pageNumber', (pagination()?.pageNumber ?? 1) + 1)"
-            [disabled]="(pagination()?.pageNumber ?? 1) >= (pagination()?.totalPages ?? 1)">
-            Próxima
-          </button>
+  (click)="changePage(paginationInfo()!.currentPage - 1)"
+  [disabled]="!paginationInfo()!.hasPrev">
+  Anterior
+</button>
+<button class="pagination-button pagination-next"
+  (click)="changePage(paginationInfo()!.currentPage + 1)"
+  [disabled]="!paginationInfo()!.hasNext">
+  Próxima
+</button>
         </div>
       </div>
     }

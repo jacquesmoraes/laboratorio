@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { WorkSection } from '../../models/work-section.interface';
 import { WorkSectionService } from '../../services/works-section.service';
 import { WorkSectionModalComponent, WorkSectionModalData } from '../work-section-modal/work-section-modal.component';
 import { MatTooltip } from '@angular/material/tooltip';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-work-section-list',
@@ -31,7 +32,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 export class WorkSectionListComponent implements OnInit {
   private workSectionService = inject(WorkSectionService);
   private dialog = inject(MatDialog);
-
+  private readonly destroyRef = inject(DestroyRef);
   workSections = signal<WorkSection[]>([]);
   displayedColumns: string[] = [ 'name', 'actions'];
 
@@ -41,22 +42,16 @@ export class WorkSectionListComponent implements OnInit {
   }
 
   loadWorkSections(): void {
-    
-    this.workSectionService.getAll().subscribe({
-      next: (data) => {
-        
-        this.workSections.set(data);
-      },
-      error: (error) => {
-        console.error('Erro ao carregar seções de trabalho:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Erro ao carregar seções de trabalho',
-          confirmButtonText: 'OK'
-        });
-      }
-    });
+    this.workSectionService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
+        next: (data) => {
+          this.workSections.set(data);
+        },
+        error: () => {
+         
+        }
+      });
   }
 
   onNew(): void {
@@ -86,32 +81,33 @@ export class WorkSectionListComponent implements OnInit {
   }
 
   deleteWorkSection(id: number): void {
-    if (typeof Swal !== 'undefined') {
-      Swal.fire({
-        title: 'Tem certeza?',
-        text: 'Esta ação não pode ser desfeita!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sim, excluir!',
-        cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.performDelete(id);
-        }
-      });
-    } else {
-      if (confirm('Tem certeza que deseja excluir esta seção de trabalho?')) {
+    console.log('Tentando deletar seção:', id); // ← Adicionar este log
+    
+    Swal.fire({
+      title: 'Tem certeza?',
+      text: 'Esta ação não pode ser desfeita!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log('Confirmação aceita, executando delete...'); // ← Adicionar este log
         this.performDelete(id);
       }
-    }
+    });
   }
-
+  
   private performDelete(id: number): void {
-    this.workSectionService.delete(id).subscribe({
-      next: () => {
-        if (typeof Swal !== 'undefined') {
+    console.log('Executando delete para ID:', id); // ← Adicionar este log
+    
+    this.workSectionService.delete(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          console.log('Delete executado com sucesso'); // ← Adicionar este log
           Swal.fire({
             icon: 'success',
             title: 'Sucesso!',
@@ -119,24 +115,11 @@ export class WorkSectionListComponent implements OnInit {
             timer: 2000,
             showConfirmButton: false
           });
-        } else {
-          alert('Seção de trabalho excluída com sucesso');
+          this.loadWorkSections();
+        },
+        error: (error) => {
+          console.error('Erro no delete:', error); // ← Adicionar este log
         }
-        this.loadWorkSections();
-      },
-      error: (error) => {
-        console.error('Erro ao excluir seção de trabalho:', error);
-        if (typeof Swal !== 'undefined') {
-          Swal.fire({
-            icon: 'error',
-            title: 'Erro!',
-            text: 'Erro ao excluir seção de trabalho',
-            confirmButtonText: 'OK'
-          });
-        } else {
-          alert('Erro ao excluir seção de trabalho');
-        }
-      }
-    });
+      });
   }
 }

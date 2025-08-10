@@ -1,15 +1,14 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Scale, CreateScaleDto, UpdateScaleDto } from '../../../models/scale.interface';
 import { ScaleService } from '../../../services/scale.service';
-import { ErrorService } from '../../../../../core/services/error.service';
+
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 export interface ScaleModalData {
   scale?: Scale;
@@ -22,11 +21,10 @@ export interface ScaleModalData {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
     MatIconModule,
-    MatDialogModule
+    MatFormFieldModule,
+    MatDialogModule,
+    MatInput
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './scale-modal.component.html',
@@ -36,52 +34,50 @@ export class ScaleModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly scaleService = inject(ScaleService);
   private readonly dialogRef = inject(MatDialogRef<ScaleModalComponent>);
-  private readonly errorService = inject(ErrorService);
+ 
   private readonly data = inject<ScaleModalData>(MAT_DIALOG_DATA);
+  private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly scaleForm = signal<FormGroup>(this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2)]]
-  }));
-  
-  protected readonly isEditMode = signal(this.data.isEditMode);
-  protected readonly scaleId = signal<number | undefined>(undefined);
+  scaleForm!: FormGroup<{ name: FormControl<string> }>;
+
+  isEditMode = this.data.isEditMode;
+  scaleId?: number;
 
   ngOnInit(): void {
-    if (this.isEditMode() && this.data.scale) {
-      this.scaleId.set(this.data.scale.id);
-      this.scaleForm().patchValue({
-        name: this.data.scale.name
-      });
+    this.scaleForm = this.fb.group({
+      name: this.fb.control('', {
+        validators: [Validators.required, Validators.minLength(2)],
+        nonNullable: true
+      })
+    });
+
+    if (this.isEditMode && this.data.scale) {
+      this.scaleId = this.data.scale.id;
+      this.scaleForm.patchValue({ name: this.data.scale.name });
     }
   }
 
-  protected onSubmit(): void {
-    if (!this.scaleForm().valid) return;
+  onSubmit(): void {
+    if (this.scaleForm.invalid) return;
 
-    const formData = this.scaleForm().value;
+    const { name } = this.scaleForm.getRawValue();
+    const request$ = this.isEditMode && this.scaleId
+      ? this.scaleService.update(this.scaleId, { name })
+      : this.scaleService.create({ name });
 
-    if (this.isEditMode() && this.scaleId()) {
-      const updateData: UpdateScaleDto = { name: formData.name };
-      this.scaleService.update(this.scaleId()!, updateData).subscribe({
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: () => {
-          this.errorService.showSuccess('Escala atualizada com sucesso');
           this.dialogRef.close(true);
         },
-        error: (error) => this.errorService.showError('Erro ao atualizar escala', error)
+        error: () => {
+          
+        }
       });
-    } else {
-      const createData: CreateScaleDto = { name: formData.name };
-      this.scaleService.create(createData).subscribe({
-        next: () => {
-          this.errorService.showSuccess('Escala criada com sucesso');
-          this.dialogRef.close(true);
-        },
-        error: (error) => this.errorService.showError('Erro ao criar escala', error)
-      });
-    }
   }
 
-  protected onCancel(): void {
+  onCancel(): void {
     this.dialogRef.close();
   }
 }

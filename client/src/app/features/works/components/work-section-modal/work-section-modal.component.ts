@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 
 import { WorkSection } from '../../models/work-section.interface';
 import { WorkSectionService } from '../../services/works-section.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface WorkSectionModalData {
   workSection?: WorkSection;
@@ -28,6 +29,7 @@ export interface WorkSectionModalData {
     MatIconModule,
     MatDialogModule
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './work-section-modal.component.html',
   styleUrls: ['./work-section-modal.component.scss']
 })
@@ -36,7 +38,7 @@ export class WorkSectionModalComponent implements OnInit {
   private workSectionService = inject(WorkSectionService);
   private dialogRef = inject(MatDialogRef<WorkSectionModalComponent>);
   private data = inject<WorkSectionModalData>(MAT_DIALOG_DATA);
-
+  private readonly destroyRef = inject(DestroyRef);
   workSectionForm!: FormGroup;
   isEditMode = this.data.isEditMode;
   workSectionId?: number;
@@ -62,49 +64,41 @@ export class WorkSectionModalComponent implements OnInit {
       const formData = this.workSectionForm.value;
 
       if (this.isEditMode && this.workSectionId) {
-        this.workSectionService.update(this.workSectionId, formData).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Seção de trabalho atualizada com sucesso',
-              timer: 1000,
-              showConfirmButton: false
-            });
-            this.dialogRef.close(true);
-          },
-          error: (error) => {
-            console.error('Erro ao atualizar seção de trabalho:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erro!',
-              text: 'Erro ao atualizar seção de trabalho',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
+        this.workSectionService.update(this.workSectionId, formData)
+          .pipe(takeUntilDestroyed(this.destroyRef)) 
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Seção de trabalho atualizada com sucesso',
+                timer: 1000,
+                showConfirmButton: false
+              });
+              this.dialogRef.close(true);
+            },
+            error: () => {
+             
+            }
+          });
       } else {
-        this.workSectionService.create(formData).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Seção de trabalho criada com sucesso',
-              timer: 1000,
-              showConfirmButton: false
-            });
-            this.dialogRef.close(true);
-          },
-          error: (error) => {
-            console.error('Erro ao criar seção de trabalho:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erro!',
-              text: 'Erro ao criar seção de trabalho',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
+        this.workSectionService.create(formData)
+          .pipe(takeUntilDestroyed(this.destroyRef)) 
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Seção de trabalho criada com sucesso',
+                timer: 1000,
+                showConfirmButton: false
+              });
+              this.dialogRef.close(true);
+            },
+            error: () => {
+             
+            }
+          });
       }
     }
   }

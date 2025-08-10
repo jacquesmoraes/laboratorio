@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { SectorService } from '../service/sector.service';
 import { SectorModalComponent, SectorModalData } from '../sector-modal/sector-modal.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-sector-list',
@@ -23,13 +24,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatTooltipModule,
     MatCardModule,
     MatDialogModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sector-list.component.html',
   styleUrls: ['./sector-list.component.scss'],
 })
 export class SectorListComponent implements OnInit {
   private sectorService = inject(SectorService);
   private dialog = inject(MatDialog);
-
+  private readonly destroyRef = inject(DestroyRef);
   protected sectors = signal<Sector[]>([]);
   protected displayedColumns = ['name', 'actions'];
 
@@ -38,20 +40,16 @@ export class SectorListComponent implements OnInit {
   }
 
   private loadSectors(): void {
-    this.sectorService.getAll().subscribe({
-      next: (sectors) => {
-        this.sectors.set(sectors);
-      },
-      error: (error) => {
-        console.error('Erro ao carregar setores:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Erro ao carregar setores',
-          confirmButtonText: 'OK'
-        });
-      }
-    });
+    this.sectorService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
+        next: (sectors) => {
+          this.sectors.set(sectors);
+        },
+        error: () => {
+         
+        }
+      });
   }
 
   protected onNew(): void {
@@ -92,27 +90,25 @@ export class SectorListComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.sectorService.delete(sector.id).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Setor excluído com sucesso',
-              timer: 1000,
-              showConfirmButton: false
-            });
-            this.loadSectors();
-          },
-          error: (error) => {
-            console.error('Erro ao excluir setor:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erro!',
-              text: 'Erro ao excluir setor',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
+        this.sectorService.delete(sector.id)
+          .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Setor excluído com sucesso',
+                timer: 1000,
+                showConfirmButton: false
+              });
+              this.loadSectors();
+            },
+            error: (error) => {
+              // REMOVER - interceptor já mostra
+              // console.error('Erro ao excluir setor:', error);
+              // Swal.fire({ ... });
+            }
+          });
       }
     });
   }

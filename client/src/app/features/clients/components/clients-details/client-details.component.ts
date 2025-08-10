@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { ClientService } from '../../services/clients.services';
@@ -6,7 +6,7 @@ import { ClientDetails, BillingMode, BillingModeLabels } from '../../models/clie
 import { MatIconModule } from '@angular/material/icon';
 import { ClientServiceOrdersComponent } from '../client-service-orders/client-service-orders.component';
 import { ClientPaymentsComponent } from '../client-payments/client-payments.component';
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-client-details',
@@ -23,18 +23,18 @@ import { Subject, takeUntil } from 'rxjs';
   styleUrls: ['./client-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClientDetailsComponent implements OnInit, OnDestroy {
+export class ClientDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private clientService = inject(ClientService);
-  private destroy$ = new Subject<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   client = signal<ClientDetails | null>(null);
   loading = signal(true);
 
   ngOnInit(): void {
-    this.route.paramMap
-      .pipe(takeUntil(this.destroy$))
+    this.route.paramMap 
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
         const id = Number(params.get('id'));
         if (id) this.loadClient(id);
@@ -43,7 +43,9 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
 
   private loadClient(id: number): void {
     this.loading.set(true);
-    this.clientService.getClientById(id).subscribe({
+    this.clientService.getClientById(id)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: client => {
         this.client.set(client);
         this.loading.set(false);
@@ -55,15 +57,17 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  hasAddress(): boolean {
+  protected readonly hasAddress = computed(() => {
     const address = this.client()?.address;
     return !!(address?.street || address?.city || address?.neighborhood);
-  }
+  }); 
 
-  getBillingModeLabel(mode?: BillingMode): string {
-    if (mode === undefined) return 'Não informado';
-    return BillingModeLabels[mode] || 'Desconhecido';
-  }
+  protected readonly getBillingModeLabel = computed(() => {
+    return (mode?: BillingMode): string => {
+      if (mode === undefined) return 'Não informado';
+      return BillingModeLabels[mode] || 'Desconhecido';
+    };
+  });
 
   editClient(): void {
     const client = this.client();
@@ -76,8 +80,4 @@ export class ClientDetailsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/clients']);
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 }

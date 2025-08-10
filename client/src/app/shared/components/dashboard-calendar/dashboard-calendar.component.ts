@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -6,6 +6,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { SectorScheduleRecord } from '../../../core/models/schedule.model';
 import { ScheduleService } from '../../../core/services/schedule.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-dashboard-calendar',
@@ -17,7 +18,7 @@ import { ScheduleService } from '../../../core/services/schedule.service';
 })
 export class DashboardCalendarComponent {
   private readonly scheduleService = inject(ScheduleService);
-
+  private readonly destroyRef = inject(DestroyRef);
   readonly calendarOptions = signal<CalendarOptions>({
     plugins: [dayGridPlugin, interactionPlugin],
     timeZone: 'local',
@@ -61,7 +62,9 @@ export class DashboardCalendarComponent {
       const start = fetchInfo.startStr;
       const end = fetchInfo.endStr;
 
-      this.scheduleService.getScheduleByRange(start, end).subscribe({
+      this.scheduleService.getScheduleByRange(start, end)
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
         next: (records: SectorScheduleRecord[]) => {
           const allEvents: EventInput[] = [];
 
@@ -107,8 +110,7 @@ export class DashboardCalendarComponent {
           successCallback(allEvents);
         },
         error: err => {
-          console.error('Erro ao carregar agenda', err);
-          failureCallback(err);
+           failureCallback(err);
         }
       });
     }

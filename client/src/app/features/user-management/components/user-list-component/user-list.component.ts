@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -19,9 +19,9 @@ import {
   UserManagementQueryParams, 
   UserManagementPagination 
 } from '../../models/user-management.interface';
-import { ErrorService } from '../../../../core/services/error.service';
 import { UserManagementService } from '../../services/user-management.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-user-list',
@@ -46,8 +46,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class UserListComponent implements OnInit {
   private userManagementService = inject(UserManagementService);
-  private errorService = inject(ErrorService);
-  private router = inject(Router);
+    private router = inject(Router);
+    private readonly destroyRef = inject(DestroyRef);
   
   users = signal<ClientUserListRecord[]>([]);
   loading = signal(false);
@@ -70,6 +70,7 @@ export class UserListComponent implements OnInit {
   private loadUsers() {
     this.loading.set(true);
     this.userManagementService.getClientUsers(this.currentParams())
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
       .subscribe({
         next: (pagination) => {
           this.pagination.set(pagination);
@@ -77,7 +78,6 @@ export class UserListComponent implements OnInit {
           this.loading.set(false);
         },
         error: (error) => {
-          this.errorService.showError('Erro ao carregar usuários', error);
           this.loading.set(false);
         }
       });
@@ -112,61 +112,66 @@ export class UserListComponent implements OnInit {
 
 }
 
-  async onBlock(user: ClientUserListRecord) {
-    const result = await Swal.fire({
-      title: 'Bloquear Usuário',
-      text: `Tem certeza que deseja bloquear o acesso de ${user.clientName}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sim, bloquear',
-      cancelButtonText: 'Cancelar'
-    });
+async onBlock(user: ClientUserListRecord) {
+  const result = await Swal.fire({
+    title: 'Bloquear Usuário',
+    text: `Tem certeza que deseja bloquear o acesso de ${user.clientName}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Sim, bloquear',
+    cancelButtonText: 'Cancelar'
+  });
 
-    if (result.isConfirmed) {
-      this.loading.set(true);
-      this.userManagementService.blockClientUser(user.userId)
-        .subscribe({
-          next: () => {
-            Swal.fire('Sucesso!', 'Usuário bloqueado com sucesso.', 'success');
-            this.loadUsers();
-          },
-          error: (error) => {
-            this.errorService.showError('Erro ao bloquear usuário', error);
-            this.loading.set(false);
-          }
-        });
-    }
+  if (result.isConfirmed) {
+    this.loading.set(true);
+    this.userManagementService.blockClientUser(user.userId)
+      .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar
+      .subscribe({
+        next: () => {
+          Swal.fire('Sucesso!', 'Usuário bloqueado com sucesso.', 'success');
+          this.loadUsers();
+        },
+        error: (error) => {
+          // REMOVER - interceptor já mostra
+          // this.errorService.showError('Erro ao bloquear usuário', error);
+          this.loading.set(false);
+        }
+      });
   }
+}
 
-  async onUnblock(user: ClientUserListRecord) {
-    const result = await Swal.fire({
-      title: 'Desbloquear Usuário',
-      text: `Tem certeza que deseja desbloquear o acesso de ${user.clientName}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Sim, desbloquear',
-      cancelButtonText: 'Cancelar'
-    });
+async onUnblock(user: ClientUserListRecord) {
+  const result = await Swal.fire({
+    title: 'Desbloquear Usuário',
+    text: `Tem certeza que deseja desbloquear o acesso de ${user.clientName}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Sim, desbloquear',
+    cancelButtonText: 'Cancelar'
+  });
 
-    if (result.isConfirmed) {
-      this.loading.set(true);
-      this.userManagementService.unblockClientUser(user.userId)
-        .subscribe({
-          next: () => {
-            Swal.fire('Sucesso!', 'Usuário desbloqueado com sucesso.', 'success');
-            this.loadUsers();
-          },
-          error: (error) => {
-            this.errorService.showError('Erro ao desbloquear usuário', error);
-            this.loading.set(false);
-          }
-        });
-    }
+  if (result.isConfirmed) {
+    this.loading.set(true);
+    this.userManagementService.unblockClientUser(user.userId)
+      .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar
+      .subscribe({
+        next: () => {
+          Swal.fire('Sucesso!', 'Usuário desbloqueado com sucesso.', 'success');
+          this.loadUsers();
+        },
+        error: (error) => {
+          // REMOVER - interceptor já mostra
+          // this.errorService.showError('Erro ao desbloquear usuário', error);
+          this.loading.set(false);
+        }
+      });
   }
+}
+
 
   async onResetAccessCode(user: ClientUserListRecord) {
     const result = await Swal.fire({
@@ -183,6 +188,7 @@ export class UserListComponent implements OnInit {
     if (result.isConfirmed) {
       this.loading.set(true);
       this.userManagementService.resetClientUserAccessCode(user.userId)
+        .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar
         .subscribe({
           next: (response) => {
             Swal.fire({
@@ -194,7 +200,8 @@ export class UserListComponent implements OnInit {
             this.loadUsers();
           },
           error: (error) => {
-            this.errorService.showError('Erro ao resetar código de acesso', error);
+            // REMOVER - interceptor já mostra
+            // this.errorService.showError('Erro ao resetar código de acesso', error);
             this.loading.set(false);
           }
         });

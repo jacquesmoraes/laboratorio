@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, DestroyRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,9 +14,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, Subject, takeUntil } from 'rxjs';
+import { debounceTime, Subject } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
 import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-billing-invoice-list',
@@ -39,12 +40,11 @@ import Swal from 'sweetalert2';
   templateUrl: './billing-invoice-list.component.html',
   styleUrls: ['./billing-invoice-list.component.scss']
 })
-export class BillingInvoiceListComponent implements OnInit, OnDestroy {
+export class BillingInvoiceListComponent implements OnInit {
   private billingService = inject(BillingInvoiceService);
   private router = inject(Router);
-  private destroy$ = new Subject<void>();
   private refreshSubject = new Subject<void>();
-
+  private readonly destroyRef = inject(DestroyRef);
   loading = signal(false);
   invoices = signal<BillingInvoice[]>([]);
   pagination = signal<Pagination<BillingInvoice> | null>(null);
@@ -58,27 +58,27 @@ export class BillingInvoiceListComponent implements OnInit, OnDestroy {
   };
   filters = signal<InvoiceParams>({ ...this.defaultFilters });
 
-  private readonly statusClassMap: Record<InvoiceStatus, string> = {
-    Open: 'status-open',
-    PartiallyPaid: 'status-partially',
-    Paid: 'status-paid',
-    Cancelled: 'status-cancelled',
-    Closed: 'status-closed'
-  };
+  
 
   displayedColumns = ['invoiceNumber', 'clientName', 'createdAt', 'status', 'total', 'actions'];
 
   ngOnInit(): void {
+    // Debounce apenas para filtros de busca
     this.refreshSubject
-      .pipe(debounceTime(300), takeUntil(this.destroy$))
+      .pipe(
+        debounceTime(300),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe(() => this.loadInvoices());
-
+  
     this.loadInvoices();
   }
 
   loadInvoices(): void {
     this.loading.set(true);
-    this.billingService.getInvoices(this.filters()).subscribe({
+    this.billingService.getInvoices(this.filters())
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
       next: (response) => {
         this.invoices.set(response.data);
         this.pagination.set(response);
@@ -95,7 +95,11 @@ export class BillingInvoiceListComponent implements OnInit, OnDestroy {
     this.filters.update(f => ({ ...f, [key]: value, pageNumber: 1 }));
     this.refreshSubject.next();
   }
-
+  
+  changePage(pageNumber: number): void {
+    this.filters.update(f => ({ ...f, pageNumber }));
+    this.loadInvoices(); 
+  }
   clearFilters(): void {
     this.filters.set({ ...this.defaultFilters });
     this.refreshSubject.next();
@@ -121,7 +125,9 @@ export class BillingInvoiceListComponent implements OnInit, OnDestroy {
     cancelButtonText: 'Não'
   }).then(result => {
     if (result.isConfirmed) {
-      this.billingService.cancelInvoice(id).subscribe({
+      this.billingService.cancelInvoice(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: () => {
           Swal.fire('Cancelada!', 'A fatura foi cancelada com sucesso.', 'success');
           this.loadInvoices(); // ou reload da fatura no caso de details
@@ -134,12 +140,31 @@ export class BillingInvoiceListComponent implements OnInit, OnDestroy {
   });
 }
 
-  getStatusClass(status: InvoiceStatus): string {
-    return this.statusClassMap[status] ?? '';
-  }
+protected readonly paginationInfo = computed(() => {
+  const p = this.pagination();
+  if (!p) return null;
+  
+  return {
+    currentPage: p.pageNumber,
+    totalPages: p.totalPages,
+    hasNext: p.pageNumber < p.totalPages,
+    hasPrev: p.pageNumber > 1
+  };
+});
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+protected readonly getStatusClass = computed(() => {
+  return (status: InvoiceStatus): string => {
+    const statusClassMap: Record<InvoiceStatus, string> = {
+      Open: 'status-open',
+      PartiallyPaid: 'status-partially',
+      Paid: 'status-paid',
+      Cancelled: 'status-cancelled',
+      Closed: 'status-closed'
+    };
+    return statusClassMap[status] ?? '';
+  };
+});
+
+ 
+  
 }

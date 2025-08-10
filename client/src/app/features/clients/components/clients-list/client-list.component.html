@@ -11,83 +11,77 @@
     <div class="filters-grid">
       <div class="filter-item">
         <label class="filter-label" for="search">Buscar</label>
-        <input
-          id="search"
-          type="text"
-          class="filter-input"
-          [formControl]="searchControl"
-          placeholder="Digite o nome, email, telefone ou CPF..."
-        />
+        <input id="search" type="text" class="filter-input" [formControl]="searchControl"
+          placeholder="Digite o nome, email, telefone ou CPF..." />
       </div>
     </div>
   </div>
 
   @if (clients().length > 0) {
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Cidade</th>
-            <th>Faturamento</th>
-            <th>Status</th>
-            <th style="width: 1%;">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (client of clients(); track client.clientId) {
-            <tr>
-              <td data-label="Nome">{{ client.clientName }}</td>
-              <td data-label="Cidade" >{{ client.city || '-' }}</td>
-              <td data-label="Cobrança" >
-                <mat-chip>{{ getBillingModeLabel(client.billingMode) }}</mat-chip>
-              </td>
-              <td data-label="Status" >
-                <mat-chip [color]="client.isInactive ? 'warn' : 'accent'" selected>
-                  {{ client.isInactive ? 'Inativo' : 'Ativo' }}
-                </mat-chip>
-              </td>
-              <td  class="no-label">
-                <div class="action-buttons">
-                  <button class="btn btn-primary btn-sm" (click)="onViewDetails(client)">
-                    <mat-icon>visibility</mat-icon>
-                    Detalhes
-                  </button>
-                  <button class="btn btn-primary btn-sm" (click)="onEdit(client)">
-                    <mat-icon>edit</mat-icon>
-                    Editar
-                  </button>
-                  <button class="btn btn-danger btn-sm" (click)="onDelete(client)">
-                    <mat-icon>delete</mat-icon>
-                    Excluir
-                  </button>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Cidade</th>
+          <th>Faturamento</th>
+          <th>Status</th>
+          <th style="width: 1%;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (client of clients(); track client.clientId) {
+        <tr>
+          <td data-label="Nome">{{ client.clientName }}</td>
+          <td data-label="Cidade">{{ client.city || '-' }}</td>
+          <td data-label="Cobrança">
+            <mat-chip>{{ getBillingModeLabel()(client.billingMode) }}</mat-chip>
+          </td>
+          <td data-label="Status">
+            <mat-chip [color]="client.isInactive ? 'warn' : 'accent'" selected>
+              {{ client.isInactive ? 'Inativo' : 'Ativo' }}
+            </mat-chip>
+          </td>
+          <td class="no-label">
+            <div class="action-buttons">
+              <button class="btn btn-primary btn-sm" (click)="onViewDetails(client)">
+                <mat-icon>visibility</mat-icon>
+                Detalhes
+              </button>
+              <button class="btn btn-primary btn-sm" (click)="onEdit(client)">
+                <mat-icon>edit</mat-icon>
+                Editar
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="onDelete(client)">
+                <mat-icon>delete</mat-icon>
+                Excluir
+              </button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
 
-      <div class="pagination-container" *ngIf="pagination()">
-        <span class="pagination-info">
-          Página <span class="font-medium">{{ currentParams().pageNumber }}</span> de
-          <span class="font-medium">{{ pagination()?.totalPages }}</span>
-        </span>
+    <!-- Substituir *ngIf por @if -->
+    @if (pagination()) {
+    <div class="pagination-container">
+      <span class="pagination-info">
+        Página <span class="font-medium">{{ currentParams().pageNumber }}</span> de
+        <span class="font-medium">{{ pagination()?.totalPages }}</span>
+      </span>
 
-        <mat-paginator
-          [length]="pagination()!.totalItems"
-          [pageSize]="currentParams().pageSize"
-          [pageIndex]="currentParams().pageNumber - 1"
-          [pageSizeOptions]="[5, 10, 25, 50]"
-          (page)="onPageChange($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-      </div>
+      <mat-paginator [length]="pagination()!.totalItems" [pageSize]="currentParams().pageSize"
+        [pageIndex]="currentParams().pageNumber - 1" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
     </div>
+    }
+  </div>
   } @else if (!loading()) {
-    <div class="empty-state">
-      <mat-icon>people</mat-icon>
-      <p>Nenhum cliente encontrado</p>
-    </div>
+  <div class="empty-state">
+    <mat-icon>people</mat-icon>
+    <p>Nenhum cliente encontrado</p>
+  </div>
   }
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 import { WorkType } from '../../models/work-type.interface';
 import { WorkTypeService } from '../../services/work-type.service';
 import { WorkTypeModalComponent, WorkTypeModalData } from '../work-type-modal/work-type-modal.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-work-type-list-component',
@@ -31,7 +32,7 @@ import { WorkTypeModalComponent, WorkTypeModalData } from '../work-type-modal/wo
 export class WorkTypeListComponent implements OnInit {
   private workTypeService = inject(WorkTypeService);
   private dialog = inject(MatDialog);
-
+  private readonly destroyRef = inject(DestroyRef);
   workTypes = signal<WorkType[]>([]);
   displayedColumns: string[] = [ 'name', 'description', 'workSectionName', 'isActive', 'actions'];
 
@@ -41,22 +42,16 @@ export class WorkTypeListComponent implements OnInit {
   }
 
   loadWorkTypes(): void {
-    
-    this.workTypeService.getAll().subscribe({
-      next: (data) => {
-        
-        this.workTypes.set(data);
-      },
-      error: (error) => {
-        console.error('Erro ao carregar tipos de trabalho:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Erro ao carregar tipos de trabalho',
-          confirmButtonText: 'OK'
-        });
-      }
-    });
+    this.workTypeService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef)) 
+      .subscribe({
+        next: (data) => {
+          this.workTypes.set(data);
+        },
+        error: () => {
+         
+        }
+      });
   }
 
   onNew(): void {
@@ -89,7 +84,7 @@ export class WorkTypeListComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadWorkTypes();
-        // ✅ ADICIONADO: SweetAlert na lista
+        
         Swal.fire({
           icon: 'success',
           title: 'Sucesso!',
@@ -113,27 +108,23 @@ export class WorkTypeListComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.workTypeService.delete(id).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Tipo de trabalho excluído com sucesso',
-              timer: 1000,
-              showConfirmButton: false
-            });
-            this.loadWorkTypes();
-          },
-          error: (error) => {
-            console.error('Erro ao excluir tipo de trabalho:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erro!',
-              text: 'Erro ao excluir tipo de trabalho',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
+        this.workTypeService.delete(id)
+          .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Tipo de trabalho excluído com sucesso',
+                timer: 1000,
+                showConfirmButton: false
+              });
+              this.loadWorkTypes();
+            },
+            error: () => {
+             
+            }
+          });
       }
     });
   }

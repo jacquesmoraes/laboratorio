@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { WorkType, CreateWorkTypeDto, UpdateWorkTypeDto } from '../../models/work-type.interface';
 import { WorkSection } from '../../models/work-section.interface';
@@ -34,6 +35,7 @@ export interface WorkTypeModalData {
     MatCheckboxModule,
     MatDialogModule
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './work-type-modal.component.html',
   styleUrls: ['./work-type-modal.component.scss']
 })
@@ -43,7 +45,7 @@ export class WorkTypeModalComponent implements OnInit {
   private workSectionService = inject(WorkSectionService);
   private dialogRef = inject(MatDialogRef<WorkTypeModalComponent>);
   private data = inject<WorkTypeModalData>(MAT_DIALOG_DATA);
-
+  private readonly destroyRef = inject(DestroyRef);
   workTypeForm!: FormGroup;
   isEditMode = this.data.isEditMode;
   workTypeId?: number;
@@ -64,39 +66,33 @@ export class WorkTypeModalComponent implements OnInit {
   }
 
   private loadWorkSections(): void {
-    this.workSectionService.getAll().subscribe({
-      next: (sections) => {
-        this.workSections = sections;
-        
-        // Preencher o formulário após carregar as seções (se for edição)
-        if (this.isEditMode && this.data.workType) {
-          this.workTypeId = this.data.workType.id;
-          this.workTypeForm.patchValue({
-            name: this.data.workType.name,
-            description: this.data.workType.description || '',
-            isActive: this.data.workType.isActive,
-            workSectionId: this.data.workType.workSectionId
-          });
+    this.workSectionService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (sections) => {
+          this.workSections = sections;
+          
+         
+          if (this.isEditMode && this.data.workType) {
+            this.workTypeId = this.data.workType.id;
+            this.workTypeForm.patchValue({
+              name: this.data.workType.name,
+              description: this.data.workType.description || '',
+              isActive: this.data.workType.isActive,
+              workSectionId: this.data.workType.workSectionId
+            });
+          }
+        },
+        error: () => {
+         
         }
-      },
-      error: (error) => {
-        console.error('Erro ao carregar seções de trabalho:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro!',
-          text: 'Erro ao carregar seções de trabalho',
-          confirmButtonText: 'OK'
-        });
-      }
-    });
+      });
   }
 
   onSubmit(): void {
     if (this.workTypeForm.valid) {
       const formData = this.workTypeForm.value;
-      
-      // Verificar se workSectionId é válido
-      if (!formData.workSectionId || formData.workSectionId === 0) {
+       if (!formData.workSectionId || formData.workSectionId === 0) {
         Swal.fire({
           icon: 'error',
           title: 'Erro!',
@@ -114,26 +110,22 @@ export class WorkTypeModalComponent implements OnInit {
           workSectionId: formData.workSectionId
         };
   
-        this.workTypeService.update(this.workTypeId, updateData).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Tipo de trabalho atualizado com sucesso',
-              confirmButtonText: 'OK'
-            });
-            this.dialogRef.close(true);
-          },
-          error: (error) => {
-            console.error('Erro ao atualizar tipo de trabalho:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erro!',
-              text: 'Erro ao atualizar tipo de trabalho',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
+        this.workTypeService.update(this.workTypeId, updateData)
+          .pipe(takeUntilDestroyed(this.destroyRef)) 
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Tipo de trabalho atualizado com sucesso',
+                confirmButtonText: 'OK'
+              });
+              this.dialogRef.close(true);
+            },
+            error: () => {
+             
+            }
+          });
       } else {
         const createData: CreateWorkTypeDto = {
           name: formData.name,
@@ -142,26 +134,22 @@ export class WorkTypeModalComponent implements OnInit {
           workSectionId: formData.workSectionId
         };
   
-        this.workTypeService.create(createData).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Sucesso!',
-              text: 'Tipo de trabalho criado com sucesso',
-              confirmButtonText: 'OK'
-            });
-            this.dialogRef.close(true);
-          },
-          error: (error) => {
-            console.error('Erro ao criar tipo de trabalho:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Erro!',
-              text: 'Erro ao criar tipo de trabalho',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
+        this.workTypeService.create(createData)
+          .pipe(takeUntilDestroyed(this.destroyRef)) 
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: 'Tipo de trabalho criado com sucesso',
+                confirmButtonText: 'OK'
+              });
+              this.dialogRef.close(true);
+            },
+            error: () => {
+             
+            }
+          });
       }
     }
   }

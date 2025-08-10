@@ -8,39 +8,41 @@
 
   <form [formGroup]="shadeForm" (ngSubmit)="onSubmit()">
     <mat-dialog-content>
+
+      @let colorControl = shadeForm.get('color');
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Cor</mat-label>
-        <input matInput formControlName="color" placeholder="Digite o nome da cor" />
+        <input 
+          matInput
+          formControlName="color"
+          placeholder="Digite o nome da cor"
+          required
+        />
         <mat-icon matSuffix>palette</mat-icon>
 
-        @if (shadeForm.get('color')?.hasError('required')) {
-          <mat-error>
-            Cor é obrigatória
-          </mat-error>
+        @if (colorControl?.hasError('required')) {
+          <mat-error>Cor é obrigatória</mat-error>
         }
-        @if (shadeForm.get('color')?.hasError('minlength')) {
-          <mat-error>
-            Cor deve ter pelo menos 2 caracteres
-          </mat-error>
+        @if (colorControl?.hasError('minlength')) {
+          <mat-error>Cor deve ter pelo menos 2 caracteres</mat-error>
         }
       </mat-form-field>
 
+      @let scaleIdControl = shadeForm.get('scaleId');
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Escala</mat-label>
-        <mat-select formControlName="scaleId">
+        <mat-select formControlName="scaleId" required>
+          <mat-option [value]="null">Selecione uma escala</mat-option>
           @for (scale of scales(); track scale.id) {
-            <mat-option [value]="scale.id">
-              {{ scale.name }}
-            </mat-option>
+            <mat-option [value]="scale.id">{{ scale.name }}</mat-option>
           }
         </mat-select>
 
-        @if (shadeForm.get('scaleId')?.hasError('required')) {
-          <mat-error>
-            Escala é obrigatória
-          </mat-error>
+        @if (scaleIdControl?.hasError('required')) {
+          <mat-error>Escala é obrigatória</mat-error>
         }
       </mat-form-field>
+
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
