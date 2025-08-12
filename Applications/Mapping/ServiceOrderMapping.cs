@@ -43,7 +43,7 @@
                 .ForMember ( dest => dest.CurrentSectorName, opt => opt.MapFrom<CurrentSectorNameResolver> ( ) )
                 .ForMember ( dest => dest.TotalAmount, opt => opt.MapFrom ( src => 
                 src.Works != null ? src.Works.Sum ( w => w.Quantity * w.PriceUnit ) : 0 ) )
-                .ForMember ( dest => dest.ClientName, opt => opt.MapFrom ( src => src.Client.ClientName ) ); // Adicione esta linha
+                .ForMember ( dest => dest.ClientName, opt => opt.MapFrom ( src => src.Client.ClientName ) ); 
 
 
             CreateMap<ServiceOrder, ServiceOrderAlertRecord> ( )

@@ -119,8 +119,8 @@
         {
             var result = await _tablePriceService.GetItemPriceByClientAndWorkTypeAsync(clientId, workTypeId);
 
-            if ( result is null )
-                return NotFound ( $"No price found for service ID {workTypeId} in client ID {clientId}" );
+            //if ( result is null )
+            //    return NotFound ( $"No price found for service ID {workTypeId} in client ID {clientId}" );
 
             return Ok ( result );
         }

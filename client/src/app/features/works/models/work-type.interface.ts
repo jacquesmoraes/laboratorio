@@ -12,6 +12,7 @@ export interface WorkTypeApiResponse {
   name: string;
   description?: string;
   isActive: boolean;
+  workSectionId: number;
   workSectionName: string;
 }
 

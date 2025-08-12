@@ -78,7 +78,7 @@ export class ServiceOrderFormComponent implements OnInit {
   isEditMode = signal(false);
   loading = signal(false);
   serviceOrderId = signal<number | null>(null);
-  shadesByWorkIndex = signal<Record<number, { shadeId: number; shadeColor: string }[]>>({});
+  shadesByWorkIndex = signal<Record<number, ShadeFormData[]>>({});
   clients = signal<ClientFormData[]>([]);
   sectors = signal<SectorFormData[]>([]);
   workTypes = signal<WorkTypeFormData[]>([]);
@@ -347,13 +347,9 @@ export class ServiceOrderFormComponent implements OnInit {
     const filtered = scaleId
       ? this.shades().filter(shade => shade.scaleId === scaleId)
       : this.shades();
-
-    const mappedShades = filtered.map(shade => ({
-      shadeId: shade.id,
-      shadeColor: shade.color
-    }));
-
-    this.shadesByWorkIndex.update(state => ({ ...state, [index]: mappedShades }));
+  
+    // Não precisa mais do mapeamento!
+    this.shadesByWorkIndex.update(state => ({ ...state, [index]: filtered }));
   }
 
   private loadPriceForWorkType(workGroup: FormGroup, workTypeId: number) {
@@ -427,7 +423,11 @@ getWorkErrorMessage(index: number, controlName: string): string {
 }
 
 getShadesForWork(index: number) {
-  return this.shadesByWorkIndex()[index] || this.shades();
+  const filteredShades = this.shadesByWorkIndex()[index];
+  if (filteredShades) {
+    return filteredShades; 
+    } 
+  return this.shades();
 }
 
 cancel() {

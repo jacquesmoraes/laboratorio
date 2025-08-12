@@ -69,13 +69,16 @@ export class ErrorMappingService {
     'No valid service order found': 'Ordem de serviço já finalizada.',
 
     // Validações de datas
+    'Cannot send to try-in if there is no open stage.': 'Não é possível enviar para prova se não há estágio aberto.',
+    'Cannot send to try-in without prior stages.': 'Não é possível enviar para prova sem estágios anteriores.',
+    'The new stage must occur after the last recorded stage.': 'A nova data deve ser posterior ao último estágio registrado.',
     'must occur after': 'A nova data deve ser posterior ao último estágio registrado.',
     'after the last recorded stage': 'A nova data deve ser posterior ao último estágio registrado.',
-    'Cannot send to try-in without prior stages': 'Não é possível enviar para prova sem estágios anteriores.',
     'Try-in date must be after the last recorded stage': 'A data de prova deve ser posterior ao último estágio registrado.',
     'Finish date cannot be earlier than the entry date': 'A data de finalização não pode ser anterior à data de entrada.',
     'Finish date must be after the last stage out date': 'A data de finalização deve ser posterior à data de saída do último estágio.',
 
+    
     // Erros de agendamento
     'Cannot update a schedule that has already been delivered': 'Não é possível atualizar um agendamento que já foi entregue.',
     'Cannot remove a schedule that has already been delivered': 'Não é possível remover um agendamento que já foi entregue.',

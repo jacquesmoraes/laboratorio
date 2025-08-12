@@ -20,7 +20,7 @@ export class WorkTypeService {
           name: item.name,
           description: item.description,
           isActive: item.isActive,
-          workSectionId: 0, // Não vem na resposta da API
+          workSectionId: item.workSectionId, 
           workSectionName: item.workSectionName
         })))
       );
@@ -34,7 +34,7 @@ export class WorkTypeService {
           name: response.name,
           description: response.description,
           isActive: response.isActive,
-          workSectionId: 0, // Não vem na resposta da API
+          workSectionId: response.workSectionId, 
           workSectionName: response.workSectionName
         }))
       );
@@ -48,7 +48,7 @@ export class WorkTypeService {
           name: response.name,
           description: response.description,
           isActive: response.isActive,
-          workSectionId: 0,
+          workSectionId: response.workSectionId,
           workSectionName: response.workSectionName
         }))
       );
@@ -62,7 +62,7 @@ export class WorkTypeService {
           name: response.name,
           description: response.description,
           isActive: response.isActive,
-          workSectionId: 0,
+          workSectionId: response.workSectionId,
           workSectionName: response.workSectionName
         }))
       );
