@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, DestroyRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -45,6 +45,7 @@ export class TablePriceFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private cdr = inject(ChangeDetectorRef);
   form!: FormGroup;
   workTypes = signal<WorkType[]>([]);
   loading = signal(true);
@@ -135,6 +136,7 @@ export class TablePriceFormComponent implements OnInit {
       price: ['', [Validators.required, Validators.min(0)]]
     });
     this.itemsArray.push(group);
+    this.cdr.detectChanges();
   }
 
   removeItem(index: number): void {
@@ -148,6 +150,7 @@ export class TablePriceFormComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.itemsArray.removeAt(index);
+        this.cdr.detectChanges();
         Swal.fire('Removido!', 'Item removido com sucesso.', 'success');
       }
     });

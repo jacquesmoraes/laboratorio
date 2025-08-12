@@ -99,13 +99,13 @@ namespace Applications.Services
 
             var order = await _orderRepo.GetEntityWithSpec(ServiceOrderSpecs.ByIdFull(dto.ServiceOrderId))
         ?? throw new NotFoundException($"Service Order {dto.ServiceOrderId} not found.");
-           
-           var dateOutUtc = dto.DateOut.Kind switch
-{
-    DateTimeKind.Utc => dto.DateOut,
-    DateTimeKind.Local => dto.DateOut.ToUniversalTime(),
-    _ => throw new UnprocessableEntityException("DateOut must have a defined DateTimeKind.")
-};
+
+            var dateOutUtc = dto.DateOut.Kind switch
+            {
+                DateTimeKind.Utc => dto.DateOut,
+                DateTimeKind.Local => dto.DateOut.ToUniversalTime(),
+                _ => throw new UnprocessableEntityException("DateOut must have a defined DateTimeKind.")
+            };
 
 
             var existingSchedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ActiveByServiceOrderId(dto.ServiceOrderId));
@@ -115,7 +115,7 @@ namespace Applications.Services
             }
 
             var localTime = DateTime.SpecifyKind(dto.DateOut, DateTimeKind.Local);
-            
+
             ServiceOrderDateValidator.ValidateTryInDate ( order.Stages, dateOutUtc );
             order.SendToTryIn ( dateOutUtc );
 

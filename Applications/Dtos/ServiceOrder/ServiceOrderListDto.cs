@@ -6,6 +6,7 @@
         public string OrderNumber { get; set; } = string.Empty;
         public required string ClientName { get; init; } 
         public DateTime DateIn { get; set; }
+        public int ClientId { get; set; }
         public DateTime? LastMovement { get; init; }
         public string PatientName { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
