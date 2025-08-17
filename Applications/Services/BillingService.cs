@@ -56,19 +56,13 @@
             if ( lastInvoice != null )
             {
                 lastInvoice.Status = InvoiceStatus.Closed;
-
-                // Calculate balance from previous invoice
-                var payments = await _paymentRepo.GetAllAsync(
-                    PaymentSpecs.ByInvoiceId(lastInvoice.BillingInvoiceId));
-
-                var totalPaid = payments.Sum(p => p.AmountPaid);
-                var balanceDifference = totalPaid - lastInvoice.TotalInvoiceAmount;
-
-                if ( balanceDifference > 0 )
-                    invoice.PreviousCredit = balanceDifference;
-                else if ( balanceDifference < 0 )
-                    invoice.PreviousDebit = Math.Abs ( balanceDifference );
+            
             }
+
+            var balance = ClientBalance.Calculate(client);
+
+            invoice.PreviousCredit = balance.Credit;
+            invoice.PreviousDebit = balance.Debit;
 
             // Link orders to invoice
             foreach ( var order in invoice.ServiceOrders )

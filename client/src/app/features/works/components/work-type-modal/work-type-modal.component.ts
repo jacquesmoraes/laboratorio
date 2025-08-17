@@ -114,12 +114,7 @@ export class WorkTypeModalComponent implements OnInit {
           .pipe(takeUntilDestroyed(this.destroyRef)) 
           .subscribe({
             next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Sucesso!',
-                text: 'Tipo de trabalho atualizado com sucesso',
-                confirmButtonText: 'OK'
-              });
+              
               this.dialogRef.close(true);
             },
             error: () => {
@@ -138,12 +133,7 @@ export class WorkTypeModalComponent implements OnInit {
           .pipe(takeUntilDestroyed(this.destroyRef)) 
           .subscribe({
             next: () => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Sucesso!',
-                text: 'Tipo de trabalho criado com sucesso',
-                confirmButtonText: 'OK'
-              });
+             
               this.dialogRef.close(true);
             },
             error: () => {

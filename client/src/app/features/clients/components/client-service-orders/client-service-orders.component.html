@@ -72,7 +72,7 @@
             (click)="onPageChange(pagination()!.pageNumber - 1)"
             [disabled]="pagination()!.pageNumber <= 1"
             class="pagination-button pagination-prev">
-            <mat-icon>chevron_left</mat-icon>
+            
             Anterior
           </button>
           <span class="pagination-current">
@@ -83,7 +83,7 @@
             [disabled]="pagination()!.pageNumber >= pagination()!.totalPages"
             class="pagination-button pagination-next">
             Próxima
-            <mat-icon>chevron_right</mat-icon>
+            
           </button>
         </nav>
       </div>

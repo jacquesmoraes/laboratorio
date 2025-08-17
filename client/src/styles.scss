@@ -266,13 +266,14 @@ html, body {
 .page-wrapper {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 1rem;
   overflow-x: hidden;
 }
 
 .page-title {
   color: var(--primary);
   font-size: 2.25rem;
+  
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.025em;
@@ -286,6 +287,7 @@ html, body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   margin: 2rem 0;
+  
   border: 1px solid rgba(150, 175, 184, 0.1);
 }
 
@@ -606,4 +608,50 @@ mat-dialog-actions {
   gap: 0.5rem;
 }
 
+//search for client payments and serviceorder
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.card-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  h2 {
+    margin: 0;
+    color: #334a52;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 200px;
+  flex: 1;
+
+  &:focus {
+    outline: none;
+    border-color: #276678;
+    box-shadow: 0 0 0 3px rgba(39, 102, 120, 0.1);
+  }
+}
 

@@ -98,7 +98,7 @@ namespace API.Services
             if ( !string.IsNullOrEmpty ( parameters.Search ) )
             {
                 query = query.Where ( u =>
-                    u.Email.Contains ( parameters.Search ) ||
+                    (u.Email ?? "").Contains ( parameters.Search ) ||
                     u.DisplayName.Contains ( parameters.Search ) );
             }
 
@@ -122,7 +122,7 @@ namespace API.Services
             var records = users.Select(u => new ClientUserListRecord
             {
                 UserId = u.Id,
-                ClientId = u.ClientId.Value,
+                ClientId = u.ClientId!.Value,
                 ClientName = u.DisplayName, // Nome do cliente
                 Email = u.Email ?? "",
                 IsActive = u.IsActive,

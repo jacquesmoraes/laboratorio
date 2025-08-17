@@ -93,10 +93,6 @@ export class ScheduleDeliveryModalComponent implements OnInit {
     sectorId: sectorId ?? undefined
   };
 
-  // Adicionar log para debug
-  console.log('Enviando DTO:', dto);
-  console.log('Modo edição:', this.isEditMode);
-  console.log('Schedule ID:', this.data.scheduleId);
 
   this.loading = true;
 

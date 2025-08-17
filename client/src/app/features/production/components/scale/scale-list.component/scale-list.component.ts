@@ -51,7 +51,21 @@ export class ScaleListComponent implements OnInit {
     }).afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
-        if (result) this.loadScales();
+        if (result) {
+          this.loadScales();
+          // ✅ ADICIONADO: SweetAlert na lista para criação e edição
+          const message = data.isEditMode 
+            ? 'Escala atualizada com sucesso'
+            : 'Escala criada com sucesso';
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: message,
+            timer: 1000,
+            showConfirmButton: false
+          });
+        }
       });
   }
 
