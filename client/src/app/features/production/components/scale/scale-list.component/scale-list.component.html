@@ -1,5 +1,6 @@
 <div class="page-container">
-  <div class="page-wrapper flex justify-between items-center mb-6">
+  <!-- Toolbar compacta -->
+  <div class="filters-toolbar">
     <h1 class="page-title">Escalas</h1>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
@@ -7,12 +8,13 @@
     </button>
   </div>
 
+  <!-- Lista de Escalas -->
   <div class="table-container">
     <table class="table">
       <thead>
         <tr>
           <th>Nome</th>
-          <th style="width: 1%;" >Ações</th>
+          <th style="width: 1%;">Ações</th>
         </tr>
       </thead>
       <tbody>

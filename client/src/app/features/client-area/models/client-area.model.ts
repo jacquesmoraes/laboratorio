@@ -7,7 +7,7 @@ export interface ClientDashboard {
   clientName: string;
   street: string;
   number: string;
-  complement: string;
+  complement?: string;
   neighborhood: string;
   city: string;
   phoneNumber: string;

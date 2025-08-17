@@ -3,5 +3,5 @@ import { ShadeListComponent } from "./components/shade/shade-list.component/shad
 
 // client/src/app/features/production/shade.routes.ts
 export const SHADE_ROUTES: Routes = [
-  { path: '', component: ShadeListComponent }
+  { path: '', component: ShadeListComponent, title: 'Cores' },
 ];

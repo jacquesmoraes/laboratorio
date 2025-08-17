@@ -6,18 +6,22 @@ import { ServiceOrderDetailsComponent } from './components/service-order-details
 export const SERVICE_ORDERS_ROUTES: Routes = [
   {
     path: '',
-    component: ServiceOrderListComponent
+    component: ServiceOrderListComponent,
+    title: 'Ordens de Serviço'
   },
   {
     path: 'new',
-    component: ServiceOrderFormComponent
+    component: ServiceOrderFormComponent,
+    title: 'Nova Ordem de Serviço'
   },
   {
     path: ':id',
-    component: ServiceOrderDetailsComponent
+    component: ServiceOrderDetailsComponent,
+    title: 'Detalhes da Ordem de Serviço'
   },
   {
     path: ':id/edit',
-    component: ServiceOrderFormComponent
+    component: ServiceOrderFormComponent,
+    title: 'Editar Ordem de Serviço'
   }
 ];

@@ -1,5 +1,6 @@
 <div class="page-container">
-  <div class="page-wrapper flex justify-between items-center mb-6">
+  <!-- Toolbar compacta -->
+  <div class="filters-toolbar">
     <h1 class="page-title">Setores</h1>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
@@ -7,6 +8,7 @@
     </button>
   </div>
 
+  <!-- Lista de setores -->
   <div class="table-container">
     <table class="table">
       <thead>
@@ -20,7 +22,7 @@
           <tr>
             <td class="name" data-label="Nome">{{ sector.name }}</td>
             <td>
-              <div  class="action-buttons">
+              <div class="action-buttons">
                 <button class="btn btn-primary btn-sm" (click)="onEdit(sector)">
                   <mat-icon>edit</mat-icon>
                   Editar

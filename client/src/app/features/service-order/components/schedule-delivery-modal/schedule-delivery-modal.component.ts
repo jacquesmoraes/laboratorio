@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -31,12 +31,12 @@ export class ScheduleDeliveryModalComponent implements OnInit {
     serviceOrderId: number;
     sectors: { sectorId: number; sectorName: string }[];
     scheduleId?: number; 
-     existingSchedule?: ScheduleItemRecord; 
+    existingSchedule?: ScheduleItemRecord; 
   };
 
   readonly deliveryTypes: ScheduledDeliveryType[] = ['SectorTransfer', 'TryIn', 'FinalDelivery'];
   isEditMode = false;
-  loading = false;
+  loading = signal(false);
 
   readonly form = this.fb.group({
     scheduledDate: ['', Validators.required],
@@ -44,33 +44,33 @@ export class ScheduleDeliveryModalComponent implements OnInit {
     sectorId: [null as number | null]
   });
 
- ngOnInit() {
-  // Se tem scheduleId e existingSchedule, é modo edição
-  if (this.data.scheduleId && this.data.existingSchedule) {
-    this.isEditMode = true;
-    this.loadExistingScheduleData();
-  } else {
-    // Modo criação - definir data atual como padrão
-    this.form.patchValue({
-      scheduledDate: new Date().toISOString().split('T')[0],
-    });
+  ngOnInit() {
+    // Se tem scheduleId e existingSchedule, é modo edição
+    if (this.data.scheduleId && this.data.existingSchedule) {
+      this.isEditMode = true;
+      this.loadExistingScheduleData();
+    } else {
+      // Modo criação - definir data atual como padrão
+      this.form.patchValue({
+        scheduledDate: new Date().toISOString().split('T')[0],
+      });
+    }
   }
-}
 
   private loadExistingScheduleData() {
-  this.loading = true;
-  
-  // Usar os dados passados diretamente
-  const schedule = this.data.existingSchedule!;
-  
-  this.form.patchValue({
-    scheduledDate: new Date(schedule.scheduledDate).toISOString().split('T')[0],
-    deliveryType: schedule.deliveryType,
-    sectorId: schedule.targetSectorName ? this.getSectorIdByName(schedule.targetSectorName) : null
-  });
-  
-  this.loading = false;
-}
+    this.loading.set(true);
+    
+    // Usar os dados passados diretamente
+    const schedule = this.data.existingSchedule!;
+    
+    this.form.patchValue({
+      scheduledDate: new Date(schedule.scheduledDate).toISOString().split('T')[0],
+      deliveryType: schedule.deliveryType,
+      sectorId: schedule.targetSectorName ? this.getSectorIdByName(schedule.targetSectorName) : null
+    });
+    
+    this.loading.set(false);
+  }
 
   private getSectorIdByName(sectorName: string): number | null {
     const sector = this.sectors.find(s => s.sectorName === sectorName);
@@ -81,39 +81,49 @@ export class ScheduleDeliveryModalComponent implements OnInit {
     return this.form.get('deliveryType')?.value === 'SectorTransfer';
   }
 
- submit() {
-  if (this.form.invalid || this.loading) return;
+  submit() {
+    if (this.form.invalid || this.loading()) return;
 
-  const { scheduledDate, deliveryType, sectorId } = this.form.value;
+    const { scheduledDate, deliveryType, sectorId } = this.form.value;
 
-  const dto: ScheduleDeliveryDto = {
-    serviceOrderId: this.serviceOrderId,
-    scheduledDate: scheduledDate ?? '',
-    deliveryType: (deliveryType ?? 'FinalDelivery') as ScheduledDeliveryType,
-    sectorId: sectorId ?? undefined
-  };
+    const dto: ScheduleDeliveryDto = {
+      serviceOrderId: this.serviceOrderId,
+      scheduledDate: scheduledDate ?? '',
+      deliveryType: (deliveryType ?? 'FinalDelivery') as ScheduledDeliveryType,
+      sectorId: sectorId ?? undefined
+    };
 
+    this.loading.set(true);
 
-  this.loading = true;
+    const request = this.isEditMode && this.data.scheduleId
+      ? this.scheduleService.updateSchedule(this.data.scheduleId, dto)
+      : this.scheduleService.scheduleDelivery(dto);
 
-  const request = this.isEditMode && this.data.scheduleId
-    ? this.scheduleService.updateSchedule(this.data.scheduleId, dto)
-    : this.scheduleService.scheduleDelivery(dto);
-
-  request.subscribe({
-    next: () => {
-      this.loading = false;
-      
-      this.dialogRef.close(true);
-    },
-    error: (err) => {
-      this.loading = false;
-      console.error('Erro ao agendar entrega', err);
-      console.error('Detalhes do erro:', err.error);
-      this.snackBar.open('Erro ao agendar entrega', 'Fechar', { duration: 3000 });
-    }
-  });
-}
+    request.subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        console.error('Erro ao agendar entrega', err);
+        console.error('Detalhes do erro:', err.error);
+        
+        // Extrair mensagem específica do backend
+        let errorMessage = 'Erro ao agendar entrega';
+        
+        if (err.error && err.error.message) {
+          errorMessage = err.error.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        this.snackBar.open(errorMessage, 'Fechar', { duration: 5000 });
+      }
+    });
+  }
 
   cancel() {
     this.dialogRef.close(false);

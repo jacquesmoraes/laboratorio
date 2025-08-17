@@ -5,6 +5,7 @@ import { WorkTypeListComponent } from './components/work-type-list/work-type-lis
 export const WORK_TYPE_ROUTES: Routes = [
   {
     path: '',
-    component: WorkTypeListComponent
+    component: WorkTypeListComponent,
+    title: 'Tipos de Trabalho'
   }
 ];

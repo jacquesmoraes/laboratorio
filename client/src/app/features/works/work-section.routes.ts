@@ -5,6 +5,7 @@ import { WorkSectionListComponent } from './components/work-section-list/work-se
 export const WORK_SECTION_ROUTES: Routes = [
   {
     path: '',
-    component: WorkSectionListComponent
+    component: WorkSectionListComponent,
+    title: 'Seções de Trabalho'
   }
 ];

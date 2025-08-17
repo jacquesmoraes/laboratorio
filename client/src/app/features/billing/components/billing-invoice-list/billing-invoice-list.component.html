@@ -1,72 +1,45 @@
 <div class="page-container">
-  <div class="page-wrapper flex justify-between items-center mb-6">
+  <!-- Header + Filtros em formato de Toolbar -->
+  <div class="filters-toolbar">
     <h1 class="page-title">Faturas</h1>
-    <button (click)="navigateToCreate()" class="btn btn-primary">
-      Nova Fatura
-    </button>
-  </div>
-
-  <!-- Filtros -->
-  <div class="filters-container">
-  <div class="filters-grid">
 
     <!-- Buscar -->
-    <div class="filter-item">
-      <label class="filter-label">Buscar</label>
-      <input
-        type="text"
-        class="filter-input"
-        placeholder="Número da fatura, cliente..."
-        [(ngModel)]="filters().search"
-        (ngModelChange)="updateFilter('search', $event)">
-    </div>
+    <input
+      type="text"
+      class="filter-input"
+      placeholder="Número da fatura, cliente..."
+      [(ngModel)]="filters().search"
+      (ngModelChange)="updateFilter('search', $event)" />
 
     <!-- Data Início -->
-    <div class="filter-item">
-      <label class="filter-label">Data Início</label>
-      <div class="date-input-container">
-        <input
-          class="filter-input"
-          type="text"
-          [matDatepicker]="startPicker"
-          [(ngModel)]="filters().startDate"
-          (ngModelChange)="updateFilter('startDate', $event)"
-          placeholder="Selecione uma data">
-        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-        <mat-datepicker #startPicker></mat-datepicker>
-      </div>
-    </div>
+    <input
+      type="text"
+      class="filter-input"
+      [matDatepicker]="startPicker"
+      [(ngModel)]="filters().startDate"
+      (ngModelChange)="updateFilter('startDate', $event)"
+      placeholder="Início" />
+    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+    <mat-datepicker #startPicker></mat-datepicker>
 
     <!-- Data Fim -->
-    <div class="filter-item">
-      <label class="filter-label">Data Fim</label>
-      <div class="date-input-container">
-        <input
-          class="filter-input"
-          type="text"
-          [matDatepicker]="endPicker"
-          [(ngModel)]="filters().endDate"
-          (ngModelChange)="updateFilter('endDate', $event)"
-          placeholder="Selecione uma data">
-        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-        <mat-datepicker #endPicker></mat-datepicker>
-      </div>
-    </div>
+    <input
+      type="text"
+      class="filter-input"
+      [matDatepicker]="endPicker"
+      [(ngModel)]="filters().endDate"
+      (ngModelChange)="updateFilter('endDate', $event)"
+      placeholder="Fim" />
+    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+    <mat-datepicker #endPicker></mat-datepicker>
 
-    <!-- Botão Limpar -->
-    <div class="filter-item">
-      <button class="clear-btn" (click)="clearFilters()">
-        Limpar Filtros
-      </button>
-    </div>
-
+    <!-- Botões -->
+    <button class="btn btn-secondary" (click)="clearFilters()">Limpar</button>
+    <button class="btn btn-primary" (click)="navigateToCreate()">Nova Fatura</button>
   </div>
-</div>
 
-  
-
-    <!-- Lista de Faturas -->
-    @if (invoices().length > 0) {
+  <!-- Lista de Faturas -->
+  @if (invoices().length > 0) {
     <div class="table-container">
       <table class="table">
         <thead>
@@ -81,29 +54,29 @@
         </thead>
         <tbody>
           @for (invoice of invoices(); track invoice.billingInvoiceId) {
-          <tr>
-            <td data-label="Fat" class="invoice-number">{{ invoice.invoiceNumber }}</td>
-            <td data-label="Name" class="client-name">{{ invoice.client.clientName }}</td>
-            <td data-label="Date">{{ invoice.createdAt | date:'dd/MM/yyyy' }}</td>
-            <td data-label="Status">
-              <mat-chip [class]="'status-badge ' + getStatusClass()(invoice.status)">
-                {{ invoice.status }}
-              </mat-chip>
-            </td>
-            <td data-label="Total">{{ invoice.totalInvoiceAmount | currency:'BRL':'symbol':'1.2-2' }}</td>
-            <td class="actions">
-              <div class="action-buttons">
-                <button class="btn btn-primary btn-sm" (click)="viewInvoice(invoice.billingInvoiceId)">
-                  <mat-icon>visibility</mat-icon>
-                  Ver
-                </button>
-                <button class="btn btn-danger btn-sm" (click)="cancelInvoice(invoice.billingInvoiceId)">
-                  <mat-icon>cancel</mat-icon>
-                  Cancelar
-                </button>
-              </div>
-            </td>
-          </tr>
+            <tr>
+              <td data-label="Fat" class="invoice-number">{{ invoice.invoiceNumber }}</td>
+              <td data-label="Name" class="client-name">{{ invoice.client.clientName }}</td>
+              <td data-label="Date">{{ invoice.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td data-label="Status">
+                <mat-chip [class]="'status-badge ' + getStatusClass()(invoice.status)">
+                  {{ invoice.status }}
+                </mat-chip>
+              </td>
+              <td data-label="Total">{{ invoice.totalInvoiceAmount | currency:'BRL':'symbol':'1.2-2' }}</td>
+              <td class="actions">
+                <div class="action-buttons">
+                  <button class="btn btn-primary btn-sm" (click)="viewInvoice(invoice.billingInvoiceId)">
+                    <mat-icon>visibility</mat-icon>
+                    Ver
+                  </button>
+                  <button class="btn btn-danger btn-sm" (click)="cancelInvoice(invoice.billingInvoiceId)">
+                    <mat-icon>cancel</mat-icon>
+                    Cancelar
+                  </button>
+                </div>
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -111,27 +84,29 @@
 
     <!-- Paginação -->
     @if (paginationInfo()) {
-    <div class="pagination-container">
-      <div class="pagination-info">
-        Página <span class="font-medium">{{ paginationInfo()!.currentPage }}</span> de
-        <span class="font-medium">{{ paginationInfo()!.totalPages }}</span>
+      <div class="pagination-container">
+        <div class="pagination-info">
+          Página <span class="font-medium">{{ paginationInfo()!.currentPage }}</span> de
+          <span class="font-medium">{{ paginationInfo()!.totalPages }}</span>
+        </div>
+        <div class="pagination-nav">
+          <button class="pagination-button pagination-prev"
+                  (click)="changePage(paginationInfo()!.currentPage - 1)"
+                  [disabled]="!paginationInfo()!.hasPrev">
+            Anterior
+          </button>
+          <button class="pagination-button pagination-next"
+                  (click)="changePage(paginationInfo()!.currentPage + 1)"
+                  [disabled]="!paginationInfo()!.hasNext">
+            Próxima
+          </button>
+        </div>
       </div>
-      <div class="pagination-nav">
-        <button class="pagination-button pagination-prev" (click)="changePage(paginationInfo()!.currentPage - 1)"
-          [disabled]="!paginationInfo()!.hasPrev">
-          Anterior
-        </button>
-        <button class="pagination-button pagination-next" (click)="changePage(paginationInfo()!.currentPage + 1)"
-          [disabled]="!paginationInfo()!.hasNext">
-          Próxima
-        </button>
-      </div>
-    </div>
     }
-    }
+  }
 
-    <!-- Estado vazio -->
-    @if (!loading() && invoices().length === 0) {
+  <!-- Estado vazio -->
+  @if (!loading() && invoices().length === 0) {
     <div class="empty-state">
       <div class="empty-icon">📄</div>
       <h3 class="empty-title">Nenhuma fatura encontrada</h3>
@@ -139,5 +114,5 @@
         Comece criando sua primeira fatura ou ajuste os filtros de busca.
       </p>
     </div>
-    }
-  </div>
+  }
+</div>

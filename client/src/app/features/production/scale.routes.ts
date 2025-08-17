@@ -3,5 +3,5 @@ import { ScaleListComponent } from "./components/scale/scale-list.component/scal
 
 // client/src/app/features/production/scale.routes.ts
 export const SCALE_ROUTES: Routes = [
-  { path: '', component: ScaleListComponent }
+  { path: '', component: ScaleListComponent, title: 'Escalas' },
 ];

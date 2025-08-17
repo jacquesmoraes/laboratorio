@@ -1,5 +1,5 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -14,6 +14,7 @@ import {
   ChangePasswordRequest,
   
 } from '../models/auth.interface';
+import { ErrorMappingService } from './error.mapping.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -22,7 +23,7 @@ export class AuthService {
 private authBaseUrl = 'https://localhost:7058';
   private userSignal = signal<UserInfo | null>(this.loadUser());
   private tokenSignal = signal<string | null>(this.loadToken());
-
+private errorMapping = inject(ErrorMappingService);
   readonly isAuthenticated = computed(() => !!this.tokenSignal() && !!this.userSignal());
   readonly user = computed(() => this.userSignal());
   readonly token = computed(() => this.tokenSignal());
@@ -31,23 +32,29 @@ private authBaseUrl = 'https://localhost:7058';
 
 
   
-  async login(dto: LoginRequest): Promise<boolean> {
+  async login(dto: LoginRequest): Promise<{ success: boolean; error?: string }> {
     try {
       const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.authBaseUrl}/auth/login`, dto));
       if (res) this.setSession(res);
-      return !!res;
-    } catch {
-      return false;
+      return { success: !!res };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: this.errorMapping.getAuthErrorMessage(error) 
+      };
     }
   }
 
-  async completeFirstAccess(dto: CompleteFirstAccessRequest): Promise<boolean> {
+  async completeFirstAccess(dto: CompleteFirstAccessRequest): Promise<{ success: boolean; error?: string }> {
     try {
       const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.authBaseUrl}/auth/complete-first-access`, dto));
       if (res) this.setSession(res);
-      return !!res;
-    } catch {
-      return false;
+      return { success: !!res };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: this.errorMapping.getAuthErrorMessage(error) 
+      };
     }
   }
 
@@ -107,7 +114,7 @@ private authBaseUrl = 'https://localhost:7058';
     return this.userSignal()?.accessCode ?? '';
   }
 
-  // Private helpers
+  
   private setSession(res: AuthResponse): void {
     localStorage.setItem(this.tokenKey, res.token);
     localStorage.setItem(this.userKey, JSON.stringify(res.user));
@@ -127,4 +134,5 @@ private authBaseUrl = 'https://localhost:7058';
       return null;
     }
   }
+ 
 }

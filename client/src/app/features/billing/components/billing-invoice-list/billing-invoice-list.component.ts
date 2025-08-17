@@ -105,7 +105,7 @@ export class BillingInvoiceListComponent implements OnInit {
   }
   clearFilters(): void {
     this.filters.set({ ...this.defaultFilters });
-    this.refreshSubject.next();
+    this.loadInvoices(); 
   }
 
   navigateToCreate(): void {
@@ -133,10 +133,19 @@ export class BillingInvoiceListComponent implements OnInit {
       .subscribe({
         next: () => {
           Swal.fire('Cancelada!', 'A fatura foi cancelada com sucesso.', 'success');
-          this.loadInvoices(); // ou reload da fatura no caso de details
+          this.loadInvoices(); 
         },
-        error: () => {
-          Swal.fire('Erro!', 'Não foi possível cancelar a fatura.', 'error');
+        error: (error) => {
+          let errorMessage = 'Não foi possível cancelar a fatura.';
+          
+            
+          if (error.error && typeof error.error === 'string') {
+            errorMessage = error.error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
+          Swal.fire('Erro!', errorMessage, 'error');
         }
       });
     }

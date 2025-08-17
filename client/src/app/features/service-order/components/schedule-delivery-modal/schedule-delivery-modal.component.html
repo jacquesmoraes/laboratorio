@@ -1,14 +1,14 @@
 <div class="modal-container">
   <h2>{{ isEditMode ? 'Editar Agendamento' : 'Agendar Entrega' }}</h2>
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading-container">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Carregando...</p>
     </div>
   }
 
-  @if (!loading) {
+  @if (!loading()) {
     <form [formGroup]="form" (ngSubmit)="submit()">
       <div class="form-group">
         <label for="scheduledDate">Data:</label>
@@ -54,10 +54,10 @@
         <button
           mat-button
           type="submit"
-          [disabled]="form.invalid || loading"
+          [disabled]="form.invalid || loading()"
           class="btn-primary"
         >
-          @if (loading) {
+          @if (loading()) {
             <mat-spinner diameter="20"></mat-spinner>
           } @else {
             {{ isEditMode ? 'Atualizar' : 'Agendar' }}
@@ -68,7 +68,7 @@
           mat-button
           type="button"
           (click)="cancel()"
-          [disabled]="loading"
+          [disabled]="loading()"
           class="btn-secondary"
         >
           Cancelar

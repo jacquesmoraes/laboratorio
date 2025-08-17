@@ -5,6 +5,7 @@ import { SystemSettingsComponent } from './components/system-settings.component'
 export const SETTINGS_ROUTES: Routes = [
   {
     path: '',
-    component: SystemSettingsComponent
+    component: SystemSettingsComponent,
+    title: 'Configurações do Sistema'
   }
 ];

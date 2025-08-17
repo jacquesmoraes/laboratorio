@@ -12,11 +12,11 @@ export const CLIENT_AREA_ROUTES: Routes = [
     path: '',
     component: ClientAreaLayoutComponent,
     children: [
-      { path: '', component: ClientAreaDashboardComponent },
-      { path: 'payments', component: ClientAreaPaymentsComponent },
-      { path: 'invoices', component: ClientAreaInvoicesComponent },
-      { path: 'orders', component: ClientAreaOrdersComponent },
-      { path: 'orders/:id', component: ClientAreaOrderDetailsComponent },
+      { path: '', component: ClientAreaDashboardComponent,title: 'Dashboard' },
+      { path: 'payments', component: ClientAreaPaymentsComponent, title: 'Pagamentos' },
+      { path: 'invoices', component: ClientAreaInvoicesComponent, title: 'Faturas' },
+      { path: 'orders', component: ClientAreaOrdersComponent, title: 'Pedidos' },
+      { path: 'orders/:id', component: ClientAreaOrderDetailsComponent, title: 'Detalhes do Pedido' },
 { 
         path: 'change-password', 
         loadComponent: () => import('../../core/auth/change-password/change-password.component').then(m => m.ChangePasswordComponent) 

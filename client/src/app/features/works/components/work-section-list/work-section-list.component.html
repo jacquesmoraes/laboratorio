@@ -1,5 +1,6 @@
 <div class="page-container">
-  <div class="page-wrapper flex justify-between items-center mb-6">
+  <!-- Toolbar compacta -->
+  <div class="filters-toolbar">
     <h1 class="page-title">Seções de Trabalho</h1>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
@@ -7,6 +8,7 @@
     </button>
   </div>
 
+  <!-- Lista de Seções -->
   <div class="table-container">
     <table class="table">
       <thead>
@@ -19,7 +21,7 @@
         @for (section of workSections(); track section.id) {
           <tr>
             <td class="name" data-label="Nome">{{ section.name }}</td>
-            <td >
+            <td>
               <div class="action-buttons">
                 <button class="btn btn-primary btn-sm" (click)="onEdit(section)">
                   <mat-icon>edit</mat-icon>

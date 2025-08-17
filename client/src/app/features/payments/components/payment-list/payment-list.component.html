@@ -1,103 +1,97 @@
 <div class="page-container">
-  <div class="page-wrapper flex justify-between items-center mb-6">
+  <!-- Toolbar compacta -->
+  <div class="filters-toolbar">
     <h1 class="page-title">Pagamentos</h1>
-    <button (click)="navigateToCreate()" class="btn btn-primary">
-      Novo Pagamento
-    </button>
+
+    <!-- Buscar -->
+    <input
+      type="text"
+      class="filter-input"
+      placeholder="Cliente ou descrição do pagamento"
+      [(ngModel)]="filters().search"
+      (ngModelChange)="setSearchFilter($event)" />
+
+    <!-- Data Início -->
+    <input
+      type="text"
+      class="filter-input"
+      [matDatepicker]="startPicker"
+      [(ngModel)]="filters().startDate"
+      (ngModelChange)="onFilterChange()"
+      placeholder="Início" />
+    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+    <mat-datepicker #startPicker></mat-datepicker>
+
+    <!-- Data Fim -->
+    <input
+      type="text"
+      class="filter-input"
+      [matDatepicker]="endPicker"
+      [(ngModel)]="filters().endDate"
+      (ngModelChange)="onFilterChange()"
+      placeholder="Fim" />
+    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+    <mat-datepicker #endPicker></mat-datepicker>
+
+    <!-- Botões -->
+    <button class="btn btn-secondary" (click)="clearFilters()">Limpar</button>
+    <button class="btn btn-primary" (click)="navigateToCreate()">Novo Pagamento</button>
   </div>
 
-  <!-- Filtros -->
-  <div class="filters-container">
-    <div class="filters-grid">
-      <div class="filter-item">
-        <label class="filter-label">Buscar</label>
-        <input type="text" placeholder="Cliente ou descrição do pagamento" class="filter-input"
-          [(ngModel)]="filters().search" (ngModelChange)="setSearchFilter($event)">
+  <!-- Lista de Pagamentos -->
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Data</th>
+          <th>Valor</th>
+          <th>Descrição</th>
+          <th>Fatura</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (payment of payments(); track payment.id) {
+          <tr (click)="viewPayment(payment.id)" class="payment-row">
+            <td class="client-name">{{ payment.clientName }}</td>
+            <td class="payment-date">{{ formatDate(payment.paymentDate) }}</td>
+            <td class="payment-amount">
+              R$ {{ formatCurrency(payment.amountPaid) }}
+            </td>
+            <td class="payment-description">{{ payment.description || '-' }}</td>
+            <td class="invoice-number">{{ payment.invoiceNumber || '-' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 
+  <!-- Paginação -->
+  @if (paginationInfo()) {
+    <div class="pagination-container">
+      <div class="pagination-info">
+        Mostrando
+        <span class="font-medium">{{ paginationInfo()!.start }}</span>
+        a
+        <span class="font-medium">{{ paginationInfo()!.end }}</span>
+        de
+        <span class="font-medium">{{ paginationInfo()!.total }}</span>
+        resultados
       </div>
-
-
-      <div class="filter-item">
-        <label class="filter-label">Data Início</label>
-        <div class="date-input-container">
-          <input [matDatepicker]="startPicker" [(ngModel)]="filters().startDate" (change)="onFilterChange()"
-            class="filter-input" placeholder="Selecione uma data">
-
-          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-          <mat-datepicker #startPicker></mat-datepicker>
-        </div>
-      </div>
-      <div class="filter-item">
-        <label class="filter-label">Data Fim</label>
-        <div class="date-input-container">
-          <input
-          [matDatepicker]="endPicker"
-          placeholder="Selecione uma data" [(ngModel)]="filters().endDate" (change)="onFilterChange()"
-            class="filter-input">
-          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-          <mat-datepicker #endPicker></mat-datepicker>
-        </div>
-      </div>
-      <div class="filter-item">
-        <button (click)="clearFilters()" class="clear-btn">
-          Limpar Filtros
+      <nav class="pagination-nav">
+        <button
+          (click)="changePage(-1)"
+          [disabled]="(pagination()?.pageNumber ?? 0) <= 1"
+          class="pagination-button pagination-prev">
+          Anterior
         </button>
-      </div>
+        <button
+          (click)="changePage(1)"
+          [disabled]="(pagination()?.pageNumber ?? 0) >= (pagination()?.totalPages ?? 0)"
+          class="pagination-button pagination-next">
+          Próxima
+        </button>
+      </nav>
     </div>
-
-
-    <!-- Lista de Pagamentos -->
-    <div class="table-container">
-      <div class="overflow-x-auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Data</th>
-              <th>Valor</th>
-              <th>Descrição</th>
-              <th>Fatura</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (payment of payments(); track payment.id) {
-            <tr (click)="viewPayment(payment.id)" class="payment-row">
-              <td class="client-name">{{ payment.clientName }}</td>
-              <td class="payment-date">{{ formatDate(payment.paymentDate) }}</td>
-              <td class="payment-amount">R$ {{ formatCurrency(payment.amountPaid) }}</td>
-              <td class="payment-description">{{ payment.description || '-' }}</td>
-              <td class="invoice-number">{{ payment.invoiceNumber || '-' }}</td>
-            </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Paginação -->
-      @if (paginationInfo()) {
-      <div class="pagination-container">
-        <div class="pagination-info">
-          Mostrando
-          <span class="font-medium">{{ paginationInfo()!.start }}</span>
-          a
-          <span class="font-medium">{{ paginationInfo()!.end }}</span>
-          de
-          <span class="font-medium">{{ paginationInfo()!.total }}</span>
-          resultados
-        </div>
-        <nav class="pagination-nav">
-          <button (click)="changePage(-1)" [disabled]="(pagination()?.pageNumber ?? 0) <= 1"
-            class="pagination-button pagination-prev">
-            Anterior
-          </button>
-          <button (click)="changePage(1)"
-            [disabled]="(pagination()?.pageNumber ?? 0) >= (pagination()?.totalPages ?? 0)"
-            class="pagination-button pagination-next">
-            Próxima
-          </button>
-        </nav>
-      </div>
-      }
-
-    </div>
-  </div>
+  }
+</div>

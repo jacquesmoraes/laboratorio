@@ -204,8 +204,17 @@ namespace API.Services
                 ?? throw new UnauthorizedAccessException("Invalid credentials.");
 
             if ( !user.IsActive )
-                throw new UnauthorizedAccessException ( "Account is not activated." );
-
+    {
+        // Diferenciar entre usuário não ativado (primeiro acesso) e usuário bloqueado
+        if ( user.IsFirstLogin )
+        {
+            throw new UnauthorizedAccessException ( "Account is not activated." );
+        }
+        else
+        {
+            throw new UnauthorizedAccessException ( "Account is deactivated." );
+        }
+    }
             if ( !await _userManager.CheckPasswordAsync ( user, dto.Password ) )
             {
                 _logger?.LogWarning ( "Incorrect password for email: {Email}", dto.Email );

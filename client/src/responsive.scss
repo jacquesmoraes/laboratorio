@@ -1,6 +1,4 @@
-
-
-// Responsivo - modo cartão
+// Responsivo - modo cartão para tabelas
 @media (max-width: 768px) {
   .table {
     thead {
@@ -12,20 +10,18 @@
       margin-bottom: 1.5rem;
       border: 1px solid var(--border-color);
       border-radius: 1rem;
-      
       padding: 1rem;
       background: var(--white);
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
-     tbody td {
+    tbody td {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0.5rem 0;
-      font-size: 0.675rem;
+      font-size: 0.875rem;
       border-bottom: 1px solid var(--border-color);
-     
 
       &::before {
         content: attr(data-label);
@@ -34,7 +30,7 @@
         color: var(--dark);
         margin-right: 1rem;
         flex: 1;
-        font-size: 0.675rem;
+        font-size: 0.75rem;
       }
 
       &:last-child {
@@ -42,15 +38,30 @@
       }
     }
 
-     .action-buttons {
-    flex-direction: row; // Mudança: mantém os botões lado a lado mesmo no mobile
-    align-items: center; // Mudança: centraliza verticalmente
-    gap: 0.5rem;
-    
-    button {
-      flex: 1; // Opcional: faz os botões ocuparem espaço igual
-      min-width: 0; // Permite que os botões encolham se necessário
+    .action-buttons {
+      flex-direction: row; // mantém os botões lado a lado
+      align-items: center;
+      gap: 0.5rem;
+
+      button {
+        flex: 1; // distribui espaço entre eles
+        min-width: 0; // deixa encolher se precisar
+      }
     }
   }
+
+  // Toolbar (título + botões) responsiva
+  .filters-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+
+    .page-title {
+      margin-bottom: 0.5rem;
+    }
+
+    .filter-input,
+    button {
+      width: 100%;
+    }
   }
 }

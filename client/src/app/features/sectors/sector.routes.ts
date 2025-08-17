@@ -4,7 +4,7 @@ import { SectorModalComponent } from './sector-modal/sector-modal.component';
 
 
 export const SectorRoutes: Routes = [
-  { path: '', component: SectorListComponent },
-  { path: 'new', component: SectorModalComponent },
-  { path: ':id/edit', component: SectorModalComponent },
+  { path: '', component: SectorListComponent, title: 'Setores' },
+  { path: 'new', component: SectorModalComponent, title: 'Novo Setor' },
+  { path: ':id/edit', component: SectorModalComponent, title: 'Editar Setor' },
 ];

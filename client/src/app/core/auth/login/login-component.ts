@@ -66,37 +66,36 @@ export class LoginComponent {
         confirmNewPassword: this.credentials().password
       };
 
-      const success = await this.authService.completeFirstAccess(firstAccessData);
+      const result = await this.authService.completeFirstAccess(firstAccessData);
 
-      if (success) {
+      if (result.success) {
         if (this.authService.isClient()) {
           this.router.navigate(['/client-area']);
         } else {
           this.router.navigate(['/']);
         }
       } else {
-        this.error.set('Código de acesso inválido ou email não encontrado');
+        this.error.set(result.error || 'Código de acesso inválido ou email não encontrado');
       }
     } else {
       // Login normal
-      const success = await this.authService.login(this.credentials());
+      const result = await this.authService.login(this.credentials());
 
-      if (success) {
+      if (result.success) {
         if (this.authService.isClient()) {
           this.router.navigate(['/client-area']);
         } else {
           this.router.navigate(['/']);
         }
-
       } else {
-        this.error.set('Email ou senha inválidos');
+        this.error.set(result.error || 'Email ou senha inválidos');
       }
     }
 
     this.loading.set(false);
   }
 
-  
+   
   onFirstAccessChange(): void {
     this.error.set('');
   }

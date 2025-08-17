@@ -6,18 +6,22 @@ import { ClientDetailsComponent } from './components/clients-details/client-deta
 export const CLIENT_ROUTES: Routes = [
   {
     path: '',
-    component: ClientListComponent
+    component: ClientListComponent,
+    title: 'Clientes'
   },
   {
     path: 'new',
-    component: ClientFormComponent
+    component: ClientFormComponent,
+    title: 'Novo Cliente'
   },
   {
     path: ':id',
-    component: ClientDetailsComponent
+    component: ClientDetailsComponent,
+    title: 'Detalhes do Cliente'
   },
   {
     path: ':id/edit',
-    component: ClientFormComponent
+    component: ClientFormComponent,
+    title: 'Editar Cliente'
   }
 ];
