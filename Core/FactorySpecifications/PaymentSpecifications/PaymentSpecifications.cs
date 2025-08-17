@@ -31,29 +31,23 @@ namespace Core.FactorySpecifications.PaymentSpecifications
             public static PaymentSpecification Paged ( PaymentParams p )
             {
                 Expression<Func<Payment, bool>> criteria = x =>
-                    (!p.ClientId.HasValue || x.ClientId == p.ClientId) &&
-                    (string.IsNullOrEmpty(p.Search) ||
-                    x.Description!.ToLower().Contains(p.Search.ToLower()) ||
-                    x.Client.ClientName.ToLower().Contains(p.Search.ToLower())) &&
-                    (!p.StartDate.HasValue || x.PaymentDate >= p.StartDate.Value) &&
-                    (!p.EndDate.HasValue || x.PaymentDate <= p.EndDate.Value);
+        (!p.ClientId.HasValue || x.ClientId == p.ClientId) &&
+        (string.IsNullOrEmpty(p.Search) ||
+         x.Description!.ToLower().Contains(p.Search.ToLower()) ||
+         x.Client.ClientName.ToLower().Contains(p.Search.ToLower())) &&
+        (!p.StartDate.HasValue || x.PaymentDate >= p.StartDate.Value.Date) &&
+        (!p.EndDate.HasValue   || x.PaymentDate  < p.EndDate.Value.Date.AddDays(1));
 
                 var spec = new PaymentSpecification(criteria);
-
                 spec.AddInclude ( x => x.Client );
                 spec.AddInclude ( x => x.BillingInvoice! );
 
                 if ( !string.IsNullOrEmpty ( p.Sort ) )
-                {
                     spec.ApplySorting ( p.Sort );
-                }
                 else
-                {
                     spec.ApplySorting ( "-PaymentDate" );
-                }
 
                 spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
-
                 return spec;
             }
 
@@ -62,8 +56,8 @@ namespace Core.FactorySpecifications.PaymentSpecifications
                 Expression<Func<Payment, bool>> criteria = x =>
         (!p.ClientId.HasValue || x.ClientId == p.ClientId) &&
         (string.IsNullOrEmpty(p.Search) || x.Description!.ToLower().Contains(p.Search.ToLower())) &&
-        (!p.StartDate.HasValue || x.PaymentDate >= p.StartDate.Value) &&
-        (!p.EndDate.HasValue || x.PaymentDate <= p.EndDate.Value);
+        (!p.StartDate.HasValue || x.PaymentDate >= p.StartDate.Value.Date) &&
+        (!p.EndDate.HasValue   || x.PaymentDate  < p.EndDate.Value.Date.AddDays(1));
 
                 return new PaymentSpecification ( criteria );
             }

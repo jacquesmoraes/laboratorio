@@ -75,7 +75,7 @@
           <button 
             type="button"
             (click)="addItem()"
-            class="btn">
+            class="submit-btn">
             <mat-icon>add</mat-icon>
             Adicionar Item
           </button>
@@ -149,13 +149,13 @@
       <button 
         type="button"
         (click)="goBack()"
-        class="btn btn-secondary">
+        class="cancel-btn">
         <mat-icon>cancel</mat-icon>
         Cancelar
       </button>
       <button 
         type="submit"
-        class="btn"
+        class="submit-btn"
         [disabled]="form.invalid || submitting()">
         <mat-icon>{{ submitting() ? 'hourglass_empty' : (isNew() ? 'add' : 'save') }}</mat-icon>
         {{ submitting() ? 'Salvando...' : (isNew() ? 'Criar' : 'Atualizar') }}

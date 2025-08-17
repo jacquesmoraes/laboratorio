@@ -32,7 +32,7 @@
             <th>Status</th>
             <th>Código de Acesso</th>
             <th>Último Acesso</th>
-            <th style="width: 1%;">Ações</th>
+            <th >Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -58,17 +58,17 @@
                     Detalhes
                   </button>
                   @if (user.isActive) {
-                    <button class="btn btn-warn btn-sm" (click)="onBlock(user)" matTooltip="Bloquear Usuário">
+                    <button class="btn btn-danger btn-sm" (click)="onBlock(user)" matTooltip="Bloquear Usuário">
                       <mat-icon>block</mat-icon>
                       Bloquear
                     </button>
                   } @else {
-                    <button class="btn btn-success btn-sm" (click)="onUnblock(user)" matTooltip="Desbloquear Usuário">
+                    <button class="btn btn-secondary btn-sm" (click)="onUnblock(user)" matTooltip="Desbloquear Usuário">
                       <mat-icon>check_circle</mat-icon>
                       Desbloquear
                     </button>
                   }
-                  <button class="btn btn-info btn-sm" (click)="onResetAccessCode(user)" matTooltip="Resetar Código de Acesso">
+                  <button class="btn btn-secondary btn-sm" (click)="onResetAccessCode(user)" matTooltip="Resetar Código de Acesso">
                     <mat-icon>refresh</mat-icon>
                     Resetar Código
                   </button>

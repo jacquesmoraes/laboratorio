@@ -1,6 +1,6 @@
-<div class="container">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="title">Cores</h1>
+<div class="page-container">
+  <div class="page-wrapper flex justify-between items-center mb-6">
+    <h1 class="page-title">Cores</h1>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
       Nova Cor
@@ -23,6 +23,7 @@
             </mat-select>
           </mat-form-field>
         </div>
+        
       </div>
     </div>
   </form>
@@ -39,12 +40,12 @@
       <tbody>
         @for (shade of shades(); track shade.id) {
           <tr>
-            <td data-label="Cor">
+            <td class="name" data-label="Cor">
               <div class="color-display">
                 {{ shade.color || '-' }}
               </div>
             </td>
-            <td data-label="Escala">{{ getScaleName()(shade.scaleId) }}</td>
+            <td class="name" data-label="Escala">{{ getScaleName()(shade.scaleId) }}</td>
             <td>
               <div class="action-buttons">
                 <button class="btn btn-primary btn-sm" (click)="onEdit(shade)">

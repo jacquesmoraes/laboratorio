@@ -79,13 +79,13 @@
           <button 
             type="button"
             (click)="goBack()"
-            class="btn btn-secondary">
+            class="cancel-btn">
             Cancelar
           </button>
           <button 
             type="submit"
             [disabled]="paymentForm.invalid || loading()"
-            class="btn btn-primary">
+            class="submit-btn">
             @if (loading()) {
               <div class="loading-spinner-small"></div>
             } @else {

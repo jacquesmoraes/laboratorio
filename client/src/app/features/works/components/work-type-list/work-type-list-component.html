@@ -1,6 +1,6 @@
-<div class="container">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="title">Tipos de Trabalho</h1>
+<div class="page-container">
+  <div class="page-wrapper flex justify-between items-center mb-6">
+    <h1 class="page-title">Tipos de Trabalho</h1>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
       Novo Tipo
@@ -21,9 +21,9 @@
       <tbody>
         @for (type of workTypes(); track type.id) {
           <tr>
-            <td data-label="Nome">{{ type.name }}</td>
-            <td data-label="Descrição">{{ type.description }}</td>
-            <td data-label="Seção">{{ type.workSectionName }}</td>
+            <td class="name" data-label="Nome">{{ type.name }}</td>
+            <td class="description" data-label="Descrição">{{ type.description }}</td>
+            <td class="sectionName" data-label="Seção">{{ type.workSectionName }}</td>
             <td data-label="Status">
               <mat-chip-listbox>
                 <mat-chip [color]="type.isActive ? 'accent' : 'warn'" selected>

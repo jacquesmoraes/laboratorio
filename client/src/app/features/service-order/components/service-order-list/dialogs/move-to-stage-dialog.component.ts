@@ -45,9 +45,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 </mat-form-field>
       </form>
     </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="onSubmit()">
+    <mat-dialog-actions align="center" >
+      <button matButton  mat-dialog-close>Cancelar</button>
+      <button mat-raised-button  color="primary" [disabled]="!form.valid" (click)="onSubmit()">
         Confirmar
       </button>
     </mat-dialog-actions>

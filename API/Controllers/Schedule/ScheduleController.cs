@@ -78,13 +78,15 @@
         public async Task<ActionResult<ScheduleItemRecord>> GetActiveScheduleByServiceOrder ( int serviceOrderId )
         {
             var result = await _scheduleService.GetActiveScheduleByServiceOrderIdAsync(serviceOrderId);
-            return result is null ? NotFound ( ) : Ok ( result );
+            return result is null ? NoContent ( ) : Ok ( result );
         }
 
         /// <summary>
         /// Gets the scheduled deliveries for a specific sector and date.
         /// </summary>
         [HttpGet ( "current-sector/{sectorId}/date/{date:datetime}" )]
+        [ProducesResponseType ( typeof ( ScheduleItemRecord ), StatusCodes.Status200OK )]
+        [ProducesResponseType ( StatusCodes.Status204NoContent )]
         public async Task<ActionResult<object>> GetCurrentSectorSchedule ( int sectorId, DateTime date )
         {
             var result = await _scheduleService.GetScheduleByCurrentSectorAsync(sectorId, date);

@@ -54,7 +54,7 @@
 
             // Validate scheduled date
             var lastDateIn = order.Stages?.Max(s => s.DateIn);
-            if ( lastDateIn.HasValue && dto.ScheduledDate <= lastDateIn.Value )
+            if ( lastDateIn.HasValue && dto.ScheduledDate < lastDateIn.Value )
                 throw new BusinessRuleException (
                     $"Scheduled date ({dto.ScheduledDate:yyyy-MM-dd}) must be after the last stage entry date ({lastDateIn:yyyy-MM-dd})." );
 
@@ -113,7 +113,7 @@
             var newDate = dto.ScheduledDate ?? schedule.ScheduledDate;
             var lastDateIn = order.Stages?.Max(s => s.DateIn);
 
-            if ( lastDateIn.HasValue && newDate <= lastDateIn.Value )
+            if ( lastDateIn.HasValue && newDate < lastDateIn.Value )
                 throw new BusinessRuleException (
                     $"New schedule date ({newDate:yyyy-MM-dd}) must be after the last stage entry date ({lastDateIn:yyyy-MM-dd})." );
 

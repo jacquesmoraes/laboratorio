@@ -1,6 +1,6 @@
-<div class="container">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="title">Clientes</h1>
+<div class="page-container">
+  <div class="page-wrapper flex justify-between items-center mb-6">
+    <h1 class="page-title">Clientes</h1>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
       Novo Cliente
@@ -26,16 +26,16 @@
           <th>Cidade</th>
           <th>Faturamento</th>
           <th>Status</th>
-          <th style="width: 1%;">Ações</th>
+          <th >Ações</th>
         </tr>
       </thead>
       <tbody>
         @for (client of clients(); track client.clientId) {
         <tr>
-          <td data-label="Nome">{{ client.clientName }}</td>
-          <td data-label="Cidade">{{ client.city || '-' }}</td>
+          <td class="name" data-label="Nome">{{ client.clientName }}</td>
+          <td class="name" data-label="Cidade">{{ client.city || '-' }}</td>
           <td data-label="Cobrança">
-            <mat-chip>{{ getBillingModeLabel()(client.billingMode) }}</mat-chip>
+            <mat-chip >{{ getBillingModeLabel()(client.billingMode) }}</mat-chip>
           </td>
           <td data-label="Status">
             <mat-chip [color]="client.isInactive ? 'warn' : 'accent'" selected>
@@ -44,17 +44,17 @@
           </td>
           <td class="no-label">
             <div class="action-buttons">
-              <button class="btn btn-primary btn-sm" (click)="onViewDetails(client)">
+              <button mat-icon-button class="action-btn" (click)="onViewDetails(client)">
                 <mat-icon>visibility</mat-icon>
-                Detalhes
+                
               </button>
-              <button class="btn btn-primary btn-sm" (click)="onEdit(client)">
+              <button mat-icon-button class="action-btn" (click)="onEdit(client)">
                 <mat-icon>edit</mat-icon>
-                Editar
+                
               </button>
-              <button class="btn btn-danger btn-sm" (click)="onDelete(client)">
+              <button  mat-icon-button  class="action-btn" (click)="onDelete(client)">
                 <mat-icon>delete</mat-icon>
-                Excluir
+                
               </button>
             </div>
           </td>

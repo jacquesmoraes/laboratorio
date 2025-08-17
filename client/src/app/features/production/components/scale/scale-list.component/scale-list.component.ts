@@ -19,7 +19,7 @@ import Swal from 'sweetalert2';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './scale-list.component.html',
-  styleUrls: ['./scale-list.component.scss']
+  
 })
 export class ScaleListComponent implements OnInit {
   private readonly scaleService = inject(ScaleService);

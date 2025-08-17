@@ -123,11 +123,11 @@
 
         <!-- Ações -->
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading()">
+          <button type="button" class="cancel-btn" (click)="onCancel()" [disabled]="loading()">
             <mat-icon>cancel</mat-icon>
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid || loading()">
+          <button type="submit" class="submit-btn" [disabled]="userForm.invalid || loading()">
             <mat-icon>save</mat-icon>
             {{ isEditMode() ? 'Atualizar' : 'Registrar' }}
             @if (loading()) {

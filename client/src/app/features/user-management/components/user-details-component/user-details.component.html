@@ -5,7 +5,7 @@
         <h1>{{ user()?.clientName }}</h1>
         <div class="header-actions">
           @if (user()?.isActive) {
-            <button class="btn btn-warn" (click)="onBlockUser()" [disabled]="loading()" matTooltip="Bloquear Usuário">
+            <button class="btn btn-danger" (click)="onBlockUser()" [disabled]="loading()" matTooltip="Bloquear Usuário">
               <mat-icon>block</mat-icon>
               Bloquear
             </button>
@@ -19,10 +19,10 @@
             <mat-icon>refresh</mat-icon>
             Resetar Código
           </button>
-          <button class="btn btn-secondary" (click)="editUser()" [disabled]="loading()">
+          <button class="btn btn-warn" (click)="editUser()" [disabled]="loading()">
             Editar
           </button>
-          <button class="btn btn-primary" (click)="goBack()" [disabled]="loading()">
+          <button class="btn btn-secondary" (click)="goBack()" [disabled]="loading()">
             Voltar
           </button>
         </div>

@@ -89,11 +89,11 @@
 
           <!-- Botões -->
           <div class="form-actions">
-            <button type="button" (click)="goBack()" class="btn btn-secondary">
+            <button type="button" (click)="goBack()" class="cancel-btn">
               Cancelar
             </button>
             <button type="submit" [disabled]="invoiceForm.invalid || selectedServiceOrders().length === 0 || loading()"
-              class="btn btn-primary">
+              class="submit-btn">
               @if (loading()) {
               <div class="loading-spinner"></div>
               <span>Criando...</span>

@@ -22,8 +22,8 @@ export interface PaymentParams {
   sort?: string;
   search?: string;
   clientId?: number;
-  startDate?: string;
-  endDate?: string;
+  startDate?: string | Date;
+  endDate?: string | Date;
 }
 
 export interface Pagination<T> {

@@ -33,7 +33,7 @@ import Swal from 'sweetalert2';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shade-list.component.html',
-  styleUrls: ['./shade-list.component.scss']
+  
 })
 export class ShadeListComponent implements OnInit {
   private readonly shadeService = inject(ShadeService);

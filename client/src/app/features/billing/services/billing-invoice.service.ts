@@ -15,7 +15,7 @@ import {
 export class BillingInvoiceService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/billingInvoices`;
-
+  private invoicesUrl = `${environment.apiUrl}/invoices`;
   private serializeParams(params: InvoiceParams): HttpParams {
     let httpParams = new HttpParams();
 
@@ -52,7 +52,7 @@ export class BillingInvoiceService {
 
   downloadInvoicePdf(id: number): Observable<Blob> {
     // Alinhar rota com backend — mantive dentro de billingInvoices
-    return this.http.get(`${this.apiUrl}/${id}/pdf`, { 
+    return this.http.get(`${this.invoicesUrl}/${id}/pdf`, { 
       responseType: 'blob' 
     });
   }

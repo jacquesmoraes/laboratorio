@@ -1,6 +1,6 @@
-<div class="container">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="title">Seções de Trabalho</h1>
+<div class="page-container">
+  <div class="page-wrapper flex justify-between items-center mb-6">
+    <h1 class="page-title">Seções de Trabalho</h1>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
       Nova Seção
@@ -12,13 +12,13 @@
       <thead>
         <tr>
           <th>Nome</th>
-          <th style="width: 1%;">Ações</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         @for (section of workSections(); track section.id) {
           <tr>
-            <td data-label="Nome">{{ section.name }}</td>
+            <td class="name" data-label="Nome">{{ section.name }}</td>
             <td >
               <div class="action-buttons">
                 <button class="btn btn-primary btn-sm" (click)="onEdit(section)">

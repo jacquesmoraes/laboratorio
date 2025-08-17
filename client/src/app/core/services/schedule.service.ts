@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 
 import {
   ScheduleDeliveryDto,
@@ -18,26 +18,20 @@ export class ScheduleService {
    * Agenda uma entrega para uma OS
    */
   scheduleDelivery(dto: ScheduleDeliveryDto): Observable<ScheduleItemRecord> {
-    // ✅ Corrigido: POST para /api/schedule
-    return this.http.post<ScheduleItemRecord>(this.apiUrl, dto);
+      return this.http.post<ScheduleItemRecord>(this.apiUrl, dto);
   }
 
-  /**
-   * Atualiza um agendamento existente
-   */
+  
   updateSchedule(
     id: number,
     dto: ScheduleDeliveryDto
   ): Observable<ScheduleItemRecord> {
-    // ✅ Correto: PUT para /api/schedule/{id}
-    return this.http.put<ScheduleItemRecord>(`${this.apiUrl}/${id}`, dto);
+      return this.http.put<ScheduleItemRecord>(`${this.apiUrl}/${id}`, dto);
   }
 
-  /**
-   * Remove um agendamento
-   */
+ 
   removeSchedule(id: number): Observable<void> {
-    // ✅ Correto: DELETE para /api/schedule/{id}
+    
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
@@ -77,7 +71,15 @@ getScheduleByRange(start: string, end: string) {
   /**
  * Busca o agendamento ativo de uma OS
  */
-getActiveScheduleByServiceOrder(serviceOrderId: number): Observable<ScheduleItemRecord> {
-  return this.http.get<ScheduleItemRecord>(`${this.apiUrl}/service-order/${serviceOrderId}`);
+getActiveScheduleByServiceOrder(serviceOrderId: number) {
+  return this.http.get<ScheduleItemRecord>(`${this.apiUrl}/service-order/${serviceOrderId}`)
+    .pipe(
+      catchError(err => {
+        if (err.status === 404) {
+            return of(null as unknown as ScheduleItemRecord);
+        }
+        throw err;
+      })
+    );
 }
 }

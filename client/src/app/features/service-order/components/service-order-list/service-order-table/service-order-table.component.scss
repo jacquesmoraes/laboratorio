@@ -1,13 +1,4 @@
-.table-container {
-  width: 100%;
-  overflow-x: hidden;
-  border-radius: 1rem;
-  border: 1px solid rgba(150, 175, 184, 0.1);
-  background: var(--white);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: 0.5rem;
-  box-sizing: border-box;
-}
+
 
 .service-order-table {
   width: 100%;
@@ -80,30 +71,9 @@
     color: #666;
   }
 }
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0.25rem 0;
-}
 
-// Desktop - Action buttons visíveis
-@media (min-width: 769px) {
- .action-buttons {
-  display: flex !important;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  overflow: visible;
-}
 
-.action-btn {
-  flex-shrink: 0;
-}
-}
+
 
 // Responsividade estilo card
 @media (max-width: 768px) {
@@ -184,9 +154,6 @@
     margin: 0;
     flex-shrink: 0;
 
-    mat-icon {
-      font-size: 20px;
-    }
   }
 
   .status-chip {

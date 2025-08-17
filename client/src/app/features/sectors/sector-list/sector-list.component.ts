@@ -25,8 +25,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatCardModule,
     MatDialogModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './sector-list.component.html',
-  styleUrls: ['./sector-list.component.scss'],
+  templateUrl: './sector-list.component.html'
+  
 })
 export class SectorListComponent implements OnInit {
   private sectorService = inject(SectorService);
@@ -104,9 +104,7 @@ export class SectorListComponent implements OnInit {
               this.loadSectors();
             },
             error: (error) => {
-              // REMOVER - interceptor já mostra
-              // console.error('Erro ao excluir setor:', error);
-              // Swal.fire({ ... });
+           
             }
           });
       }

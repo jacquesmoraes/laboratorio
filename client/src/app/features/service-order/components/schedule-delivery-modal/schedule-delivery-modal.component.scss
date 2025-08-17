@@ -70,43 +70,7 @@ select.form-control {
   justify-content: flex-end;
 }
 
-.btn-primary,
-.btn-secondary {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
 
-.btn-primary {
-  background-color: #276678;
-  color: white;
-  
-  &:hover:not(:disabled) {
-    background-color: #334a52;
-    transform: translateY(-1px);
-  }
-  
-  &:disabled {
-    background-color: #96afb8;
-    cursor: not-allowed;
-    transform: none;
-  }
-}
-
-.btn-secondary {
-  background-color: #f4f1ee;
-  color: #334a52;
-  border: 1px solid #96afb8;
-  
-  &:hover {
-    background-color: #e0e0e0;
-    border-color: #276678;
-  }
-}
 
 // Melhorar responsividade
 @media (max-width: 480px) {

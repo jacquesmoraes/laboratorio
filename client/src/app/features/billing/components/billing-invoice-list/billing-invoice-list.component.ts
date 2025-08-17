@@ -18,6 +18,7 @@ import { debounceTime, Subject } from 'rxjs';
 import { MatTableModule } from '@angular/material/table';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatChip, MatChipsModule } from "@angular/material/chips";
 
 @Component({
   selector: 'app-billing-invoice-list',
@@ -31,12 +32,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatDatepickerModule,
     MatNativeDateModule,
     MatTableModule,
+    MatChipsModule,
     MatProgressSpinnerModule,
     MatIconModule,
     MatPaginatorModule,
     MatCardModule,
-    MatSelectModule
-  ],
+    MatSelectModule,
+    MatChip
+],
   templateUrl: './billing-invoice-list.component.html',
   styleUrls: ['./billing-invoice-list.component.scss']
 })

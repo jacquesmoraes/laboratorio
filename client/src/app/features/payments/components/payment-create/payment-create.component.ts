@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  MatCardModule } from "@angular/material/card";
 
 @Component({
   selector: 'app-payment-create',
@@ -22,10 +23,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatCardModule,
     MatSelectModule,
     MatButtonModule,
-    MatProgressSpinnerModule
-  ],
+    MatProgressSpinnerModule,
+    
+],
   templateUrl: './payment-create.component.html',
   styleUrls: ['./payment-create.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

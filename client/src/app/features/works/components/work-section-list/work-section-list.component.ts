@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 import { WorkSection } from '../../models/work-section.interface';
 import { WorkSectionService } from '../../services/works-section.service';
 import { WorkSectionModalComponent, WorkSectionModalData } from '../work-section-modal/work-section-modal.component';
-import { MatTooltip } from '@angular/material/tooltip';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -26,8 +26,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatDialogModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './work-section-list.component.html',
-  styleUrls: ['./work-section-list.component.scss']
+  templateUrl: './work-section-list.component.html'
+  
 })
 export class WorkSectionListComponent implements OnInit {
   private workSectionService = inject(WorkSectionService);
