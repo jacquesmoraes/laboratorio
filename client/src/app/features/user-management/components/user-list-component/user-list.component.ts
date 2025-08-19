@@ -12,7 +12,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertResult } from 'sweetalert2';
+
 
 import { 
   ClientUserListRecord, 
@@ -113,7 +114,7 @@ export class UserListComponent implements OnInit {
 }
 
 async onBlock(user: ClientUserListRecord) {
-  const result = await Swal.fire({
+  const result:SweetAlertResult = await Swal.fire({
     title: 'Bloquear Usuário',
     text: `Tem certeza que deseja bloquear o acesso de ${user.clientName}?`,
     icon: 'question',
@@ -133,9 +134,8 @@ async onBlock(user: ClientUserListRecord) {
           Swal.fire('Sucesso!', 'Usuário bloqueado com sucesso.', 'success');
           this.loadUsers();
         },
-        error: (error) => {
-          // REMOVER - interceptor já mostra
-          // this.errorService.showError('Erro ao bloquear usuário', error);
+        error: () => {
+         
           this.loading.set(false);
         }
       });
@@ -143,7 +143,7 @@ async onBlock(user: ClientUserListRecord) {
 }
 
 async onUnblock(user: ClientUserListRecord) {
-  const result = await Swal.fire({
+  const result: SweetAlertResult = await Swal.fire({
     title: 'Desbloquear Usuário',
     text: `Tem certeza que deseja desbloquear o acesso de ${user.clientName}?`,
     icon: 'question',
@@ -174,7 +174,7 @@ async onUnblock(user: ClientUserListRecord) {
 
 
   async onResetAccessCode(user: ClientUserListRecord) {
-    const result = await Swal.fire({
+    const result: SweetAlertResult = await Swal.fire({
       title: 'Resetar Código de Acesso',
       text: `Tem certeza que deseja gerar um novo código de acesso para ${user.clientName}?`,
       icon: 'question',

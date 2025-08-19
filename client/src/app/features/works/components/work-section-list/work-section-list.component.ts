@@ -5,7 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertResult } from 'sweetalert2';
+
 
 import { WorkSection } from '../../models/work-section.interface';
 import { WorkSectionService } from '../../services/works-section.service';
@@ -92,7 +93,7 @@ export class WorkSectionListComponent implements OnInit {
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sim, excluir!',
       cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then((result: SweetAlertResult ) => {
       if (result.isConfirmed) {
         console.log('Confirmação aceita, executando delete...'); // ← Adicionar este log
         this.performDelete(id);

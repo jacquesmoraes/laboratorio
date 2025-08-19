@@ -20,7 +20,7 @@ import { ErrorMappingService } from './error.mapping.service';
 export class AuthService {
   private tokenKey = 'auth_token';
   private userKey = 'auth_user';
-private authBaseUrl = 'https://localhost:7058';
+private authBaseUrl = `${environment.apiBaseUrl}/auth`;
   private userSignal = signal<UserInfo | null>(this.loadUser());
   private tokenSignal = signal<string | null>(this.loadToken());
 private errorMapping = inject(ErrorMappingService);
@@ -34,7 +34,7 @@ private errorMapping = inject(ErrorMappingService);
   
   async login(dto: LoginRequest): Promise<{ success: boolean; error?: string }> {
     try {
-      const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.authBaseUrl}/auth/login`, dto));
+      const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.authBaseUrl}/login`, dto));
       if (res) this.setSession(res);
       return { success: !!res };
     } catch (error) {
@@ -47,7 +47,7 @@ private errorMapping = inject(ErrorMappingService);
 
   async completeFirstAccess(dto: CompleteFirstAccessRequest): Promise<{ success: boolean; error?: string }> {
     try {
-      const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.authBaseUrl}/auth/complete-first-access`, dto));
+      const res = await firstValueFrom(this.http.post<AuthResponse>(`${this.authBaseUrl}/complete-first-access`, dto));
       if (res) this.setSession(res);
       return { success: !!res };
     } catch (error) {
@@ -60,7 +60,7 @@ private errorMapping = inject(ErrorMappingService);
 
   async registerAdmin(dto: RegisterAdminRequest): Promise<boolean> {
     try {
-      await firstValueFrom(this.http.post(`${this.authBaseUrl}/auth/register-admin`, dto));
+      await firstValueFrom(this.http.post(`${this.authBaseUrl}/register-admin`, dto));
       return true;
     } catch {
       return false;
@@ -69,7 +69,7 @@ private errorMapping = inject(ErrorMappingService);
 
   async registerClient(dto: RegisterClientRequest): Promise<boolean> {
     try {
-      await firstValueFrom(this.http.post(`${this.authBaseUrl}/auth/register-client`, dto));
+      await firstValueFrom(this.http.post(`${this.authBaseUrl}/register-client`, dto));
       return true;
     } catch {
       return false;
@@ -77,12 +77,12 @@ private errorMapping = inject(ErrorMappingService);
   }
 
   async changePassword(request: ChangePasswordRequest): Promise<void> {
-  await firstValueFrom(this.http.post(`${this.authBaseUrl}/auth/change-password`, request));
+  await firstValueFrom(this.http.post(`${this.authBaseUrl}/change-password`, request));
 }
 
   async resendAccessCode(clientId: number): Promise<string | null> {
     try {
-      const res = await firstValueFrom(this.http.post<ResendAccessCodeResponse>(`${this.authBaseUrl}/auth/resend-access-code/${clientId}`, {}));
+      const res = await firstValueFrom(this.http.post<ResendAccessCodeResponse>(`${this.authBaseUrl}/resend-access-code/${clientId}`, {}));
       return res?.accessCode || null;
     } catch {
       return null;

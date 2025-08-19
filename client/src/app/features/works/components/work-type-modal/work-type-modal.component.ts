@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertResult } from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { WorkType, CreateWorkTypeDto, UpdateWorkTypeDto } from '../../models/work-type.interface';

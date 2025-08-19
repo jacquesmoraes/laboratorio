@@ -2,15 +2,15 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment())
+if ( builder.Environment.IsDevelopment ( ) )
 {
-    ThreadPool.SetMinThreads(20, 20);
-    ThreadPool.SetMaxThreads(100, 100);
+    ThreadPool.SetMinThreads ( 20, 20 );
+    ThreadPool.SetMaxThreads ( 100, 100 );
 }
 else
 {
-    ThreadPool.SetMinThreads(50, 50);
-    ThreadPool.SetMaxThreads(200, 200);
+    ThreadPool.SetMinThreads ( 50, 50 );
+    ThreadPool.SetMaxThreads ( 200, 200 );
 }
 
 // Add services to the container.
@@ -30,21 +30,21 @@ var app = builder.Build();
 
 app.UseStaticFiles ( );
 app.UseMiddleware<ExceptionMiddleware> ( );
-app.UseMiddleware<PerformanceMiddleware>();
-app.UseAntiforgery();
+app.UseMiddleware<PerformanceMiddleware> ( );
+app.UseAntiforgery ( );
 
 if ( !app.Environment.IsEnvironment ( "Test" ) )
 {
     app.UseStatusCodePagesWithReExecute ( "/errors/{0}" );
 }
 // Middleware de documenta��o
-if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Test"))
+if ( app.Environment.IsDevelopment ( ) || app.Environment.IsEnvironment ( "Test" ) )
 
 {
-    app.UseSwaggerDocumention();
+    app.UseSwaggerDocumention ( );
+    app.UseCors ( "DevCorsPolicy" );
 
 }
-app.UseCors("AllowOrigin");
 
 app.UseAuthentication ( );
 app.UseAuthorization ( );
@@ -78,6 +78,6 @@ catch ( Exception ex )
     logger.LogError ( ex, "An error occurred while migrating or seeding the database" );
     throw;
 }
-
+app.MapGet ( "/health", ( ) => Results.Ok ( new { status = "Healthy" } ) );
 app.Run ( );
 public partial class Program { }

@@ -6,12 +6,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import Swal from 'sweetalert2';
+
 
 import { WorkType } from '../../models/work-type.interface';
 import { WorkTypeService } from '../../services/work-type.service';
 import { WorkTypeModalComponent, WorkTypeModalData } from '../work-type-modal/work-type-modal.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import Swal, { SweetAlertResult } from 'sweetalert2';
+
 
 @Component({
   selector: 'app-work-type-list-component',
@@ -106,7 +108,7 @@ export class WorkTypeListComponent implements OnInit {
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sim, excluir!',
       cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then((result: SweetAlertResult ) => {
       if (result.isConfirmed) {
         this.workTypeService.delete(id)
           .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar

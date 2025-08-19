@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar apenas manifests primeiro (cache melhor)
+COPY package*.json ./
+
+# Instalar ignorando peer deps (temporário até libs suportarem Angular 20)
+RUN npm install --legacy-peer-deps
+
+# Copiar o restante do código
+COPY . .
+
+# Garantir que o ng serve exponha no container
+EXPOSE 4200
+ENV NG_CLI_ANALYTICS=false
+
+# Se seu package.json já tem --host e --port, pode deixar só "npm start"
+CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "4200"]

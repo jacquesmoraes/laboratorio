@@ -162,9 +162,7 @@ export class UserFormComponent implements OnInit {
     this.loading.set(true);
 
     if (this.isEditMode()) {
-      // TODO: Implementar edição quando necessário
-     
-      // this.errorService.showError('Edição de usuários ainda não implementada');
+      
       Swal.fire({
         icon: 'info',
         title: 'Funcionalidade em Desenvolvimento',

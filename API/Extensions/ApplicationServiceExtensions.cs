@@ -50,25 +50,37 @@ namespace API.Extensions
                     options.UseNpgsql ( config.GetConnectionString ( "DefaultConnection" ),
                      o => o.UseQuerySplittingBehavior ( QuerySplittingBehavior.SplitQuery ) ) );
             }
-            
+
             services.AddCors ( opt =>
-            {    
-                opt.AddPolicy ( "AllowOrigin", builder =>
+            {
+                opt.AddPolicy ( "DevCorsPolicy", builder =>
                 {
-                    builder  .WithOrigins ( "http://localhost:4200" )
+                    builder.WithOrigins ( "http://localhost:4200" )
                     .AllowAnyMethod ( )
                     .AllowAnyHeader ( )
-                    .AllowCredentials ( ); 
+                    .AllowCredentials ( );
                 } );
             } );
+
 
             services.AddAntiforgery ( options =>
             {
                 options.HeaderName = "X-CSRF-TOKEN";
                 options.Cookie.Name = "CSRF-TOKEN";
                 options.Cookie.HttpOnly = true;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.Strict;
+
+                // Use secure cookies only in production/non-development environments
+                var environment = config["ASPNETCORE_ENVIRONMENT"] ?? "Development";
+                if ( environment == "Development" )
+                {
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                }
+                else
+                {
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Strict;
+                }
             } );
 
 

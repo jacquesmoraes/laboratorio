@@ -7,12 +7,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { TablePriceService } from '../../services/table-price.services';
 import { TablePrice } from '../../table-price.interface';
-import Swal from 'sweetalert2';
+
 import { MatTooltip } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-table-price-list',
@@ -26,7 +26,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatIconModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    SweetAlert2Module
+    
   ],
   templateUrl: './table-price-list.component.html',
   styleUrls: ['./table-price-list.component.scss'],

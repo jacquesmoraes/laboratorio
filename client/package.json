@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --host 0.0.0.0 --port 4200",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -37,6 +37,7 @@
     "@sweetalert2/ngx-sweetalert2": "^13.0.0",
     "bootstrap": "^5.3.7",
     "rxjs": "~7.8.0",
+    "sweetalert2": "^11.22.4",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },

@@ -19,7 +19,7 @@ import {
 })
 export class UserManagementService {
   private http = inject(HttpClient);
- private authBaseUrl = 'https://localhost:7058/auth';
+  private authBaseUrl = `${environment.apiBaseUrl}/auth`;
 
   // ========== LISTAGEM E DETALHES ==========
 
