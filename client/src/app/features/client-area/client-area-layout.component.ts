@@ -4,13 +4,15 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 
+
 @Component({
   selector: 'app-client-area-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet,RouterModule, MatIconModule],
+  imports: [CommonModule, RouterOutlet, RouterModule, MatIconModule],
   template: `
     <div class="client-area-layout">
       <!-- Menu Mobile Toggle -->
+      
       <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" [class.active]="mobileMenuOpen()">
         <span></span>
         <span></span>

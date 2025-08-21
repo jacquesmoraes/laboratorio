@@ -14,6 +14,16 @@ export interface ClientDashboard {
   totalInvoiced: number;
   totalPaid: number;
   balance: number;
+  upcomingDeliveries: UpcomingDeliveries[]; 
+}
+export interface UpcomingDeliveries {
+  scheduleId: number;
+  serviceOrderId: number;
+  orderNumber: string;
+  patientName: string;
+  scheduledDate: string;
+  deliveryType: 'TryIn' | 'FinalDelivery';
+  isOverdue: boolean;
 }
 
 export interface ClientAreaInvoice {

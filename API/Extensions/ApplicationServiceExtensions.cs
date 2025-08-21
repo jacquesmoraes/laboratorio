@@ -1,5 +1,7 @@
 ﻿
 
+using Applications.Services.ClientAreaServices;
+
 namespace API.Extensions
 {
     public static class ApplicationServiceExtensions

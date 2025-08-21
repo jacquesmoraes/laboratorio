@@ -7,13 +7,8 @@ using System.Linq.Expressions;
 
 namespace Core.FactorySpecifications.ClientAreaSpecifications
 {
-    public class ClientAreaServiceOrderSpecification : BaseSpecification<ServiceOrder>
+    public class ClientAreaServiceOrderSpecification ( Expression<Func<ServiceOrder, bool>> criteria ) : BaseSpecification<ServiceOrder>(criteria)
     {
-        public ClientAreaServiceOrderSpecification(Expression<Func<ServiceOrder, bool>> criteria)
-            : base(criteria)
-        {
-        }
-
         public static class ClientAreaServiceOrderSpecs
         {
             public static ClientAreaServiceOrderSpecification ByIdForDetails(int serviceOrderId, int clientId)

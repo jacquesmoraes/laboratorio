@@ -14,4 +14,5 @@ public record ClientDashboardRecord
     public decimal TotalInvoiced { get; init; }
     public decimal TotalPaid { get; init; }
     public decimal Balance { get; init; }
+    public List<UpcomingDeliveriesRecord> UpcomingDeliveries { get; init; } = new();
 }
