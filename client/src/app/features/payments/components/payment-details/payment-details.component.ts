@@ -53,7 +53,7 @@ export class PaymentDetailsComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/payments']);
+    this.router.navigate(['/admin/payments']);
   }
 
   formatDate(dateString: string): string {

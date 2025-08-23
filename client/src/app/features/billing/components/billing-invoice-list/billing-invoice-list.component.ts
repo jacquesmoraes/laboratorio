@@ -109,11 +109,11 @@ export class BillingInvoiceListComponent implements OnInit {
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/billing/new']);
+    this.router.navigate(['/admin/billing/new']);
   }
 
   viewInvoice(id: number): void {
-    this.router.navigate(['/billing', id]);
+    this.router.navigate(['/admin/billing', id]);
   }
 
  cancelInvoice(id: number): void {

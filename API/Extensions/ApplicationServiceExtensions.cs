@@ -95,6 +95,7 @@ namespace API.Extensions
             services.AddScoped<ITablePriceService, TablePriceService> ( );
             services.AddScoped<IUnitOfWork, UnitOfWork> ( );
             services.AddScoped<UpdateOverdueStatusFilter> ( );
+            services.AddScoped<EmailService> ( );
             services.AddScoped<IClientService, ClientService> ( );
             services.AddScoped<IShadeService, ShadeService> ( );
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );

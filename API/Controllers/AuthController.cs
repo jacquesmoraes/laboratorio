@@ -57,7 +57,19 @@
             return Ok ( new { message = "Senha alterada com sucesso." } );
         }
 
+        [HttpPost ( "forgot-password" )]
+        public async Task<IActionResult> ForgotPassword ( [FromBody] ForgotPasswordDto dto )
+        {
+            var message = await _identityService.ForgotPasswordAsync(dto);
+            return Ok ( new { message } );
+        }
 
+        [HttpPost ( "reset-password" )]
+        public async Task<IActionResult> ResetPassword ( [FromBody] ResetPasswordDto dto )
+        {
+            var message = await _identityService.ResetPasswordAsync(dto);
+            return Ok ( new { message } );
+        }
 
 
         [HttpGet ( "client-users" )]

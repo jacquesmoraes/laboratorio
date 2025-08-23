@@ -60,3 +60,19 @@ export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
 }
+export interface ForgotPasswordResponse {
+  message: string;
+}
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  email: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}

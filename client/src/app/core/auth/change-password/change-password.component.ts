@@ -86,7 +86,11 @@ export class ChangePasswordComponent {
     if (url.includes('/client-area')) {
       this.router.navigate(['/client-area']);
     } else {
-      this.router.navigate(['/']);
+      if (this.authService.isClient()) {
+        this.router.navigate(['/client-area']);
+      } else {
+        this.router.navigate(['/admin']);
+      }
     }
   }
 }

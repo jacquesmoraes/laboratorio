@@ -105,7 +105,7 @@ export class ClientServiceOrdersComponent implements OnInit {
   }
 
   viewServiceOrder(id: number): void {
-    this.router.navigate(['/service-orders', id]);
+    this.router.navigate(['/admin/service-orders', id]);
   }
 
   formatDate(date: string): string {

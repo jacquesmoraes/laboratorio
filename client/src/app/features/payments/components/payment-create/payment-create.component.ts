@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { PaymentService } from '../../services/payment.service';
 import { CreatePaymentDto } from '../../models/payment.interface';
-import { ClientService } from '../../../clients/services/clients.services';
+import { ClientService } from '../../../clients/services/clients.service';
 import { Client } from '../../../clients/models/client.interface';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -101,7 +101,7 @@ export class PaymentCreateComponent implements OnInit {
       this.paymentService.createPayment(paymentData)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => this.router.navigate(['/payments']),
+        next: () => this.router.navigate(['/admin/payments']),
         error: () => {
           this.loading.set(false);
         }
@@ -110,7 +110,7 @@ export class PaymentCreateComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/payments']);
+    this.router.navigate(['/admin/payments']);
   }
 
   private formatDateTimeLocal(date: Date): string {

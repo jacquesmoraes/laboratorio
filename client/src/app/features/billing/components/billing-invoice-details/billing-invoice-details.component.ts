@@ -48,7 +48,7 @@ export class BillingInvoiceDetailsComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/billing']);
+    this.router.navigate(['/admin/billing']);
   }
 
   printInvoice(): void {

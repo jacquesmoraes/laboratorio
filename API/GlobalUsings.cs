@@ -20,6 +20,13 @@ global using Applications.Contracts;
 // Authentication & Identity
 // ==========================
 global using Applications.Contracts.Identity;
+
+// ===========================
+//  sendgrid email service
+// ===========================
+
+global using SendGrid;
+global using SendGrid.Helpers.Mail;
 // ==========================
 // DTOs
 // ==========================

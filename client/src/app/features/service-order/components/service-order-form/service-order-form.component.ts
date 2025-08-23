@@ -325,7 +325,7 @@ export class ServiceOrderFormComponent implements OnInit {
               panelClass: ['success-snackbar']
             });
           }
-          this.router.navigate(['service-orders', result.serviceOrderId]);
+          this.router.navigate(['/admin/service-orders', result.serviceOrderId]);
         });
       },
       error: () => {
@@ -431,7 +431,7 @@ getShadesForWork(index: number) {
 }
 
 cancel() {
-  this.router.navigate(['service-orders']);
+  this.router.navigate(['/admin/service-orders']);
 }
 
 }

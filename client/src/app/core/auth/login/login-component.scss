@@ -71,3 +71,111 @@ mat-card-header {
     margin-top: 4px;
   }
 }
+
+.first-access-section {
+  margin: 16px 0;
+  
+  mat-checkbox {
+    font-size: 14px;
+  }
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #334a52 0%, #276678 100%);
+  padding: 20px;
+}
+
+.login-card {
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #f44336;
+  background-color: #ffebee;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+button[mat-raised-button] {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  
+  mat-spinner {
+    margin-right: 8px;
+  }
+  
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
+mat-card-header {
+  text-align: center;
+  margin-bottom: 16px;
+  
+  mat-card-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  mat-card-subtitle {
+    color: #666;
+    margin-top: 4px;
+  }
+}
+
+.first-access-section {
+  margin: 16px 0;
+  
+  mat-checkbox {
+    font-size: 14px;
+  }
+}
+
+.forgot-password-link {
+  text-align: center;
+  margin-top: 16px;
+  
+  .link-button {
+    color: #276678;
+    font-size: 14px;
+    text-transform: none;
+    padding: 0;
+    min-width: auto;
+    
+    &:hover {
+      background-color: transparent;
+      text-decoration: underline;
+    }
+  }
+}

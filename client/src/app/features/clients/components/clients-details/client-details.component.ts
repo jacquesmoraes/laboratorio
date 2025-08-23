@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
-import { ClientService } from '../../services/clients.services';
+import { ClientService } from '../../services/clients.service';
 import { ClientDetails, BillingMode, BillingModeLabels } from '../../models/client.interface';
 import { MatIconModule } from '@angular/material/icon';
 import { ClientServiceOrdersComponent } from '../client-service-orders/client-service-orders.component';
@@ -72,12 +72,12 @@ export class ClientDetailsComponent implements OnInit {
   editClient(): void {
     const client = this.client();
     if (client) {
-      this.router.navigate(['/clients', client.clientId, 'edit']);
+      this.router.navigate(['/admin/clients', client.clientId, 'edit']);
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/clients']);
+    this.router.navigate(['/admin/clients']);
   }
 
 }

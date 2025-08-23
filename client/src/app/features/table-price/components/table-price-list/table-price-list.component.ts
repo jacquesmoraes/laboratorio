@@ -64,15 +64,15 @@ export class TablePriceListComponent implements OnInit {
   }
 
   onNew(): void {
-    this.router.navigate(['/table-price/new']);
+    this.router.navigate(['/admin/table-price/new']);
   }
 
   onView(id: number): void {
-    this.router.navigate(['/table-price', id]);
+    this.router.navigate(['/admin/table-price', id]);
   }
 
   onEdit(id: number): void {
-    this.router.navigate(['/table-price', id, 'edit']);
+    this.router.navigate(['/admin/table-price', id, 'edit']);
   }
 
   deleteTablePrice(id: number): void {

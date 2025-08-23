@@ -67,11 +67,11 @@ export class TryInAlertsComponent implements OnInit {
   }
 
   viewOrder(orderId: number) {
-    this.router.navigate(['/service-orders', orderId]);
+    this.router.navigate(['/admin/service-orders', orderId]);
   }
 
   viewAllOrders() {
-    this.router.navigate(['/service-orders'], { 
+    this.router.navigate(['/admin/service-orders'], { 
       queryParams: { status: 'TryIn' } 
     });
   }

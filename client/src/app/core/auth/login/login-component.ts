@@ -1,7 +1,7 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CompleteFirstAccessRequest, LoginRequest } from '../../../core/models/auth.interface';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,6 +20,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     FormsModule,
     MatCardModule,
     MatFormFieldModule,
+    RouterModule,
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
@@ -42,6 +43,7 @@ export class LoginComponent {
   error = signal('');
   isFirstAccess = signal(false);
   accessCode = signal('');
+  confirmPassword = signal(''); 
 
   async onSubmit(): Promise<void> {
     if (!this.credentials().email || !this.credentials().password) {
@@ -54,6 +56,17 @@ export class LoginComponent {
       return;
     }
 
+    // Validação de confirmação de senha para primeiro acesso
+    if (this.isFirstAccess() && !this.confirmPassword()) {
+      this.error.set('Digite a confirmação da senha');
+      return;
+    }
+
+    if (this.isFirstAccess() && this.credentials().password !== this.confirmPassword()) {
+      this.error.set('As senhas não coincidem');
+      return;
+    }
+
     this.loading.set(true);
     this.error.set('');
 
@@ -63,7 +76,7 @@ export class LoginComponent {
         email: this.credentials().email,
         accessCode: this.accessCode(),
         newPassword: this.credentials().password,
-        confirmNewPassword: this.credentials().password
+        confirmNewPassword: this.confirmPassword() // Usar a confirmação separada
       };
 
       const result = await this.authService.completeFirstAccess(firstAccessData);
@@ -72,7 +85,7 @@ export class LoginComponent {
         if (this.authService.isClient()) {
           this.router.navigate(['/client-area']);
         } else {
-          this.router.navigate(['/']);
+          this.router.navigate(['/admin']);
         }
       } else {
         this.error.set(result.error || 'Código de acesso inválido ou email não encontrado');
@@ -85,7 +98,7 @@ export class LoginComponent {
         if (this.authService.isClient()) {
           this.router.navigate(['/client-area']);
         } else {
-          this.router.navigate(['/']);
+          this.router.navigate(['/admin']);
         }
       } else {
         this.error.set(result.error || 'Email ou senha inválidos');
@@ -94,10 +107,19 @@ export class LoginComponent {
 
     this.loading.set(false);
   }
+  goToForgotPassword(): void {
+    console.log('Navegando para forgot-password...');
+    this.router.navigate(['/forgot-password/forgot-password']);
+  }
 
    
   onFirstAccessChange(): void {
     this.error.set('');
+    // Limpar campos específicos do primeiro acesso quando desmarcado
+    if (!this.isFirstAccess()) {
+      this.accessCode.set('');
+      this.confirmPassword.set('');
+    }
   }
 
 }

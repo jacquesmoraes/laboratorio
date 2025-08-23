@@ -12,7 +12,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Client, CreateClientDto, UpdateClientDto, BillingMode, BillingModeLabels } from '../../models/client.interface';
 
-import { ClientService } from '../../services/clients.services';
+import { ClientService } from '../../services/clients.service';
 
 import { TablePriceService } from '../../../table-price/services/table-price.services';
 import { TablePriceOption } from '../../../table-price/table-price.interface';
@@ -168,7 +168,7 @@ export class ClientFormComponent implements OnInit {
       timer: 1000,
       showConfirmButton: false
     }).then(() => {
-      this.router.navigate(['/clients']);
+      this.router.navigate(['/admin/clients']);
     });
   }
 
@@ -244,11 +244,11 @@ export class ClientFormComponent implements OnInit {
         cancelButtonText: 'Cancelar'
       }).then((result) => {
         if (result.isConfirmed) {
-          this.router.navigate(['/clients']);
+          this.router.navigate(['/admin/clients']);
         }
       });
     } else {
-      this.router.navigate(['/clients']);
+      this.router.navigate(['/admin/clients']);
     }
   }
 }

@@ -45,7 +45,7 @@ export class UserDetailsComponent implements OnInit {
     this.loadUser(userId);
   } else {
     console.error('UserId inválido ou não encontrado');
-    this.router.navigate(['/user-management']);
+    this.router.navigate(['/admin/user-management']);
   }
 }
 
@@ -199,12 +199,12 @@ private loadUser(userId: string) {
   }
 
   goBack() {
-    this.router.navigate(['/user-management']);
+    this.router.navigate(['/admin/user-management']);
   }
 
   editUser() {
     if (this.user()) {
-      this.router.navigate(['/user-management', this.user()!.userId, 'edit']);
+      this.router.navigate(['/admin/user-management', this.user()!.userId, 'edit']);
     }
   }
 }

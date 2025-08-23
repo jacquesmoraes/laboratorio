@@ -14,13 +14,15 @@
 
         Task<AuthResponseRecord> CompleteFirstAccessAsync ( FirstAccessPasswordResetDto dto );
 
-        Task<string> RegenerateAccessCodeByUserIdAsync(string userId);
+        Task<string> RegenerateAccessCodeByUserIdAsync ( string userId );
 
+        Task<string> ForgotPasswordAsync ( ForgotPasswordDto dto );
+        Task<string> ResetPasswordAsync ( ResetPasswordDto dto );
 
         Task<Pagination<ClientUserListRecord>> GetClientUsersPaginatedAsync ( QueryParams parameters );
-       Task<ClientUserDetailsRecord> GetClientUserDetailsByUserIdAsync ( string userId );
+        Task<ClientUserDetailsRecord> GetClientUserDetailsByUserIdAsync ( string userId );
         Task BlockClientUserAsync ( string userId );
         Task UnblockClientUserAsync ( string userId );
-       
+
     }
 }

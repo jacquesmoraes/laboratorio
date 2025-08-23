@@ -55,6 +55,20 @@
             />
             <mat-icon matSuffix>key</mat-icon>
           </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirmar Nova Senha</mat-label>
+            <input 
+              matInput 
+              type="password" 
+              [(ngModel)]="confirmPassword" 
+              name="confirmPassword"
+              required
+              [disabled]="loading()"
+              placeholder="Digite novamente sua nova senha"
+            />
+            <mat-icon matSuffix>lock_outline</mat-icon>
+          </mat-form-field>
         }
 
         @if (error()) {
@@ -82,6 +96,16 @@
             
           }
         </button>
+        <div class="forgot-password-link">
+          <button 
+            mat-button 
+            type="button"
+            class="link-button"
+            (click)="goToForgotPassword()"
+          >
+            Esqueceu sua senha?
+          </button>
+        </div>
       </form>
     </mat-card-content>
   </mat-card>

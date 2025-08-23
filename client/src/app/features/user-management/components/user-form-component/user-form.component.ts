@@ -13,7 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 import { UserManagementService } from '../../services/user-management.service';
-import { ClientService } from '../../../clients/services/clients.services';
+import { ClientService } from '../../../clients/services/clients.service';
 import { 
   RegisterClientUserRequest, 
   ClientUserRegistrationResponse,
@@ -218,12 +218,12 @@ export class UserFormComponent implements OnInit {
       confirmButtonText: 'OK',
       confirmButtonColor: '#276678'
     }).then(() => {
-      this.router.navigate(['/user-management']);
+      this.router.navigate(['/admin/user-management']);
     });
   }
 
   onCancel() {
-    this.router.navigate(['/user-management']);
+    this.router.navigate(['/admin/user-management']);
   }
 
   private markFormGroupTouched(formGroup: any) {

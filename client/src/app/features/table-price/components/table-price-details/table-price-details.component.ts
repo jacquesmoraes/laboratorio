@@ -74,7 +74,7 @@ export class TablePriceDetailsComponent  implements OnInit {
   }
 
   onEdit(): void {
-    this.router.navigate(['/table-price', this.tablePrice()!.id, 'edit']);
+    this.router.navigate(['/admin/table-price', this.tablePrice()!.id, 'edit']);
   }
 
   deleteTablePrice(): void {
@@ -94,7 +94,7 @@ export class TablePriceDetailsComponent  implements OnInit {
           .subscribe({
             next: () => {
               Swal.fire('Excluído!', 'A tabela de preço foi excluída com sucesso.', 'success').then(() => {
-                this.router.navigate(['/table-price']);
+                this.router.navigate(['/admin/table-price']);
               });
             },
             error: () => {
@@ -107,6 +107,6 @@ export class TablePriceDetailsComponent  implements OnInit {
 
  
   goBack(): void {
-    this.router.navigate(['/table-price']);
+    this.router.navigate(['/admin/table-price']);
   }
 }

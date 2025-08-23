@@ -122,7 +122,7 @@ export class ClientPaymentsComponent implements OnInit {
   }
 
   viewPayment(id: number): void {
-    this.router.navigate(['/payments', id]);
+    this.router.navigate(['/admin/payments', id]);
   }
 
   formatDate(date: string): string {

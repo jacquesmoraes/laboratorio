@@ -88,11 +88,11 @@ export class PaymentListComponent implements OnInit {
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/payments/new']);
+    this.router.navigate(['/admin/payments/new']);
   }
 
   viewPayment(id: number): void {
-    this.router.navigate(['/payments', id]);
+    this.router.navigate(['/admin/payments', id]);
   }
 
   formatDate(dateString: string): string {

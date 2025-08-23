@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { MatRadioModule } from '@angular/material/radio';
 
 import { AuthService } from '../../../core/services/auth.service';
-import { ClientService } from '../../../features/clients/services/clients.services';
+import { ClientService } from '../../../features/clients/services/clients.service';
 import {
   RegisterAdminRequest,
   RegisterClientRequest
@@ -103,7 +103,7 @@ export class RegisterComponent implements OnInit {
     this.loading.set(false);
 
     if (success) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/admin']);
     } else {
       this.error.set('Erro ao registrar administrador');
     }
@@ -145,13 +145,13 @@ export class RegisterComponent implements OnInit {
     this.loading.set(false);
 
     if (success) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/admin']);
     } else {
       this.error.set('Erro ao registrar cliente');
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/admin']);
   }
 }

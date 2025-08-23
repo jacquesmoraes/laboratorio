@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AuthResponse,
@@ -12,6 +12,9 @@ import {
   ResendAccessCodeResponse,
   UserInfo,
   ChangePasswordRequest,
+  ForgotPasswordResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
   
 } from '../models/auth.interface';
 import { ErrorMappingService } from './error.mapping.service';
@@ -75,9 +78,15 @@ private errorMapping = inject(ErrorMappingService);
       return false;
     }
   }
-
+forgotPassword(data: { email: string }): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(`${this.authBaseUrl}/forgot-password`, data);
+  }
   async changePassword(request: ChangePasswordRequest): Promise<void> {
   await firstValueFrom(this.http.post(`${this.authBaseUrl}/change-password`, request));
+}
+
+resetPassword(data: ResetPasswordRequest): Observable<ResetPasswordResponse> {
+  return this.http.post<ResetPasswordResponse>(`${this.authBaseUrl}/reset-password`, data);
 }
 
   async resendAccessCode(clientId: number): Promise<string | null> {

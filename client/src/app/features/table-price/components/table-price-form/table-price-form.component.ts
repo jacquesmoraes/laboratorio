@@ -183,7 +183,7 @@ export class TablePriceFormComponent implements OnInit {
         .subscribe({
           next: () => {
             Swal.fire('Atualizado!', 'Tabela de preço atualizada com sucesso.', 'success').then(() => {
-              this.router.navigate(['/table-price']);
+              this.router.navigate(['/admin/table-price']);
             });
           },
           error: () => {
@@ -199,7 +199,7 @@ export class TablePriceFormComponent implements OnInit {
         .subscribe({
           next: () => {
             Swal.fire('Criado!', 'Tabela de preço criada com sucesso.', 'success').then(() => {
-              this.router.navigate(['/table-price']);
+              this.router.navigate(['/admin/table-price']);
             });
           },
           error: () => {
@@ -220,7 +220,7 @@ export class TablePriceFormComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.router.navigate(['/table-price']);
+        this.router.navigate(['/admin/table-price']);
       }
     });
   }

@@ -79,7 +79,11 @@ export class FirstAccessComponent implements OnInit {
     const success = await this.authService.completeFirstAccess(data);
     
     if (success) {
-      this.router.navigate(['/']);
+      if (this.authService.isClient()) {
+        this.router.navigate(['/client-area']);
+      } else {
+        this.router.navigate(['/admin']);
+      }
     } else {
       this.error.set('Erro ao completar primeiro acesso. Verifique o código de acesso.');
     }

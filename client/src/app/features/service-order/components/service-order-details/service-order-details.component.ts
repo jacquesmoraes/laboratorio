@@ -84,7 +84,7 @@ private sectorService = inject(SectorService);
   editOrder() {
     const order = this.serviceOrder();
     if (order) {
-      this.router.navigate(['service-orders', order.serviceOrderId, 'edit']);
+      this.router.navigate(['/admin/service-orders', order.serviceOrderId, 'edit']);
     }
   }
 
@@ -104,7 +104,7 @@ private sectorService = inject(SectorService);
         this.serviceOrdersService.deleteServiceOrder(order.serviceOrderId).subscribe({
           next: () => {
             Swal.fire('Excluída!', 'Ordem excluída com sucesso.', 'success');
-            this.router.navigate(['service-orders']);
+            this.router.navigate(['/admin/service-orders']);
           },
           error: () => {
             Swal.fire('Erro', 'Erro ao excluir ordem de serviço.', 'error');

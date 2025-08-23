@@ -17,7 +17,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { Client, BillingMode, BillingModeLabels, Pagination, QueryParams } from '../../models/client.interface';
 import { ErrorService } from '../../../../core/services/error.service';
-import { ClientService } from '../../services/clients.services';
+import { ClientService } from '../../services/clients.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -109,11 +109,11 @@ export class ClientListComponent implements OnInit {
   }
 
   onNew() {
-    this.router.navigate(['/clients/new']);
+    this.router.navigate(['/admin/clients/new']);
   }
 
   onEdit(client: Client) {
-    this.router.navigate(['/clients', client.clientId, 'edit']);
+    this.router.navigate(['/admin/clients', client.clientId, 'edit']);
   }
 
   onDelete(client: Client) {
@@ -149,7 +149,7 @@ export class ClientListComponent implements OnInit {
   }
 
   onViewDetails(client: Client) {
-    this.router.navigate(['/clients', client.clientId]);
+    this.router.navigate(['/admin/clients', client.clientId]);
   }
 
   protected readonly getBillingModeLabel = computed(() => {

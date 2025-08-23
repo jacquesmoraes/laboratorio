@@ -129,15 +129,15 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
 
   // Navegação
   navigateToNew() {
-    this.router.navigate(['/service-orders/new']);
+    this.router.navigate(['/admin/service-orders/new']);
   }
 
   viewDetails(id: number) {
-    this.router.navigate(['/service-orders', id]);
+    this.router.navigate(['/admin/service-orders', id]);
   }
 
   editOrder(id: number) {
-    this.router.navigate(['/service-orders', id, 'edit']);
+    this.router.navigate(['/admin/service-orders', id, 'edit']);
   }
 
   // Ações de OS

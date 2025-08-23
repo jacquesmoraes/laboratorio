@@ -6,7 +6,7 @@ import { BillingInvoiceService } from '../../services/billing-invoice.service';
 import { CreateBillingInvoiceDto } from '../../models/billing-invoice.interface';
 import { OrderStatus, ServiceOrder, ServiceOrderParams } from '../../../service-order/models/service-order.interface';
 import { ServiceOrdersService } from '../../../service-order/services/service-order.service';
-import { ClientService } from '../../../clients/services/clients.services';
+import { ClientService } from '../../../clients/services/clients.service';
 import { Client } from '../../../clients/models/client.interface';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -118,7 +118,7 @@ export class BillingInvoiceCreateComponent implements OnInit {
       .subscribe({
         next: invoice => {
           this.loading.set(false);
-          this.router.navigate(['/billing', invoice.billingInvoiceId]);
+          this.router.navigate(['/admin/billing', invoice.billingInvoiceId]);
         },
         error: err => {
 
@@ -130,7 +130,7 @@ export class BillingInvoiceCreateComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/billing']);
+    this.router.navigate(['/admin/billing']);
   }
 
   getSelectedTotal(): number {

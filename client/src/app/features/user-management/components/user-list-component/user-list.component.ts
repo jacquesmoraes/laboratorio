@@ -104,12 +104,12 @@ export class UserListComponent implements OnInit {
   }
 
   onNew() {
-    this.router.navigate(['/user-management/new']);
+    this.router.navigate(['/admin/user-management/new']);
   }
 
  onViewDetails(user: ClientUserListRecord) {
   
-  this.router.navigate(['/user-management', user.userId]);
+  this.router.navigate(['/admin/user-management', user.userId]);
 
 }
 
