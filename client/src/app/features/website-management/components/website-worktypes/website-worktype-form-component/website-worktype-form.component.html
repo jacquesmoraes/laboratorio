@@ -1,0 +1,158 @@
+<div class="form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="header-icon">work</mat-icon>
+        {{ isEditMode() ? 'Editar' : 'Novo' }} Serviço do Website
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isEditMode() ? 'Edite as informações do serviço' : 'Crie um novo serviço para aparecer na homepage' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="workTypeForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Seleção do WorkType -->
+        <div class="section">
+          <h3 class="section-title">
+            <mat-icon>category</mat-icon>
+            Tipo de Trabalho
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Selecionar Tipo de Trabalho</mat-label>
+              <mat-select formControlName="workTypeId" required>
+                @for (workType of availableWorkTypes(); track workType.id) {
+                  <mat-option [value]="workType.id">
+                    {{ workType.name }} - {{ workType.description || 'Sem descrição' }}
+                  </mat-option>
+                }
+              </mat-select>
+              @if (workTypeForm.get('workTypeId')?.hasError('required') && workTypeForm.get('workTypeId')?.touched) {
+                <mat-error>Seleção do tipo de trabalho é obrigatória</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Imagem do Serviço -->
+        <div class="section">
+          <h3 class="section-title">
+            <mat-icon>image</mat-icon>
+            Imagem do Serviço
+          </h3>
+
+          <div class="form-row row-align-center">
+            <mat-form-field appearance="outline" class="w-70 input-with-button">
+              <mat-label>URL da Imagem</mat-label>
+              <input 
+                matInput 
+                formControlName="imageUrl" 
+                placeholder="https://exemplo.com/imagem.jpg">
+              @if (workTypeForm.get('imageUrl')?.hasError('required') && workTypeForm.get('imageUrl')?.touched) {
+                <mat-error>URL da imagem é obrigatória</mat-error>
+              }
+              @if (workTypeForm.get('imageUrl')?.hasError('pattern') && workTypeForm.get('imageUrl')?.touched) {
+                <mat-error>URL inválida</mat-error>
+              }
+            </mat-form-field>
+
+            <button 
+              type="button"
+              (click)="uploadImage()"
+              class="btn btn-primary upload-btn">
+              <mat-icon>upload</mat-icon>
+              Upload
+            </button>
+          </div>
+
+          @if (workTypeForm.get('imageUrl')?.value && !workTypeForm.get('imageUrl')?.hasError('pattern')) {
+            <div class="image-preview">
+              <div class="image-container">
+                <img 
+                  [src]="workTypeForm.get('imageUrl')?.value" 
+                  alt="Preview"
+                  class="preview-image"
+                  (error)="onImageError($event)">
+                <button 
+                  type="button"
+                  class="remove-image-btn"
+                  (click)="clearImage()"
+                  [title]="'Remover imagem'">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Configurações -->
+        <div class="section">
+          <h3 class="section-title">
+            <mat-icon>settings</mat-icon>
+            Configurações
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>Ordem de Exibição</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="order" 
+                placeholder="1, 2, 3..."
+                min="1">
+              @if (workTypeForm.get('order')?.hasError('required') && workTypeForm.get('order')?.touched) {
+                <mat-error>Ordem é obrigatória</mat-error>
+              }
+              @if (workTypeForm.get('order')?.hasError('min') && workTypeForm.get('order')?.touched) {
+                <mat-error>Ordem deve ser maior que 0</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="w-50">
+              <mat-checkbox formControlName="isActive" class="status-checkbox">
+                Serviço ativo (visível no site)
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="form-actions">
+          @if (isEditMode()) {
+            <button 
+              type="button"
+              (click)="deleteWorkType()"
+              class="btn btn-danger">
+              <mat-icon>delete</mat-icon>
+              Excluir
+            </button>
+          }
+
+          <button 
+            type="button" 
+            (click)="cancel()"
+            class="cancel-btn">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+
+          <button 
+            type="submit"
+            class="submit-btn"
+            [disabled]="workTypeForm.invalid || isSubmitting()">
+            @if (isSubmitting()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <mat-icon>{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
+            }
+            {{ isEditMode() ? 'Salvar Alterações' : 'Criar Serviço' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

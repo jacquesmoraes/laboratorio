@@ -47,6 +47,13 @@ global using Applications.Mapping;
 // PDF Generation (QuestPDF)
 // ==========================
 global using Applications.PdfDocuments;
+
+// ==========================
+//  website 
+// ==========================
+global using Applications.Contracts.WebSiteServices;
+global using Applications.Services.ClientAreaServices;
+global using Applications.Services.WebSiteServices;
 // ==========================
 // Projections
 // ==========================

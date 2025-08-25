@@ -7,6 +7,10 @@ export const routes: Routes = [
     path: '',
     loadComponent: () => import('./pages/homepage.component').then(m => m.HomepageComponent)
   },
+  {
+    path: 'case/:id',
+    loadComponent: () => import('./features/website-management/components/website-cases/website-case-details-component/website-case-details.component').then(m => m.WebsiteCaseDetailsComponent)
+  },
   
   // Rotas públicas de autenticação
   {
@@ -49,6 +53,7 @@ export const routes: Routes = [
       { path: 'billing', loadChildren: () => import('./features/billing/billing.routes').then(m => m.BILLING_ROUTES) },
       { path: 'payments', loadChildren: () => import('./features/payments/payment.routes').then(m => m.PAYMENT_ROUTES) },
       { path: 'user-management', loadChildren: () => import('./features/user-management/user-management.routes').then(m => m.USER_MANAGEMENT_ROUTES) },
+      { path: 'website-management', loadChildren: () => import('./features/website-management/website-management.routes').then(m => m.WEBSITE_MANAGEMENT_ROUTES) },
     ]
   },
   

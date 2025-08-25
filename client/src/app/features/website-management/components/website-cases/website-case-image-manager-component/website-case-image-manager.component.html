@@ -1,0 +1,115 @@
+<div class="image-manager">
+    <div class="image-manager-header">
+      <h3>Gerenciar Imagens</h3>
+      <div class="header-actions">
+        <!-- Botão de reordenação -->
+        <button 
+          mat-raised-button 
+          color="accent" 
+          (click)="openReorderModal()"
+          class="reorder-btn"
+          [disabled]="images.length < 2"
+          matTooltip="Reordenar imagens"
+        >
+          <mat-icon>sort</mat-icon>
+          Reordenar
+        </button>
+        
+        <!-- Botão de adicionar -->
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="addImage()"
+          class="add-image-btn"
+        >
+          <mat-icon>add_photo_alternate</mat-icon>
+          Adicionar Imagem
+        </button>
+      </div>
+    </div>
+  
+    <div class="images-grid">
+      <div 
+        *ngFor="let image of images; let i = index; trackBy: trackByImageId"
+        class="image-card"
+        [class.dragging]="isDragging() && draggedIndex() === i"
+        [class.drag-over]="isDragging() && draggedIndex() !== i"
+        draggable="true"
+        (dragstart)="onDragStart($event, i)"
+        (dragover)="onDragOver($event, i)"
+        (drop)="onDrop($event, i)"
+        (dragend)="onDragEnd()"
+      >
+        <div class="image-preview">
+          <img 
+            [src]="getImagePreviewUrl(image.imageUrl)" 
+            [alt]="image.altText"
+            class="preview-image"
+          />
+          
+          <div class="image-overlay">
+            <div class="image-actions">
+              <button 
+                mat-icon-button 
+                color="primary"
+                matTooltip="Editar imagem"
+                (click)="editImage(image)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              
+              <button 
+                mat-icon-button 
+                color="warn"
+                matTooltip="Excluir imagem"
+                (click)="deleteImage(image)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+  
+          <!-- Main image indicator -->
+          <div *ngIf="image.isMainImage" class="main-image-badge">
+            <mat-icon>star</mat-icon>
+            <span>Principal</span>
+          </div>
+        </div>
+  
+        <div class="image-info">
+          <div class="image-details">
+            <p class="image-caption" *ngIf="image.caption">{{ image.caption }}</p>
+            <p class="image-alt" *ngIf="image.altText">{{ image.altText }}</p>
+          </div>
+  
+          <div class="image-controls">
+            <mat-chip 
+              *ngIf="!image.isMainImage"
+              color="primary" 
+              (click)="setMainImage(image)"
+              class="set-main-chip"
+            >
+              <mat-icon>star_border</mat-icon>
+              Definir como Principal
+            </mat-chip>
+            
+            <span class="image-order">Ordem: {{ image.order }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Empty state -->
+    <div *ngIf="images.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">photo_library</mat-icon>
+      <h4>Nenhuma imagem adicionada</h4>
+      <p>Adicione imagens para mostrar o caso clínico</p>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="addImage()"
+      >
+        Adicionar Primeira Imagem
+      </button>
+    </div>
+  </div>

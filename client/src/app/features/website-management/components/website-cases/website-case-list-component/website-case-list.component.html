@@ -1,0 +1,122 @@
+<div class="page-wrapper">
+  <!-- Header -->
+  <div class="filters-toolbar">
+    <div class="header-content">
+      <h1 class="page-title">Casos Clínicos</h1>
+      <p class="subtitle">Gerencie os casos clínicos exibidos no site</p>
+    </div>
+    <button 
+      (click)="createNewCase()"
+      class="btn btn-primary">
+      <mat-icon>add</mat-icon>
+      Novo Caso
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <!-- Empty State -->
+    @if (cases().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">folder_open</mat-icon>
+        <h3>Nenhum caso encontrado</h3>
+        <p>Comece criando seu primeiro caso clínico</p>
+        <button 
+          class="btn btn-primary"
+          (click)="createNewCase()">
+          <mat-icon>add</mat-icon>
+          Criar Primeiro Caso
+        </button>
+      </div>
+    }
+
+    <!-- Table -->
+    @if (cases().length > 0) {
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Status</th>
+              <th>Ordem</th>
+              <th>Imagens</th>
+              <th>Criado em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (case of cases(); track case.id) {
+              <tr>
+                <!-- Title Column -->
+                <td class="case-title">
+                  <div class="case-info">
+                    <img 
+                      [src]="case.mainImageUrl" 
+                      [alt]="case.title"
+                      class="case-image"
+                      (error)="onImageError($event)">
+                    <div class="case-details">
+                      <div class="case-name">{{ case.title }}</div>
+                      <div class="case-description">{{ case.shortDescription }}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Status Column -->
+                <td>
+                  <mat-chip 
+                    [color]="case.isActive ? 'accent' : 'warn'"
+                    class="status-chip">
+                    {{ case.isActive ? 'Ativo' : 'Inativo' }}
+                  </mat-chip>
+                </td>
+
+                <!-- Order Column -->
+                <td class="order-value">{{ case.order }}</td>
+
+                <!-- Images Column -->
+                <td class="image-count">{{ case.imageCount }} imagens</td>
+
+                <!-- Created At Column -->
+                <td class="created-date">{{ case.createdAt | date:'dd/MM/yyyy' }}</td>
+
+                <!-- Actions Column -->
+                <td>
+                  <div class="action-buttons">
+                    <button 
+                      class="action-btn"
+                      [title]="'Ver detalhes'"
+                      (click)="viewCase(case.id)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    
+                    <button 
+                      class="action-btn"
+                      [title]="'Editar'"
+                      (click)="editCase(case.id)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    
+                    <button 
+                      class="action-btn"
+                      [title]="case.isActive ? 'Desativar' : 'Ativar'"
+                      (click)="toggleStatus(case)">
+                      <mat-icon>{{ case.isActive ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                    
+                    <button 
+                      class="action-btn action-btn-danger"
+                      [title]="'Excluir'"
+                      (click)="deleteCase(case)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

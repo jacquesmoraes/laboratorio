@@ -58,10 +58,31 @@
           
           Pagamentos
         </a>
-        <a routerLink="/admin/settings" routerLinkActive="active" (click)="closeSidebar()">
-          <mat-icon>settings</mat-icon>
-          Configurações
-        </a>
+        <div class="nav-dropdown">
+          <a 
+            class="nav-dropdown-trigger" 
+            [class.active]="isSettingsRoute()"
+            (click)="toggleSettingsDropdown()">
+            <mat-icon>settings</mat-icon>
+            Configurações
+            <mat-icon class="dropdown-arrow" [class.rotated]="settingsDropdownOpen()">expand_more</mat-icon>
+          </a>
+          
+          <div class="nav-dropdown-menu" [class.open]="settingsDropdownOpen()">
+            <a routerLink="/admin/settings" routerLinkActive="active" (click)="closeSidebar()">
+              <mat-icon>tune</mat-icon>
+              Config. do Sistema
+            </a>
+            <a routerLink="/admin/website-management/cases" routerLinkActive="active" (click)="closeSidebar()">
+              <mat-icon>photo_library</mat-icon>
+              Config. Homepage - Casos
+            </a>
+            <a routerLink="/admin/website-management/work-types" routerLinkActive="active" (click)="closeSidebar()">
+              <mat-icon>work</mat-icon>
+              Config. Homepage - Serviços
+            </a>
+          </div>
+        </div>
       </div>
       
       <!-- Ações do usuário no final da sidebar -->
@@ -78,9 +99,9 @@
           <mat-icon>logout</mat-icon>
         </a>
       </div>
-
     </div>
   </nav>
+  
 
   <!-- Container principal com header e conteúdo -->
   <div class="main-wrapper">

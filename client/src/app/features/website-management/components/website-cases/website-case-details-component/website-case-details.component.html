@@ -1,0 +1,122 @@
+<div class="case-details-page">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Carregando detalhes do caso...</p>
+    </div>
+  }
+
+  <!-- Case Details -->
+  @if (!isLoading() && caseDetails()) {
+    <div class="case-content">
+      <!-- Header -->
+      <header class="case-header">
+        <div class="container">
+          <button class="back-button" (click)="goBack()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Voltar aos Casos
+          </button>
+          
+          <h1 class="case-title">{{ caseDetails()?.title }}</h1>
+          <p class="case-subtitle">{{ caseDetails()?.shortDescription }}</p>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="case-main">
+        <div class="container">
+          <div class="case-grid">
+            <!-- Image Gallery -->
+            <div class="image-gallery">
+              <div class="main-image-container">
+                <img 
+                  [src]="caseDetails()?.images?.[currentImageIndex()]?.imageUrl || caseDetails()?.mainImageUrl" 
+                  [alt]="caseDetails()?.images?.[currentImageIndex()]?.altText || caseDetails()?.title"
+                  class="main-image"
+                  (error)="onImageError($event)"
+                />
+                
+                <!-- Navigation arrows -->
+                @if ((caseDetails()?.images?.length ?? 0) > 1) {
+                  <button 
+                    class="nav-arrow prev" 
+                    (click)="prevImage()"
+                    [attr.aria-label]="'Imagem anterior'"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  
+                  <button 
+                    class="nav-arrow next" 
+                    (click)="nextImage()"
+                    [attr.aria-label]="'Próxima imagem'"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                }
+
+                <!-- Image counter -->
+                @if ((caseDetails()?.images?.length ?? 0) > 1) {
+                  <div class="image-counter">
+                    {{ currentImageIndex() + 1 }} / {{ caseDetails()?.images?.length }}
+                  </div>
+                }
+              </div>
+
+              <!-- Thumbnail navigation -->
+              @if ((caseDetails()?.images?.length ?? 0) > 1) {
+                <div class="thumbnails">
+                  @for (image of caseDetails()?.images ?? []; track image.id; let i = $index) {
+                    <button 
+                      class="thumbnail"
+                      [class.active]="i === currentImageIndex()"
+                      (click)="goToImage(i)"
+                      [attr.aria-label]="'Ver imagem ' + (i + 1)"
+                    >
+                      <img [src]="image?.imageUrl" [alt]="image?.altText" />
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Case Information -->
+            <div class="case-info">
+              <div class="info-section">
+                <h2>Descrição Completa</h2>
+                <p>{{ caseDetails()?.fullDescription || 'Descrição não disponível' }}</p>
+              </div>
+
+              <div class="info-section">
+                <h2>Materiais Utilizados</h2>
+                <p>{{ caseDetails()?.materials || 'Informações sobre materiais não disponíveis' }}</p>
+              </div>
+
+              <div class="info-section">
+                <h2>Procedimento</h2>
+                <p>{{ caseDetails()?.procedure || 'Detalhes do procedimento não disponíveis' }}</p>
+              </div>
+
+              <div class="info-section">
+                <h2>Resultados</h2>
+                <p>{{ caseDetails()?.results || 'Resultados não disponíveis' }}</p>
+              </div>
+
+              <div class="info-section">
+                <h2>Informações do Paciente</h2>
+                <p>{{ caseDetails()?.patientInfo || 'Informações do paciente não disponíveis' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  }
+</div>

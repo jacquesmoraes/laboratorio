@@ -1,4 +1,13 @@
 ﻿// ==========================
+//  WebSite Services Global Usings
+// ==========================
+global using Applications.Dtos.WebSite;
+global using Applications.Contracts.WebSiteServices;
+global using Core.Models.WebSite;
+
+global using Core.FactorySpecifications.WebSiteSpecifications;
+
+// ==========================
 // AutoMapper
 // ==========================
 global using AutoMapper;

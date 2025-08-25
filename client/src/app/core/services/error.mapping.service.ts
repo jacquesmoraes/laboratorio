@@ -126,7 +126,16 @@ export class ErrorMappingService {
     'Bad request': 'Requisição inválida',
     'Not found': 'Recurso não encontrado',
     'Unauthorized': 'Não autorizado',
-    'Forbidden': 'Acesso negado'
+    'Forbidden': 'Acesso negado',
+    // Erros de upload de arquivo
+  'Nenhum arquivo foi enviado.': 'Nenhum arquivo foi selecionado.',
+  'Tipo de arquivo não permitido. Use apenas: jpg, jpeg, png, gif, webp': 'Tipo de arquivo não permitido. Use apenas: jpg, jpeg, png, gif, webp',
+  'Arquivo muito grande. Tamanho máximo: 5MB': 'Arquivo muito grande. Tamanho máximo: 5MB',
+  'Erro interno do servidor ao fazer upload.': 'Erro interno do servidor ao fazer upload.',
+  'Erro interno do servidor ao deletar arquivo.': 'Erro interno do servidor ao deletar arquivo.',
+  'Nome do arquivo é obrigatório.': 'Nome do arquivo é obrigatório.',
+  'Arquivo não encontrado.': 'Arquivo não encontrado.',
+  'Upload failed': 'Falha no upload do arquivo.',
   };
 
   mapServiceOrderError(error: ServiceOrderError | HttpErrorResponse | string): string {

@@ -1,6 +1,5 @@
-﻿
-
-using Applications.Services.ClientAreaServices;
+﻿using Applications.Settings;
+using Azure.Storage.Blobs;
 
 namespace API.Extensions
 {
@@ -29,6 +28,9 @@ namespace API.Extensions
                     return new BadRequestObjectResult ( response );
                 };
             } );
+
+            services.Configure<BlobStorageSettings>(config.GetSection("Azure:BlobStorage"));
+
 
             services
                 .AddControllers ( )
@@ -85,6 +87,9 @@ namespace API.Extensions
                 }
             } );
 
+             services.AddSingleton(x => 
+             new BlobServiceClient(config.GetConnectionString("AzureStorage")));
+
 
             services.AddScoped ( typeof ( IGenericRepository<> ), typeof ( GenericRepository<> ) );
             services.AddScoped ( typeof ( IGenericService<> ), typeof ( GenericService<> ) );
@@ -97,6 +102,7 @@ namespace API.Extensions
             services.AddScoped<UpdateOverdueStatusFilter> ( );
             services.AddScoped<EmailService> ( );
             services.AddScoped<IClientService, ClientService> ( );
+            services.AddScoped<IFileStorageService, AzureBlobStorageService>();
             services.AddScoped<IShadeService, ShadeService> ( );
             services.AddScoped<IWorkTypeService, WorkTypeService> ( );
             services.AddScoped<IPaymentService, PaymentService> ( );
@@ -106,6 +112,8 @@ namespace API.Extensions
             services.AddScoped<ISystemSettingsService, SystemSettingsService> ( );
             services.AddScoped<IBillingService, BillingService> ( );
             services.AddAutoMapper ( typeof ( ProductionMappingProfile ).Assembly );
+            services.AddScoped<IWebsiteCaseService, WebsiteCaseService> ( );
+            services.AddScoped<IWebsiteWorkTypeService, WebsiteWorkTypeService> ( );
 
             //client area services
             services.AddScoped<IClientAreaService, ClientAreaService> ( );

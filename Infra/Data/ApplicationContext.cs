@@ -1,4 +1,6 @@
-﻿namespace Infra.Data
+﻿using Core.Models.WebSite;
+
+namespace Infra.Data
 {
     public class ApplicationContext ( DbContextOptions<ApplicationContext> options ) : DbContext ( options )
     {
@@ -17,6 +19,9 @@
         public DbSet<WorkType> WorkTypes => Set<WorkType> ( );
         public DbSet<WorkSection> WorkSections => Set<WorkSection> ( );
         public DbSet<ServiceOrderSchedule> ServiceOrderSchedules => Set<ServiceOrderSchedule> ( );
+        public DbSet<WebsiteCase> WebsiteCases => Set<WebsiteCase> ( );
+        public DbSet<WebsiteWorkType> WebsiteWorkTypes => Set<WebsiteWorkType> ( );
+        public DbSet<WebsiteCaseImage> WebsiteCaseImages => Set<WebsiteCaseImage> ( );
 
         protected override void OnModelCreating ( ModelBuilder modelBuilder )
         {

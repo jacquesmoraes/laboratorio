@@ -14,18 +14,24 @@ import { AuthService } from "../../../core/services/auth.service";
 })
 export class LayoutComponent {
   private authService = inject(AuthService);
-  
+  private router = inject(Router);
 
   sidebarOpen = signal(false);
   profileMenuOpen = signal(false);
   user = this.authService.user;
+  settingsDropdownOpen = signal(false);
 
+  
   toggleSidebar() {
     this.sidebarOpen.update(value => !value);
   }
 
   closeSidebar() {
     this.sidebarOpen.set(false);
+    this.settingsDropdownOpen.set(false);
+  }
+  toggleSettingsDropdown() {
+    this.settingsDropdownOpen.update(open => !open);
   }
   toggleProfileMenu() {
     this.profileMenuOpen.update(open => !open);
@@ -38,4 +44,13 @@ export class LayoutComponent {
   logout() {
     this.authService.logout();
   }
+
+  isSettingsRoute(): boolean {
+  const currentUrl = this.router.url;
+  return currentUrl.includes('/admin/settings') || 
+         currentUrl.includes('/admin/website-management/cases') || 
+         currentUrl.includes('/admin/website-management/work-types');
+}
+
+  
 }

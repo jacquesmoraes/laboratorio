@@ -1,0 +1,122 @@
+<div class="page-wrapper">
+  <!-- Header -->
+  <div class="filters-toolbar">
+    <div class="header-content">
+      <h1 class="page-title">Gerenciar Serviços do Website</h1>
+      <p class="subtitle">Gerencie os serviços que aparecem na homepage do site</p>
+    </div>
+    
+    <button 
+      (click)="createWorkType()"
+      class="btn btn-primary">
+      <mat-icon>add</mat-icon>
+      Novo Serviço
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <!-- Empty State -->
+    @if (workTypes().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">work</mat-icon>
+        <h3>Nenhum serviço encontrado</h3>
+        <p>Comece adicionando o primeiro serviço para aparecer na homepage</p>
+        <button 
+          class="btn btn-primary"
+          (click)="createWorkType()">
+          <mat-icon>add</mat-icon>
+          Adicionar Primeiro Serviço
+        </button>
+      </div>
+    }
+
+    <!-- Work Types Grid -->
+    @if (workTypes().length > 0) {
+      <div class="dashboard-grid">
+        @for (workType of workTypes(); track workType.id) {
+          <mat-card class="card worktype-card" [class.inactive]="!workType.isActive">
+            
+            <!-- Card Header -->
+            <div class="card-header">
+              <div class="worktype-info">
+                <h3 class="worktype-name">{{ workType.workTypeName }}</h3>
+                <mat-chip 
+                  [color]="getStatusColor(workType.isActive)" 
+                  class="status-chip">
+                  {{ getStatusText(workType.isActive) }}
+                </mat-chip>
+              </div>
+              
+              <div class="action-buttons">
+                <button 
+                  class="action-btn"
+                  [title]="'Ver detalhes'"
+                  (click)="viewWorkType(workType)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                
+                <button 
+                  class="action-btn"
+                  [title]="'Editar'"
+                  (click)="editWorkType(workType)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                
+                <button 
+                  class="action-btn"
+                  [title]="workType.isActive ? 'Desativar' : 'Ativar'"
+                  (click)="toggleActive(workType)">
+                  <mat-icon>{{ workType.isActive ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                
+                <button 
+                  class="action-btn action-btn-danger"
+                  [title]="'Excluir'"
+                  (click)="deleteWorkType(workType)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card Content -->
+            <div class="card-content">
+              <!-- Image -->
+              <div class="worktype-image">
+                @if (workType.imageUrl) {
+                  <img 
+                    [src]="workType.imageUrl" 
+                    [alt]="workType.workTypeName"
+                    class="service-image"
+                    (error)="onImageError($event)">
+                } @else {
+                  <div class="no-image">
+                    <mat-icon>image</mat-icon>
+                    <span>Sem imagem</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Details -->
+              <div class="worktype-details">
+                <p class="worktype-description">{{ workType.workTypeDescription }}</p>
+                
+                <div class="worktype-meta">
+                  <span class="meta-item">
+                    <mat-icon>sort</mat-icon>
+                    Ordem: {{ workType.order }}
+                  </span>
+                  
+                  <span class="meta-item">
+                    <mat-icon>schedule</mat-icon>
+                    Criado: {{ workType.createdAt | date:'dd/MM/yyyy' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </mat-card>
+        }
+      </div>
+    }
+  </div>
+</div>

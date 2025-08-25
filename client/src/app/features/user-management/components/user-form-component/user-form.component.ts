@@ -21,6 +21,7 @@ import {
 } from '../../models/user-management.interface';
 import { Client } from '../../../clients/models/client.interface';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ErrorMappingService } from '../../../../core/services/error.mapping.service';
 
 @Component({
   selector: 'app-user-form',
@@ -48,7 +49,8 @@ export class UserFormComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  
+  private errorMapping = inject(ErrorMappingService);
+
   userForm!: any;
   loading = signal(false);
   isEditMode = signal(false);
@@ -57,6 +59,7 @@ export class UserFormComponent implements OnInit {
   loadingClients = signal(false);
   userToLoad = signal<ClientUserDetailsRecord | null>(null);
   registrationResponse = signal<ClientUserRegistrationResponse | null>(null);
+  
 
   ngOnInit() {
     this.initForm();
@@ -190,6 +193,7 @@ export class UserFormComponent implements OnInit {
           },
           error: (error) => {
             this.loading.set(false);
+            this.showErrorDialog(error);
           }
         });
     }
@@ -219,6 +223,17 @@ export class UserFormComponent implements OnInit {
       confirmButtonColor: '#276678'
     }).then(() => {
       this.router.navigate(['/admin/user-management']);
+    });
+  }
+
+  private showErrorDialog(error: any) {
+    const errorMessage = this.errorMapping.getAuthErrorMessage(error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Erro no Registro',
+      text: errorMessage,
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#276678'
     });
   }
 

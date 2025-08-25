@@ -399,6 +399,136 @@ namespace Infra.Migrations
                     b.ToTable("ServiceOrders");
                 });
 
+            modelBuilder.Entity("Core.Models.WebSite.WebsiteCase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FullDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MainImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Materials")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PatientInfo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Procedure")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Results")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ShortDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WebsiteCases");
+                });
+
+            modelBuilder.Entity("Core.Models.WebSite.WebsiteCaseImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AltText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Caption")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsMainImage")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WebsiteCaseId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WebsiteCaseId");
+
+                    b.ToTable("WebsiteCaseImages");
+                });
+
+            modelBuilder.Entity("Core.Models.WebSite.WebsiteWorkType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("WorkTypeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkTypeId");
+
+                    b.ToTable("WebsiteWorkTypes");
+                });
+
             modelBuilder.Entity("Core.Models.Works.Work", b =>
                 {
                     b.Property<int>("Id")
@@ -717,6 +847,28 @@ namespace Infra.Migrations
                     b.Navigation("Client");
                 });
 
+            modelBuilder.Entity("Core.Models.WebSite.WebsiteCaseImage", b =>
+                {
+                    b.HasOne("Core.Models.WebSite.WebsiteCase", "WebsiteCase")
+                        .WithMany("Images")
+                        .HasForeignKey("WebsiteCaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WebsiteCase");
+                });
+
+            modelBuilder.Entity("Core.Models.WebSite.WebsiteWorkType", b =>
+                {
+                    b.HasOne("Core.Models.Works.WorkType", "WorkType")
+                        .WithMany()
+                        .HasForeignKey("WorkTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WorkType");
+                });
+
             modelBuilder.Entity("Core.Models.Works.Work", b =>
                 {
                     b.HasOne("Core.Models.Production.Scale", "Scale")
@@ -792,6 +944,11 @@ namespace Infra.Migrations
                     b.Navigation("Stages");
 
                     b.Navigation("Works");
+                });
+
+            modelBuilder.Entity("Core.Models.WebSite.WebsiteCase", b =>
+                {
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("Core.Models.Works.WorkSection", b =>

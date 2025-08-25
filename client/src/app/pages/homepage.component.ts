@@ -1,6 +1,10 @@
-import { Component, ChangeDetectionStrategy, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, OnDestroy, signal, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { WebsiteWorkTypeService } from '../features/website-management/services/website-worktype.service';
+import { WebsiteCaseService } from '../features/website-management/services/website-case.service';
+import { WebsiteWorkType } from '../features/website-management/models/website-worktype.interface';
+import { WebsiteCase } from '../features/website-management/models/website-case.interface';
 
 @Component({
   selector: 'app-homepage',
@@ -8,16 +12,19 @@ import { Router } from '@angular/router';
   imports: [CommonModule],
   templateUrl: './homepage.component.html',
   styleUrls: ['./homepage.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class HomepageComponent implements OnInit, OnDestroy {
   private router = inject(Router);
-  
+  private websiteCaseService = inject(WebsiteCaseService);
+  private websiteWorkTypeService = inject(WebsiteWorkTypeService);
   readonly isDarkMode = signal(false);
   readonly mobileMenuOpen = signal(false);
   readonly currentSlide = signal(0);
   readonly showScrollTop = signal(false);
-  
+  readonly websiteCases = signal<WebsiteCase[]>([]);
+  readonly websiteWorkTypes = signal<WebsiteWorkType[]>([]);
   readonly slides = [
     { src: 'assets/images/imagecover.jpg', alt: 'Modelo 3D de prótese' },
     { src: 'assets/images/imagecover2.jpg', alt: 'Modelo 3D de prótese' }
@@ -31,6 +38,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.initCarousel();
     this.initScrollListener();
     this.initSmoothScroll();
+    this.loadHomepageData();
   }
 
   ngOnDestroy(): void {
@@ -42,6 +50,21 @@ export class HomepageComponent implements OnInit, OnDestroy {
     }
   }
 
+  private loadHomepageData(): void {
+    
+    this.websiteCaseService.getActiveForHomepage().subscribe(cases => {
+      this.websiteCases.set(cases);
+    });
+     this.websiteWorkTypeService.getActive().subscribe(workTypes => {
+      this.websiteWorkTypes.set(workTypes);
+    });
+  }
+
+
+  viewCaseDetails(caseId: number): void {
+    this.router.navigate(['/case', caseId]);
+  }
+
   private initTheme(): void {
     const savedTheme = localStorage.getItem('homepage-theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -51,6 +74,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
       document.documentElement.classList.add('dark');
     }
   }
+
+  
+
 
   private initCarousel(): void {
     this.carouselInterval = setInterval(() => {
@@ -110,10 +136,14 @@ export class HomepageComponent implements OnInit, OnDestroy {
       this.initCarousel();
     }
   }
+  getLogoPath(): string {
+    return this.isDarkMode() ? 'assets/images/logo-white.png' : 'assets/images/logo.png';
+  }
 scrollToSection(sectionId: string): void {
   const element = document.getElementById(sectionId);
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' });
+ 
   }
 }
   scrollToTop(): void {
@@ -124,6 +154,6 @@ scrollToSection(sectionId: string): void {
   }
 
   goToLogin(): void {
-    this.router.navigate(['/login']);
+    window.open('/login', '_blank');
   }
 }

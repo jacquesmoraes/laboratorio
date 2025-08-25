@@ -1,0 +1,163 @@
+.form-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.form-card {
+  background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+  overflow: hidden !important;
+}
+
+.form-card mat-card-header {
+  background: var(--accent);
+  color: var(--white) !important;
+  margin: -1rem -1rem 1rem -1rem !important;
+  padding: 1.5rem !important;
+}
+
+.form-card mat-card-title {
+  color: var(--white) !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.form-card mat-card-subtitle {
+  color: var(--accent) !important;
+  margin: 0.5rem 0 0 0 !important;
+}
+
+// Classes que não existem no global e precisam ser adicionadas
+.section {
+  margin-bottom: 2rem;
+  
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 0 0 1rem 0;
+    
+    mat-icon {
+      color: var(--accent);
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  &.row-align-center {
+    align-items: flex-end; // alinha botão com o final do input
+  }
+}
+
+.input-with-button {
+  flex: 1;
+}
+
+.upload-btn {
+  height: 56px; // para igualar altura do mat-form-field
+  white-space: nowrap;
+  padding: 0 1.5rem;
+}
+
+
+
+// Classes de largura que não existem no global
+.w-15 {
+  flex: 0 0 auto; // Tamanho automático baseado no conteúdo
+}
+
+.w-50 {
+  flex: 0 0 48%;
+}
+
+.w-70 {
+  flex: 0 0 70%;
+}
+
+.w-100 {
+  flex: 1;
+}
+
+.image-preview {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  
+  .image-container {
+    position: relative;
+    display: inline-block;
+    
+    .preview-image {
+      width: 256px;
+      height: 192px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+    }
+    
+    .remove-image-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 50%;
+      background: var(--danger);
+      color: var(--white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: var(--danger-hover);
+        transform: scale(1.1);
+      }
+      
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+.status-checkbox {
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .image-preview {
+    .image-container {
+      .preview-image {
+        width: 200px;
+        height: 150px;
+      }
+    }
+  }
+  
+  .w-15, .w-50, .w-70, .w-100 {
+    flex: 1;
+  }
+}

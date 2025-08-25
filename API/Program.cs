@@ -14,16 +14,17 @@ else
 }
 
 // Add services to the container.
+
 builder.Configuration
     .SetBasePath ( Directory.GetCurrentDirectory ( ) )
     .AddJsonFile ( "appsettings.json", optional: false )
     .AddJsonFile ( $"appsettings.{builder.Environment.EnvironmentName}.json", optional: true )
+     .AddUserSecrets(typeof(Program).Assembly)
     .AddEnvironmentVariables ( );
 builder.Services.AddControllers ( );
 builder.Services.AddApplicationServices ( builder.Configuration );
 builder.Services.AddIdentityServices ( builder.Configuration );
 builder.Services.AddSwaggerDocumentation ( );
-
 
 var app = builder.Build();
 

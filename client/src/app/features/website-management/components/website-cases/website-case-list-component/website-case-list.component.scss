@@ -1,0 +1,167 @@
+// Apenas estilos específicos que não existem no global
+.subtitle {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--white);
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
+  
+  .empty-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  
+  h3 {
+    color: var(--text-dark);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+  }
+  
+  p {
+    color: var(--text-muted);
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+.case-title {
+  .case-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    .case-image {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    
+    .case-details {
+      .case-name {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+      }
+      
+      .case-description {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+.status-chip {
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.order-value {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.image-count {
+  color: var(--text-muted);
+}
+
+.created-date {
+  color: var(--text-muted);
+}
+
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    background: var(--light-gray);
+    color: var(--text-dark);
+  }
+  
+  &.action-btn-danger:hover {
+    background: var(--danger);
+    color: var(--white);
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .filters-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    
+    .page-title {
+      font-size: 1.75rem;
+    }
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .table {
+    min-width: 800px;
+    
+    th, td {
+      padding: 0.75rem;
+      font-size: 0.875rem;
+    }
+  }
+  
+  .case-title {
+    .case-info {
+      gap: 0.75rem;
+      
+      .case-image {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .case-details {
+        .case-name {
+          font-size: 0.875rem;
+        }
+        
+        .case-description {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+  
+  .action-btn {
+    width: 36px;
+    height: 36px;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}

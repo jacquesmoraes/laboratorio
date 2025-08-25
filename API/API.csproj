@@ -8,7 +8,8 @@
           <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
           <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
           <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-     </PropertyGroup>
+       <UserSecretsId>db411300-51b3-4f02-b82a-084ccc872651</UserSecretsId>
+  </PropertyGroup>
 
      <ItemGroup>
           <PackageReference Include="AutoMapper" Version="14.0.0" />
