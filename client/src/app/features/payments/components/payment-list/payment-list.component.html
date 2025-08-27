@@ -12,26 +12,30 @@
       (ngModelChange)="setSearchFilter($event)" />
 
     <!-- Data Início -->
-    <input
-      type="text"
-      class="filter-input"
-      [matDatepicker]="startPicker"
-      [(ngModel)]="filters().startDate"
-      (ngModelChange)="onFilterChange()"
-      placeholder="Início" />
-    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-    <mat-datepicker #startPicker></mat-datepicker>
+    <div class="date-input-container">
+      <input
+        type="text"
+        class="filter-input"
+        [matDatepicker]="startPicker"
+        [(ngModel)]="filters().startDate"
+        (ngModelChange)="onFilterChange()"
+        placeholder="Início" />
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </div>
 
     <!-- Data Fim -->
-    <input
-      type="text"
-      class="filter-input"
-      [matDatepicker]="endPicker"
-      [(ngModel)]="filters().endDate"
-      (ngModelChange)="onFilterChange()"
-      placeholder="Fim" />
-    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-    <mat-datepicker #endPicker></mat-datepicker>
+    <div class="date-input-container">
+      <input
+        type="text"
+        class="filter-input"
+        [matDatepicker]="endPicker"
+        [(ngModel)]="filters().endDate"
+        (ngModelChange)="onFilterChange()"
+        placeholder="Fim" />
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </div>
 
     <!-- Botões -->
     <button class="btn btn-secondary" (click)="clearFilters()">Limpar</button>

@@ -500,9 +500,11 @@ html, body {
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 200px; // Tamanho mínimo para telas grandes
   
   .filter-input {
     padding-right: 3rem; // Espaço para o ícone do datepicker
+    min-width: 180px; // Tamanho mínimo do input
   }
   
   mat-datepicker-toggle {

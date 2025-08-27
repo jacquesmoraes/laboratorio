@@ -63,5 +63,15 @@
     button {
       width: 100%;
     }
+    
+    // Ajuste específico para containers de data em telas pequenas
+    .date-input-container {
+      min-width: auto; // Remove o tamanho mínimo em telas pequenas
+      width: 100%;
+      
+      .filter-input {
+        min-width: auto; // Remove o tamanho mínimo em telas pequenas
+      }
+    }
   }
 }
