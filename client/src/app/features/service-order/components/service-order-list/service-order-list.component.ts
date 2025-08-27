@@ -12,12 +12,12 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
-import {  ServiceOrderParams } from '../../models/service-order.interface';
+import { OrderStatus, ServiceOrderParams } from '../../models/service-order.interface';
 import { ServiceOrderListService } from './services/service-order-list.service';
-import { ServiceOrderFiltersComponent } from './service-order-filters/service-order-filters.component';
-
-import { FilterChangeEvent } from './service-order-filters/service-order-filters.component';
 import { PageEvent } from '@angular/material/paginator';
 import { SERVICE_ORDER_LIST_CONFIG } from './models/service-order-list.config';
 import { ServiceOrderTableComponent, TableActionEvent } from './service-order-table/service-order-table.component';
@@ -33,7 +33,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    ServiceOrderFiltersComponent,
+    FormsModule,
     ServiceOrderTableComponent,
   ],
   templateUrl: './service-order-list.component.html',
@@ -45,6 +45,8 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar); 
+  private readonly destroy$ = new Subject<void>();
+
   // Estado do componente
   readonly serviceOrders = this.serviceOrderListService.serviceOrders;
   readonly selectedOrderIds = this.serviceOrderListService.selectedOrderIds;
@@ -65,31 +67,33 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
   readonly pageSize = computed(() => this.currentParams().pageSize);
   readonly pageIndex = computed(() => this.currentParams().pageNumber - 1);
 
+  // Filtros inline
+  searchFilter = signal('');
+  statusFilter = signal<OrderStatus | ''>('');
+  sortFilter = signal('DateIn');
+  showFinishedOrders = signal(false);
+
   ngOnInit() {
+    this.setupSearchDebounce();
     this.loadServiceOrders();
   }
 
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
     this.serviceOrderListService.destroy();
+  }
+
+  // Configuração do debounce para busca
+  private setupSearchDebounce() {
+    // Criar um observable que emite quando o searchFilter muda
+    // Como estamos usando signals, vamos usar um approach diferente
+    // Vamos implementar o debounce diretamente no método onSearchChange
   }
 
   // Carregamento de dados
   loadServiceOrders() {
     this.serviceOrderListService.loadServiceOrders().subscribe();
-  }
-
-  // Eventos de filtros
-  onFilterChange(event: FilterChangeEvent) {
-    const newParams: Partial<ServiceOrderParams> = {
-      search: event.search,
-      status: event.status || undefined,
-      sort: event.sortBy,
-      excludeFinished: !event.showFinishedOrders,
-      pageNumber: 1, // Reset para primeira página
-    };
-
-    this.serviceOrderListService.updateParams(newParams);
-    this.loadServiceOrders();
   }
 
   // Eventos da tabela
@@ -98,12 +102,10 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(event: PageEvent) {
-    const newParams: Partial<ServiceOrderParams> = {
+    this.serviceOrderListService.updateParams({
       pageNumber: event.pageIndex + 1,
       pageSize: event.pageSize,
-    };
-
-    this.serviceOrderListService.updateParams(newParams);
+    });
     this.loadServiceOrders();
   }
 
@@ -175,12 +177,68 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
     });
   }
 
-
   reopenOrder(orderId: number) {
     this.serviceOrderListService.reopenOrder(orderId).subscribe();
   }
 
   finishSelectedOrders() {
     this.serviceOrderListService.finishSelectedOrders().subscribe();
+  }
+
+  // Métodos para os filtros inline com debounce
+  private searchDebounceTimeout?: number;
+
+  onSearchChange(value: string) {
+    this.searchFilter.set(value);
+    
+    // Cancelar timeout anterior
+    if (this.searchDebounceTimeout) {
+      clearTimeout(this.searchDebounceTimeout);
+    }
+    
+    // Criar novo timeout para debounce
+    this.searchDebounceTimeout = window.setTimeout(() => {
+      this.updateFilters();
+    }, SERVICE_ORDER_LIST_CONFIG.searchDebounceTime);
+  }
+
+  onStatusChange(value: OrderStatus | '') {
+    this.statusFilter.set(value);
+    this.updateFilters();
+  }
+
+  onSortChange(value: string) {
+    this.sortFilter.set(value);
+    this.updateFilters();
+  }
+
+  onShowFinishedOrdersChange(value: boolean) {
+    this.showFinishedOrders.set(value);
+    this.updateFilters();
+  }
+
+  clearFilters() {
+    this.searchFilter.set('');
+    this.statusFilter.set('');
+    this.sortFilter.set('DateIn');
+    this.showFinishedOrders.set(false);
+    
+    // Cancelar timeout de busca se existir
+    if (this.searchDebounceTimeout) {
+      clearTimeout(this.searchDebounceTimeout);
+    }
+    
+    this.updateFilters();
+  }
+
+  private updateFilters() {
+    this.serviceOrderListService.updateParams({
+      search: this.searchFilter(),
+      status: this.statusFilter() || undefined,
+      sort: this.sortFilter(),
+      excludeFinished: !this.showFinishedOrders(),
+      pageNumber: 1, // Reset para primeira página
+    });
+    this.loadServiceOrders();
   }
 }

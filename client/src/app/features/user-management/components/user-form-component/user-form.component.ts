@@ -200,6 +200,11 @@ export class UserFormComponent implements OnInit {
   }
 
   private showSuccessDialog(response: ClientUserRegistrationResponse) {
+    const userInfo = `Cliente: ${response.user.displayName}
+Email: ${response.user.email}
+Código de Acesso: ${response.user.accessCode}
+Expira em: ${new Date(response.expiresAt).toLocaleString('pt-BR')}`;
+
     Swal.fire({
       title: 'Usuário Registrado com Sucesso!',
       html: `
@@ -219,11 +224,61 @@ export class UserFormComponent implements OnInit {
         </div>
       `,
       icon: 'success',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#276678'
-    }).then(() => {
-      this.router.navigate(['/admin/user-management']);
+      showCancelButton: true,
+      confirmButtonText: 'Copiar Informações',
+      cancelButtonText: 'OK',
+      confirmButtonColor: '#276678',
+      cancelButtonColor: '#96afb8',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Copiar informações para a área de transferência
+        navigator.clipboard.writeText(userInfo).then(() => {
+          Swal.fire({
+            title: 'Copiado!',
+            text: 'As informações foram copiadas para a área de transferência',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        }).catch(() => {
+          // Fallback para navegadores que não suportam clipboard API
+          this.fallbackCopyTextToClipboard(userInfo);
+        });
+      }
+      // this.router.navigate(['/admin/user-management']);
     });
+  }
+
+  private fallbackCopyTextToClipboard(text: string) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      Swal.fire({
+        title: 'Copiado!',
+        text: 'As informações foram copiadas para a área de transferência',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } catch (err) {
+      Swal.fire({
+        title: 'Erro',
+        text: 'Não foi possível copiar as informações automaticamente',
+        icon: 'error',
+        confirmButtonColor: '#276678'
+      });
+    }
+    
+    document.body.removeChild(textArea);
   }
 
   private showErrorDialog(error: any) {

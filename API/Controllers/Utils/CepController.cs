@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using Core.Exceptions;
-
-namespace API.Controllers.Utils
+﻿namespace API.Controllers.Utils
 {
     public class ViaCepResponse
     {

@@ -1,34 +1,31 @@
 <div class="page-container">
-  <!-- Toolbar compacta -->
+  <!-- Toolbar compacta no estilo payments/billings -->
   <div class="filters-toolbar">
     <h1 class="page-title">Cores</h1>
+
+    <!-- Filtro por Escala -->
+    <select
+      class="filter-input"
+      
+      [(ngModel)]="selectedScaleId"
+      (ngModelChange)="onScaleFilterChange($event)">
+      <option [value]="undefined">Todas as escalas</option>
+      @for (scale of scales(); track scale.id) {
+        <option [value]="scale.id">
+          {{ scale.name }}
+        </option>
+      }
+    </select>
+
+    <!-- Botões -->
+    <button class="btn btn-secondary" (click)="clearFilters()">Limpar</button>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
       Nova Cor
     </button>
   </div>
 
-  <form [formGroup]="filterForm">
-    <div class="filters-container">
-      <div class="filters-grid">
-        <div class="filter-item">
-          <label class="filter-label">Escala</label>
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-select formControlName="scaleId" (selectionChange)="onScaleFilterChange()">
-              <mat-option [value]="undefined">Todas as escalas</mat-option>
-              @for (scale of scales(); track scale.id) {
-                <mat-option [value]="scale.id">
-                  {{ scale.name }}
-                </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-        
-      </div>
-    </div>
-  </form>
-
+  <!-- Lista de Cores -->
   <div class="table-container">
     <table class="table">
       <thead>

@@ -7,7 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, FormsModule } from '@angular/forms';
 
 import { Shade } from '../../../models/shade.interface';
 import { Scale } from '../../../models/scale.interface';
@@ -29,12 +29,11 @@ import Swal from 'sweetalert2';
     MatSelectModule,
     MatFormFieldModule,
     MatDialogModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormsModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './shade-list.component.html',
-  
-  
+  templateUrl: './shade-list.component.html'
 })
 export class ShadeListComponent implements OnInit {
   private readonly shadeService = inject(ShadeService);
@@ -47,19 +46,13 @@ export class ShadeListComponent implements OnInit {
   protected readonly scales = signal<Scale[]>([]);
   protected readonly displayedColumns = ['scaleId', 'color', 'actions'];
 
-  protected filterForm!: FormGroup<{
-    scaleId: FormControl<number | null | undefined>;
-  }>;
-
+  // Simplificar para usar ngModel
+  protected selectedScaleId: number | undefined = undefined;
 
   trackByShadeId = (_: number, shade: Shade) => shade.id;
   trackByScaleId = (_: number, scale: Scale) => scale.id;
 
   ngOnInit(): void {
-    this.filterForm = this.fb.group({
-      scaleId: this.fb.control<number | null | undefined>(null)
-    });
-
     this.loadScales();
     this.loadShades();
   }
@@ -86,9 +79,13 @@ export class ShadeListComponent implements OnInit {
       });
   }
 
-  protected onScaleFilterChange(): void {
-    const scaleId = this.filterForm.value.scaleId ?? undefined;
+  protected onScaleFilterChange(scaleId?: number): void {
     this.loadShades(scaleId);
+  }
+
+  protected clearFilters(): void {
+    this.selectedScaleId = undefined;
+    this.loadShades();
   }
 
   protected onNew(): void {
@@ -97,8 +94,7 @@ export class ShadeListComponent implements OnInit {
       width: '550px'
     }).afterClosed().subscribe((result) => {
       if (result) {
-        const scaleId = this.filterForm.value.scaleId ?? undefined;
-        this.loadShades(scaleId);
+        this.loadShades(this.selectedScaleId);
       }
     });
   }
@@ -109,8 +105,7 @@ export class ShadeListComponent implements OnInit {
       width: '550px'
     }).afterClosed().subscribe((result) => {
       if (result) {
-        const scaleId = this.filterForm.value.scaleId ?? undefined;
-        this.loadShades(scaleId);
+        this.loadShades(this.selectedScaleId);
       }
     });
   }
@@ -132,8 +127,7 @@ export class ShadeListComponent implements OnInit {
           .subscribe({
             next: () => {
               Swal.fire('Sucesso!', 'Cor excluída com sucesso', 'success');
-              const scaleId = this.filterForm.value.scaleId ?? undefined;
-              this.loadShades(scaleId);
+              this.loadShades(this.selectedScaleId);
             },
             error: () => {
              

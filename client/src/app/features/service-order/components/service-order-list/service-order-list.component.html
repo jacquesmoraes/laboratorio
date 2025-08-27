@@ -1,31 +1,63 @@
-<div class="container">
-  <div class="page-wrapper flex justify-between items-center mb-6">
-    <h1 class="title">
-      <mat-icon class="title-icon">assignment</mat-icon>
-      Ordens de Serviço
-    </h1>
-
-    <div class="button-group">
-      <button class="btn btn-primary" (click)="navigateToNew()">
-        <mat-icon>add</mat-icon>
-        Nova Ordem
-      </button>
-      <button class="btn btn-secondary" [disabled]="!hasSelection()" (click)="finishSelectedOrders()">
-        <mat-icon>receipt</mat-icon>
-        Finalizar OS
-      </button>
-    </div>
+<div class="page-container">
+  <!-- Título em linha separada -->
+  <div class="page-header">
+    <h1 class="page-title">Ordens de Serviço</h1>
   </div>
 
-  <div class="table-container">
-    <app-service-order-filters
-      [initialSearch]="currentParams().search || ''"
-      [initialStatus]="currentParams().status || ''"
-      [initialSortBy]="currentParams().sort || 'DateIn'"
-      [initialShowFinishedOrders]="!currentParams().excludeFinished"
-      (filterChange)="onFilterChange($event)">
-    </app-service-order-filters>
+  <!-- Toolbar com filtros -->
+  <div class="filters-toolbar">
+    <!-- Buscar -->
+    <input
+      type="text"
+      class="filter-input"
+      placeholder="Buscar por cliente ou paciente..."
+      [(ngModel)]="searchFilter"
+      (ngModelChange)="onSearchChange($event)" />
 
+    <!-- Filtro por Status -->
+    <select
+      class="filter-input"
+      [(ngModel)]="statusFilter"
+      (ngModelChange)="onStatusChange($event)">
+      <option value="">Todos os Status</option>
+      <option [value]="1">Em Produção</option>
+      <option [value]="2">Em Prova</option>
+      <option [value]="3">Finalizada</option>
+    </select>
+
+    <!-- Ordenação -->
+    <select
+      class="filter-input"
+      [(ngModel)]="sortFilter"
+      (ngModelChange)="onSortChange($event)">
+      <option value="DateIn">Data de Entrada</option>
+      <option value="ClientName">Nome do Cliente</option>
+      <option value="PatientName">Nome do Paciente</option>
+      <option value="Status">Status</option>
+    </select>
+
+    <!-- Checkbox para mostrar OS finalizadas -->
+    <label class="checkbox-label">
+      <input
+        type="checkbox"
+        [(ngModel)]="showFinishedOrders"
+        (ngModelChange)="onShowFinishedOrdersChange($event)" />
+      Mostrar Finalizadas
+    </label>
+
+    <!-- Botões -->
+    <button class="btn btn-secondary" (click)="clearFilters()">Limpar</button>
+    <button class="btn btn-primary" (click)="navigateToNew()">Nova Ordem</button>
+    <button 
+      class="btn btn-secondary" 
+      [disabled]="!hasSelection()" 
+      (click)="finishSelectedOrders()">
+      Finalizar OS
+    </button>
+  </div>
+
+  <!-- Lista de Ordens de Serviço -->
+  <div class="table-container">
     <app-service-order-table
       [serviceOrders]="serviceOrders()"
       [selectedOrderIds]="selectedOrderIds()"

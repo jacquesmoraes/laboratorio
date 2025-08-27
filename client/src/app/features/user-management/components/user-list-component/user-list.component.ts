@@ -11,9 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import Swal, { SweetAlertResult } from 'sweetalert2';
-
 
 import { 
   ClientUserListRecord, 
@@ -39,7 +38,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatChipsModule,
     MatTooltipModule,
     MatPaginatorModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormsModule
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss',
@@ -47,12 +47,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class UserListComponent implements OnInit {
   private userManagementService = inject(UserManagementService);
-    private router = inject(Router);
-    private readonly destroyRef = inject(DestroyRef);
+  private router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   
   users = signal<ClientUserListRecord[]>([]);
   loading = signal(false);
-  searchControl = new FormControl('');
+  
+  // Filtros inline
+  searchFilter = signal('');
+  private searchDebounceTimeout?: number;
   
   // Pagination
   pagination = signal<UserManagementPagination<ClientUserListRecord> | null>(null);
@@ -65,7 +68,6 @@ export class UserListComponent implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
-    this.setupSearch();
   }
 
   private loadUsers() {
@@ -84,14 +86,39 @@ export class UserListComponent implements OnInit {
       });
   }
 
-  private setupSearch() {
-    this.searchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(search => {
-      this.currentParams.update(params => ({ ...params, search: search || '', pageNumber: 1 }));
-      this.loadUsers();
-    });
+  // Métodos para os filtros inline com debounce
+  onSearchChange(value: string) {
+    this.searchFilter.set(value);
+    
+    // Cancelar timeout anterior
+    if (this.searchDebounceTimeout) {
+      clearTimeout(this.searchDebounceTimeout);
+    }
+    
+    // Criar novo timeout para debounce
+    this.searchDebounceTimeout = window.setTimeout(() => {
+      this.updateFilters();
+    }, 300);
+  }
+
+  clearFilters() {
+    this.searchFilter.set('');
+    
+    // Cancelar timeout de busca se existir
+    if (this.searchDebounceTimeout) {
+      clearTimeout(this.searchDebounceTimeout);
+    }
+    
+    this.updateFilters();
+  }
+
+  private updateFilters() {
+    this.currentParams.update(params => ({ 
+      ...params, 
+      search: this.searchFilter(), 
+      pageNumber: 1 
+    }));
+    this.loadUsers();
   }
 
   onPageChange(event: PageEvent) {
@@ -107,71 +134,65 @@ export class UserListComponent implements OnInit {
     this.router.navigate(['/admin/user-management/new']);
   }
 
- onViewDetails(user: ClientUserListRecord) {
-  
-  this.router.navigate(['/admin/user-management', user.userId]);
-
-}
-
-async onBlock(user: ClientUserListRecord) {
-  const result:SweetAlertResult = await Swal.fire({
-    title: 'Bloquear Usuário',
-    text: `Tem certeza que deseja bloquear o acesso de ${user.clientName}?`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: 'Sim, bloquear',
-    cancelButtonText: 'Cancelar'
-  });
-
-  if (result.isConfirmed) {
-    this.loading.set(true);
-    this.userManagementService.blockClientUser(user.userId)
-      .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar
-      .subscribe({
-        next: () => {
-          Swal.fire('Sucesso!', 'Usuário bloqueado com sucesso.', 'success');
-          this.loadUsers();
-        },
-        error: () => {
-         
-          this.loading.set(false);
-        }
-      });
+  onViewDetails(user: ClientUserListRecord) {
+    this.router.navigate(['/admin/user-management', user.userId]);
   }
-}
 
-async onUnblock(user: ClientUserListRecord) {
-  const result: SweetAlertResult = await Swal.fire({
-    title: 'Desbloquear Usuário',
-    text: `Tem certeza que deseja desbloquear o acesso de ${user.clientName}?`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: 'Sim, desbloquear',
-    cancelButtonText: 'Cancelar'
-  });
+  async onBlock(user: ClientUserListRecord) {
+    const result:SweetAlertResult = await Swal.fire({
+      title: 'Bloquear Usuário',
+      text: `Tem certeza que deseja bloquear o acesso de ${user.clientName}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sim, bloquear',
+      cancelButtonText: 'Cancelar'
+    });
 
-  if (result.isConfirmed) {
-    this.loading.set(true);
-    this.userManagementService.unblockClientUser(user.userId)
-      .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar
-      .subscribe({
-        next: () => {
-          Swal.fire('Sucesso!', 'Usuário desbloqueado com sucesso.', 'success');
-          this.loadUsers();
-        },
-        error: (error) => {
-          // REMOVER - interceptor já mostra
-          // this.errorService.showError('Erro ao desbloquear usuário', error);
-          this.loading.set(false);
-        }
-      });
+    if (result.isConfirmed) {
+      this.loading.set(true);
+      this.userManagementService.blockClientUser(user.userId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            Swal.fire('Sucesso!', 'Usuário bloqueado com sucesso.', 'success');
+            this.loadUsers();
+          },
+          error: () => {
+            this.loading.set(false);
+          }
+        });
+    }
   }
-}
 
+  async onUnblock(user: ClientUserListRecord) {
+    const result: SweetAlertResult = await Swal.fire({
+      title: 'Desbloquear Usuário',
+      text: `Tem certeza que deseja desbloquear o acesso de ${user.clientName}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sim, desbloquear',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      this.loading.set(true);
+      this.userManagementService.unblockClientUser(user.userId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            Swal.fire('Sucesso!', 'Usuário desbloqueado com sucesso.', 'success');
+            this.loadUsers();
+          },
+          error: (error) => {
+            this.loading.set(false);
+          }
+        });
+    }
+  }
 
   async onResetAccessCode(user: ClientUserListRecord) {
     const result: SweetAlertResult = await Swal.fire({
@@ -188,7 +209,7 @@ async onUnblock(user: ClientUserListRecord) {
     if (result.isConfirmed) {
       this.loading.set(true);
       this.userManagementService.resetClientUserAccessCode(user.userId)
-        .pipe(takeUntilDestroyed(this.destroyRef)) // ← Adicionar
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (response) => {
             Swal.fire({
@@ -200,8 +221,6 @@ async onUnblock(user: ClientUserListRecord) {
             this.loadUsers();
           },
           error: (error) => {
-            // REMOVER - interceptor já mostra
-            // this.errorService.showError('Erro ao resetar código de acesso', error);
             this.loading.set(false);
           }
         });

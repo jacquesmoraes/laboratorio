@@ -1,27 +1,25 @@
-<div class="container">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="title">Gerenciar Usuários</h1>
+<div class="page-container">
+  <!-- Toolbar compacta no estilo payments/billings -->
+  <div class="filters-toolbar">
+    <h1 class="page-title">Gerenciar Usuários</h1>
+
+    <!-- Buscar -->
+    <input
+      type="text"
+      class="filter-input"
+      placeholder="Digite o nome do cliente ou email..."
+      [(ngModel)]="searchFilter"
+      (ngModelChange)="onSearchChange($event)" />
+
+    <!-- Botões -->
+    <button class="btn btn-secondary" (click)="clearFilters()">Limpar</button>
     <button class="btn btn-primary" (click)="onNew()">
       <mat-icon>add</mat-icon>
       Novo Usuário
     </button>
   </div>
 
-  <div class="filters-container">
-    <div class="filters-grid">
-      <div class="filter-item">
-        <label class="filter-label" for="search">Buscar</label>
-        <input
-          id="search"
-          type="text"
-          class="filter-input"
-          [formControl]="searchControl"
-          placeholder="Digite o nome do cliente ou email..."
-        />
-      </div>
-    </div>
-  </div>
-
+  <!-- Lista de Usuários -->
   @if (users().length > 0) {
     <div class="table-container">
       <table class="table">
@@ -32,7 +30,7 @@
             <th>Status</th>
             <th>Código de Acesso</th>
             <th>Último Acesso</th>
-            <th >Ações</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
