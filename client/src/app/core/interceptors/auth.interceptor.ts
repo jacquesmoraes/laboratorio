@@ -39,7 +39,7 @@ export const authInterceptor: HttpInterceptorFn = (
     withCredentials: true,
     setHeaders: {
       ...(token ? { Authorization: `Bearer ${token}` } : {})
-    }
+     }
   });
 
   return next(request).pipe(

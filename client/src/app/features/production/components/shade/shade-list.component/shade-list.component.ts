@@ -34,6 +34,7 @@ import Swal from 'sweetalert2';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shade-list.component.html',
   
+  
 })
 export class ShadeListComponent implements OnInit {
   private readonly shadeService = inject(ShadeService);

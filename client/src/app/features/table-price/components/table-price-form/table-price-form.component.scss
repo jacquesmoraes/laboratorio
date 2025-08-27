@@ -22,13 +22,6 @@
   }
 }
 
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
 .form-container {
   display: flex;
   flex-direction: column;
@@ -96,6 +89,7 @@
   border-radius: 8px;
   background-color: var(--background);
   transition: all 0.2s ease-in-out;
+  animation: slideIn 0.3s ease-out;
 
   &:hover {
     border-color: var(--primary);
@@ -137,35 +131,33 @@
   border-top: 1px solid var(--accent);
 }
 
-.btn {
-  background-color: var(--accent);
-  color: var(--white);
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: large;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: var(--secondary);
+// Animações
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.btn-secondary {
-  background-color: var(--accent);
-  color: var(--white);
-
-  &:hover {
-    background-color: var(--secondary);
+// Ajustes visuais extras
+mat-form-field {
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
   }
 }
 
-// Responsividade
+mat-checkbox {
+  margin-top: 0.5rem;
+}
+
+// ========================================
+// MEDIA QUERIES PARA COLAR NO SCSS GLOBAL
+// ========================================
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -189,31 +181,4 @@
       width: 100%;
     }
   }
-}
-
-// Animações
-.item-card {
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Ajustes visuais extras
-mat-form-field {
-  .mat-mdc-form-field-subscript-wrapper {
-    display: none;
-  }
-}
-
-mat-checkbox {
-  margin-top: 0.5rem;
 }

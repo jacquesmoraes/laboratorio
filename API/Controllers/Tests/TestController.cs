@@ -32,5 +32,27 @@
         [Authorize] // ← obrigatório
         public IActionResult RequiresAuth ( ) => Ok ( "Sucesso" );
 
+        //
+        // Teste de envio de e-mail
+        //
+        [HttpPost ( "test-email" )]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendTestEmail ( [FromServices] EmailService emailService )
+        {
+            await emailService.SendEmailAsync (
+                "jacquesbarrosmoraes@gmail.com",
+                "✅ Teste SMTP HostGator funcionando!",
+                """
+        <p>Este é um teste de envio via <strong>SMTP da HostGator (Titan)</strong>.</p>
+        <p>Se você recebeu este e-mail, sua API no Docker está <strong>enviando e-mails com sucesso!</strong></p>
+        <p>🚀</p>
+        """
+            );
+
+            return Ok ( "E-mail enviado." );
+        }
+
+
+
     }
 }

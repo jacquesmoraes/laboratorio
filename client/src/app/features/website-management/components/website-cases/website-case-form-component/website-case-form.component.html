@@ -203,60 +203,15 @@
             <mat-icon>photo_library</mat-icon>
             Imagens Adicionais
           </h3>
-
-          <div class="upload-section">
-            <div class="upload-area">
-              <mat-icon class="upload-icon">cloud_upload</mat-icon>
-              <p class="upload-text">Adicione imagens adicionais do caso clínico</p>
-              <button 
-                type="button"
-                class="btn btn-primary"
-                (click)="addImage()">
-                <mat-icon>add_photo_alternate</mat-icon>
-                Adicionar Imagem
-              </button>
-            </div>
-          </div>
-
-          @if (additionalImages().length > 0) {
-            <div class="images-grid">
-              @for (image of additionalImages(); track image.id) {
-                <div class="image-card">
-                  <div class="image-container">
-                    <img 
-                      [src]="image.imageUrl" 
-                      [alt]="image.altText"
-                      class="case-image">
-                    <div class="image-actions">
-                      <button 
-                        type="button"
-                        class="action-btn"
-                        [title]="'Editar imagem'"
-                        (click)="editImage(image)">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button 
-                        type="button"
-                        class="action-btn action-btn-danger"
-                        [title]="'Remover imagem'"
-                        (click)="removeImage(image)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="image-info">
-                    <p class="image-caption">{{ image.caption }}</p>
-                    <p class="image-alt">{{ image.altText }}</p>
-                    @if (image.isMainImage) {
-                      <mat-chip color="accent" selected class="main-image-chip">
-                        Imagem Principal
-                      </mat-chip>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-          }
+        
+          <app-website-case-image-manager
+            [images]="additionalImages()"
+            [caseId]="caseId() || 0"
+            (imageAdded)="onImageAdded($event)"
+            (imageUpdated)="onImageUpdated($event)"
+            (imageDeleted)="onImageDeleted($event)"
+            (imageReordered)="onImageReordered($event)">
+          </app-website-case-image-manager>
         </div>
 
         <!-- Status -->

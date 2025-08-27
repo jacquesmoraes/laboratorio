@@ -1,27 +1,53 @@
-﻿namespace API.Services
+﻿using System.Net;
+using System.Net.Mail;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace API.Services
 {
-    public class EmailService ( IConfiguration config )
+    public class EmailService ( IConfiguration config, ILogger<EmailService> logger )
     {
         private readonly IConfiguration _config = config;
+        private readonly ILogger<EmailService> _logger = logger;
 
-        public async Task SendEmailAsync ( string toEmail, string subject, string body )
+        public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            var apiKey = _config["SendGrid:ApiKey"] ?? throw new InvalidOperationException("SendGrid:ApiKey is not configured");
-            var fromEmail = _config["SendGrid:FromEmail"] ?? throw new InvalidOperationException("SendGrid:FromEmail is not configured");
-            var fromName = _config["SendGrid:FromName"] ?? "Sistema Laboratório";
+            var smtpSettings = _config.GetSection("SmtpSettings");
 
-            var client = new SendGridClient(apiKey);
-            var from = new EmailAddress(fromEmail, fromName);
-            var to = new EmailAddress(toEmail);
+            var smtpServer = smtpSettings["Server"] ?? throw new InvalidOperationException("SMTP Server não configurado.");
+            var smtpPort = int.Parse(smtpSettings["Port"] ?? "587");
+            var smtpUsername = smtpSettings["Username"] ?? throw new InvalidOperationException("SMTP Username não configurado.");
+            var smtpPassword = smtpSettings["Password"] ?? throw new InvalidOperationException("SMTP Password não configurado.");
+            var fromEmail = smtpSettings["FromEmail"] ?? throw new InvalidOperationException("SMTP FromEmail não configurado.");
+            var fromName = smtpSettings["FromName"] ?? "Sistema Laboratório";
+            var enableSsl = bool.Parse(smtpSettings["EnableSsl"] ?? "true");
 
-            var msg = MailHelper.CreateSingleEmail(from, to, subject, null, body);
-
-            var response = await client.SendEmailAsync(msg);
-
-            if ( !response.IsSuccessStatusCode )
+            using var client = new SmtpClient(smtpServer, smtpPort)
             {
-                var responseBody = await response.Body.ReadAsStringAsync();
-                throw new InvalidOperationException ( $"Failed to send email. Status: {response.StatusCode}, Body: {responseBody}" );
+                EnableSsl = enableSsl,
+                Credentials = new NetworkCredential(smtpUsername, smtpPassword),
+                DeliveryMethod = SmtpDeliveryMethod.Network
+            };
+
+            using var message = new MailMessage
+            {
+                From = new MailAddress(fromEmail, fromName),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+
+            message.To.Add(toEmail);
+
+            try
+            {
+                await client.SendMailAsync(message);
+                _logger.LogInformation("E-mail enviado com sucesso para {To}", toEmail);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao enviar e-mail para {To}", toEmail);
+                throw new InvalidOperationException("Erro ao enviar e-mail. Verifique o log para detalhes.");
             }
         }
     }

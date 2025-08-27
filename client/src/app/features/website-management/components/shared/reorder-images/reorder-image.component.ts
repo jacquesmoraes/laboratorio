@@ -15,20 +15,20 @@ import { WebsiteCaseImage } from '../../../models/website-case.interface';
     <div class="reorder-images-modal">
       <!-- Header -->
       <div class="modal-header">
-        <h2 class="text-xl font-semibold text-gray-900">
+        <h2 class="modal-title">
           Reordenar Imagens
         </h2>
         <button 
           mat-icon-button 
           (click)="close()"
-          class="text-gray-500 hover:text-gray-700">
+          class="close-button">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
       <!-- Content -->
       <div class="modal-content">
-        <p class="text-gray-600 mb-4">
+        <p class="instruction-text">
           Clique nas imagens para reordená-las. A primeira imagem será a principal.
         </p>
 
@@ -42,12 +42,12 @@ import { WebsiteCaseImage } from '../../../models/website-case.interface';
               <img 
                 [src]="image.imageUrl" 
                 [alt]="image.altText"
-                class="w-full h-32 object-cover rounded-lg">
+                class="item-image">
               <div class="image-info">
-                <p class="text-sm font-medium text-gray-900">{{ image.caption }}</p>
-                <p class="text-xs text-gray-500">Ordem: {{ i + 1 }}</p>
+                <p class="image-caption">{{ image.caption }}</p>
+                <p class="image-order">Ordem: {{ i + 1 }}</p>
                 @if (i === 0) {
-                  <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  <span class="main-badge">
                     Principal
                   </span>
                 }
@@ -63,7 +63,7 @@ import { WebsiteCaseImage } from '../../../models/website-case.interface';
           type="button"
           mat-button 
           (click)="close()"
-          class="text-gray-600 hover:text-gray-900">
+          class="cancel-btn">
           Cancelar
         </button>
         <button 
@@ -71,7 +71,7 @@ import { WebsiteCaseImage } from '../../../models/website-case.interface';
           mat-raised-button 
           color="primary"
           (click)="saveOrder()"
-          class="bg-[#276678] hover:bg-[#334a52]">
+          class="save-btn">
           <mat-icon>save</mat-icon>
           Salvar Ordem
         </button>
@@ -94,10 +94,30 @@ import { WebsiteCaseImage } from '../../../models/website-case.interface';
       margin-bottom: 1.5rem;
     }
 
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #334a52;
+      margin: 0;
+    }
+
+    .close-button {
+      color: #6b7280;
+    }
+
+    .close-button:hover {
+      color: #374151;
+    }
+
     .modal-content {
       padding: 0 1.5rem;
       max-height: 70vh;
       overflow-y: auto;
+    }
+
+    .instruction-text {
+      color: #6b7280;
+      margin-bottom: 1rem;
     }
 
     .modal-actions {
@@ -107,6 +127,23 @@ import { WebsiteCaseImage } from '../../../models/website-case.interface';
       padding: 1.5rem;
       border-top: 1px solid #e5e7eb;
       margin-top: 1.5rem;
+    }
+
+    .cancel-btn {
+      color: #6b7280;
+    }
+
+    .cancel-btn:hover {
+      color: #374151;
+    }
+
+    .save-btn {
+      background-color: #276678;
+      color: white;
+    }
+
+    .save-btn:hover {
+      background-color: #334a52;
     }
 
     .images-grid {
@@ -121,27 +158,74 @@ import { WebsiteCaseImage } from '../../../models/website-case.interface';
       padding: 0.5rem;
       cursor: pointer;
       transition: all 0.2s ease;
+    }
 
-      &:hover {
-        border-color: #276678;
-        transform: translateY(-2px);
-      }
+    .image-item:hover {
+      border-color: #276678;
+      transform: translateY(-2px);
+    }
 
-      &.main-image {
-        border-color: #276678;
-        background-color: #f0f9ff;
-      }
+    .image-item.main-image {
+      border-color: #276678;
+      background-color: #f0f9ff;
+    }
 
-      &.selected {
-        border-color: #a288a9;
-        background-color: #fdf2f8;
-        transform: scale(1.02);
-      }
+    .image-item.selected {
+      border-color: #a288a9;
+      background-color: #fdf2f8;
+      transform: scale(1.02);
+    }
+
+    .item-image {
+      width: 100%;
+      height: 128px;
+      object-fit: cover;
+      border-radius: 8px;
     }
 
     .image-info {
       margin-top: 0.5rem;
       text-align: center;
+    }
+
+    .image-caption {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #334a52;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .image-order {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .main-badge {
+      font-size: 0.75rem;
+      background-color: #dbeafe;
+      color: #1e40af;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    @media (max-width: 640px) {
+      .reorder-images-modal {
+        max-width: 100%;
+        margin: 0;
+      }
+      
+      .modal-header,
+      .modal-content,
+      .modal-actions {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .images-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `]
 })

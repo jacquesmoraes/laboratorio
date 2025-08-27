@@ -36,8 +36,8 @@ export interface WorkTypeModalData {
     MatDialogModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './work-type-modal.component.html',
-  styleUrls: ['./work-type-modal.component.scss']
+  templateUrl: './work-type-modal.component.html'
+  
 })
 export class WorkTypeModalComponent implements OnInit {
   private fb = inject(FormBuilder);

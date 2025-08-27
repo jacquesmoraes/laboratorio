@@ -13,19 +13,19 @@
       </mat-card-header>
 
       <mat-card-actions class="card-actions">
-        <button class="btn-primary" (click)="editOrder()">
+        <button class="btn btn-primary" (click)="editOrder()">
           <mat-icon>edit</mat-icon>
           Editar
         </button>
-        <button class="btn-danger" (click)="deleteOrder()">
+        <button class="btn btn-danger" (click)="deleteOrder()">
           <mat-icon>delete</mat-icon>
           Excluir
         </button>
-        <button class="btn-accent" (click)="updateSchedule()">
+        <button class="btn btn-secondary" (click)="updateSchedule()">
           <mat-icon>schedule</mat-icon>
           Atualizar Agendamento
         </button>
-        <button class="btn-secondary" (click)="router.navigate(['service-orders'])">
+        <button class="btn btn-secondary" (click)="router.navigate(['admin/service-orders'])">
           <mat-icon>arrow_back</mat-icon>
           Voltar
         </button>
@@ -221,7 +221,7 @@
     <div class="error-message">
       <h2>Ordem não encontrada</h2>
       <p>A ordem de serviço solicitada não foi encontrada ou não existe.</p>
-      <button class="btn btn-primary" (click)="router.navigate(['service-orders'])">Voltar</button>
+      <button class="btn btn-primary" (click)="router.navigate(['admin/service-orders'])">Voltar</button>
     </div>
   }
 </div>

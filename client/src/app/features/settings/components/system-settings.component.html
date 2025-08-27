@@ -94,7 +94,7 @@
           <div class="logo-upload">
             <input type="file" #fileInput (change)="onLogoUpload($event)" accept="image/*" style="display: none;" />
             <button type="button" mat-stroked-button (click)="fileInput.click()" [disabled]="isUploadingLogo()"
-              class="upload-btn">
+              class="">
               @if (isUploadingLogo()) {
               <mat-spinner diameter="16"></mat-spinner>
               Enviando...
@@ -171,7 +171,7 @@
 
         <!-- Botões -->
         <div class="actions">
-          <button type="submit" [disabled]="settingsForm.invalid || isLoading()" class="save-btn">
+          <button type="submit" [disabled]="settingsForm.invalid || isLoading()" class="submit-btn">
             <mat-icon>save</mat-icon>
             Salvar Configurações
           </button>

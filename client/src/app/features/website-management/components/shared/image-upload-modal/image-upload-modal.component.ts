@@ -47,24 +47,24 @@ export interface ImageUploadData {
     <div class="image-upload-modal">
       <!-- Header -->
       <div class="modal-header">
-        <h2 class="text-xl font-semibold text-gray-900">
+        <h2 class="modal-title">
           {{ isEditMode() ? 'Editar' : 'Adicionar' }} Imagem
         </h2>
         <button 
           mat-icon-button 
           (click)="close()"
-          class="text-gray-500 hover:text-gray-700">
+          class="close-button">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
       <!-- Content -->
       <div class="modal-content">
-        <form [formGroup]="imageForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <form [formGroup]="imageForm" (ngSubmit)="onSubmit()" class="form-container">
           <!-- Área de Upload -->
-          <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <mat-icon class="text-gray-400 text-4xl mb-2">cloud_upload</mat-icon>
-            <p class="text-gray-600 mb-4">Faça upload de uma imagem ou insira uma URL</p>
+          <div class="upload-area">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <p class="upload-text">Faça upload de uma imagem ou insira uma URL</p>
             
             <!-- Input de arquivo completamente oculto -->
             <input 
@@ -81,18 +81,18 @@ export interface ImageUploadData {
               color="accent"
               (click)="fileInput.click()"
               [disabled]="uploading()"
-              class="bg-[#96afb8] text-white hover:bg-[#a288a9]">
+              class="select-file-btn">
               <mat-icon>upload_file</mat-icon>
               Selecionar Arquivo
             </button>
 
             <!-- Informações do arquivo selecionado -->
             @if (selectedFile()) {
-              <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                <p class="text-sm text-gray-700">
+              <div class="file-info">
+                <p class="file-name">
                   <strong>Arquivo selecionado:</strong> {{ selectedFile()?.name }}
                 </p>
-                <p class="text-xs text-gray-500">
+                <p class="file-size">
                   Tamanho: {{ (selectedFile()?.size || 0) / 1024 / 1024 | number:'1.2-2' }} MB
                 </p>
                 
@@ -102,7 +102,7 @@ export interface ImageUploadData {
                     mat-raised-button 
                     color="primary"
                     (click)="uploadFile()"
-                    class="mt-2 bg-[#276678] hover:bg-[#334a52]">
+                    class="upload-btn">
                     <mat-icon>cloud_upload</mat-icon>
                     Fazer Upload
                   </button>
@@ -112,31 +112,31 @@ export interface ImageUploadData {
 
             <!-- Progresso do upload -->
             @if (uploading()) {
-              <div class="mt-4">
+              <div class="upload-progress">
                 <mat-progress-bar 
                   mode="determinate" 
                   [value]="uploadProgress()"
-                  class="mb-2">
+                  class="progress-bar">
                 </mat-progress-bar>
-                <p class="text-sm text-gray-600">
+                <p class="progress-text">
                   Fazendo upload... {{ uploadProgress() }}%
                 </p>
               </div>
             }
 
             <!-- Separador -->
-            <div class="my-4 flex items-center">
-              <div class="flex-1 border-t border-gray-300"></div>
-              <span class="px-3 text-gray-500 text-sm">ou</span>
-              <div class="flex-1 border-t border-gray-300"></div>
+            <div class="separator">
+              <div class="separator-line"></div>
+              <span class="separator-text">ou</span>
+              <div class="separator-line"></div>
             </div>
 
             <!-- Instrução para URL -->
-            <p class="text-gray-600 text-sm">Insira uma URL de imagem</p>
+            <p class="url-instruction">Insira uma URL de imagem</p>
           </div>
 
           <!-- URL da Imagem -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="form-field">
             <mat-label>URL da Imagem</mat-label>
             <input matInput formControlName="imageUrl" placeholder="https://exemplo.com/imagem.jpg">
             @if (imageForm.get('imageUrl')?.hasError('required') && imageForm.get('imageUrl')?.touched) {
@@ -149,15 +149,15 @@ export interface ImageUploadData {
 
           <!-- Preview da Imagem -->
           @if (imageForm.get('imageUrl')?.value && !imageForm.get('imageUrl')?.hasError('pattern')) {
-            <div class="flex justify-center">
-              <div class="relative">
+            <div class="preview-container">
+              <div class="preview-wrapper">
                 <img 
                   [src]="imageForm.get('imageUrl')?.value" 
                   alt="Preview"
-                  class="w-64 h-48 object-cover rounded-lg border-2 border-gray-200"
+                  class="preview-image"
                   (error)="onImageError()">
                 @if (imageLoading()) {
-                  <div class="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 rounded-lg">
+                  <div class="loading-overlay">
                     <mat-spinner diameter="40"></mat-spinner>
                   </div>
                 }
@@ -166,7 +166,7 @@ export interface ImageUploadData {
           }
 
           <!-- Texto Alternativo -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="form-field">
             <mat-label>Texto Alternativo (Alt Text)</mat-label>
             <input matInput formControlName="altText" placeholder="Descrição da imagem para acessibilidade">
             @if (imageForm.get('altText')?.hasError('required') && imageForm.get('altText')?.touched) {
@@ -175,7 +175,7 @@ export interface ImageUploadData {
           </mat-form-field>
 
           <!-- Legenda -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="form-field">
             <mat-label>Legenda</mat-label>
             <input matInput formControlName="caption" placeholder="Legenda da imagem">
             @if (imageForm.get('caption')?.hasError('required') && imageForm.get('caption')?.touched) {
@@ -184,7 +184,7 @@ export interface ImageUploadData {
           </mat-form-field>
 
           <!-- Ordem -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="outline" class="form-field">
             <mat-label>Ordem de Exibição</mat-label>
             <input matInput type="number" formControlName="order" placeholder="1, 2, 3...">
             @if (imageForm.get('order')?.hasError('required') && imageForm.get('order')?.touched) {
@@ -196,7 +196,7 @@ export interface ImageUploadData {
           </mat-form-field>
 
           <!-- Checkbox para Imagem Principal -->
-          <mat-checkbox formControlName="isMainImage" class="text-gray-900">
+          <mat-checkbox formControlName="isMainImage" class="main-image-checkbox">
             Definir como imagem principal
           </mat-checkbox>
         </form>
@@ -208,7 +208,7 @@ export interface ImageUploadData {
           type="button"
           mat-button 
           (click)="close()"
-          class="text-gray-600 hover:text-gray-900">
+          class="cancel-btn">
           Cancelar
         </button>
         <button 
@@ -217,7 +217,7 @@ export interface ImageUploadData {
           color="primary"
           [disabled]="imageForm.invalid || submitting()"
           (click)="onSubmit()"
-          class="bg-[#276678] hover:bg-[#334a52]">
+          class="submit-btn">
           @if (submitting()) {
             <mat-spinner diameter="20"></mat-spinner>
           } @else {
@@ -228,7 +228,7 @@ export interface ImageUploadData {
       </div>
     </div>
   `,
-  styles: [`
+   styles: [`
     .image-upload-modal {
       width: 100%;
       max-width: 600px;
@@ -244,10 +244,160 @@ export interface ImageUploadData {
       margin-bottom: 1.5rem;
     }
 
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #334a52;
+      margin: 0;
+    }
+
+    .close-button {
+      color: #6b7280;
+    }
+
+    .close-button:hover {
+      color: #374151;
+    }
+
     .modal-content {
       padding: 0 1.5rem;
       max-height: 70vh;
       overflow-y: auto;
+    }
+
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-text {
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+
+    .select-file-btn {
+      background-color: #96afb8;
+      color: white;
+    }
+
+    .select-file-btn:hover {
+      background-color: #a288a9;
+    }
+
+    .file-info {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background-color: #f9fafb;
+      border-radius: 8px;
+    }
+
+    .file-name {
+      font-size: 0.875rem;
+      color: #374151;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .file-size {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .upload-btn {
+      background-color: #276678;
+      color: white;
+    }
+
+    .upload-btn:hover {
+      background-color: #334a52;
+    }
+
+    .upload-progress {
+      margin-top: 1rem;
+    }
+
+    .progress-bar {
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-text {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .separator {
+      display: flex;
+      align-items: center;
+      margin: 1rem 0;
+    }
+
+    .separator-line {
+      flex: 1;
+      border-top: 1px solid #d1d5db;
+    }
+
+    .separator-text {
+      padding: 0 0.75rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .url-instruction {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+
+    .form-field {
+      width: 100%;
+    }
+
+    .preview-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .preview-wrapper {
+      position: relative;
+    }
+
+    .preview-image {
+      width: 200px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #d1d5db;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(243, 244, 246, 0.75);
+      border-radius: 8px;
+    }
+
+    .main-image-checkbox {
+      color: #334a52;
+      margin-top: 0.5rem;
     }
 
     .modal-actions {
@@ -257,6 +407,23 @@ export interface ImageUploadData {
       padding: 1.5rem;
       border-top: 1px solid #e5e7eb;
       margin-top: 1.5rem;
+    }
+
+    .cancel-btn {
+      color: #6b7280;
+    }
+
+    .cancel-btn:hover {
+      color: #374151;
+    }
+
+    .submit-btn {
+      background-color: #276678;
+      color: white;
+    }
+
+    .submit-btn:hover {
+      background-color: #334a52;
     }
 
     .mat-mdc-form-field {
@@ -278,6 +445,11 @@ export interface ImageUploadData {
       .modal-actions {
         padding-left: 1rem;
         padding-right: 1rem;
+      }
+
+      .preview-image {
+        width: 180px;
+        height: 135px;
       }
     }
   `]

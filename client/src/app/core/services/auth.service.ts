@@ -23,7 +23,7 @@ import { ErrorMappingService } from './error.mapping.service';
 export class AuthService {
   private tokenKey = 'auth_token';
   private userKey = 'auth_user';
-private authBaseUrl = `${environment.apiBaseUrl}/auth`;
+private authBaseUrl = `${environment.apiBaseUrl}/auth`;//TODO mudar para environment.apibaseurl
   private userSignal = signal<UserInfo | null>(this.loadUser());
   private tokenSignal = signal<string | null>(this.loadToken());
 private errorMapping = inject(ErrorMappingService);

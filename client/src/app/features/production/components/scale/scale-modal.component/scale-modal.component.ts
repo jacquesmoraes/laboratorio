@@ -27,8 +27,7 @@ export interface ScaleModalData {
     MatInput
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './scale-modal.component.html',
-  styleUrls: ['./scale-modal.component.scss']
+  templateUrl: './scale-modal.component.html'
 })
 export class ScaleModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

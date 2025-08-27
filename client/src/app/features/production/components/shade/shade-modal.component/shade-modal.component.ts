@@ -36,8 +36,8 @@ export interface ShadeModalData {
     MatDialogModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './shade-modal.component.html',
-  styleUrls: ['./shade-modal.component.scss']
+  templateUrl: './shade-modal.component.html'
+  
 })
 export class ShadeModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

@@ -31,8 +31,8 @@ export interface SectorModalData {
     MatDialogModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './sector-modal.component.html',
-  styleUrls: ['./sector-modal.component.scss']
+  templateUrl: './sector-modal.component.html'
+  
 })
 export class SectorModalComponent implements OnInit {
   private fb = inject(FormBuilder);

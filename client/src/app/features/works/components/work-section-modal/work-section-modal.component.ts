@@ -31,8 +31,8 @@ export interface WorkSectionModalData {
     MatDialogModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './work-section-modal.component.html',
-  styleUrls: ['./work-section-modal.component.scss']
+  templateUrl: './work-section-modal.component.html'
+  
 })
 export class WorkSectionModalComponent implements OnInit {
   private fb = inject(FormBuilder);

@@ -1,4 +1,4 @@
-﻿namespace API.Controllers
+﻿namespace API.Controllers.Utils
 {
     [Route ( "errors/{code}" )]
     [ApiController]

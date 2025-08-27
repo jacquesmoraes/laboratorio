@@ -55,6 +55,7 @@ import { Router } from '@angular/router';
             <th>Paciente</th>
             <th>Status</th>
             <th>Total</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -68,6 +69,11 @@ import { Router } from '@angular/router';
         </span>
       </td>
       <td data-label="Total">{{ order.orderTotal | currency:'BRL' }}</td>
+      <td data-label="Ações">
+                <button class="details-btn" (click)="goToDetails(order.serviceOrderId)">
+                  Ver Detalhes
+                </button>
+              </td>
     </tr>
   }
 </tbody>

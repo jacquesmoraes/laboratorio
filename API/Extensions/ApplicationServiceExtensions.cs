@@ -31,12 +31,13 @@ namespace API.Extensions
 
             services.Configure<BlobStorageSettings>(config.GetSection("Azure:BlobStorage"));
 
-
+            services.AddHttpClient();
             services
                 .AddControllers ( )
                 .AddJsonOptions ( opt =>
                 {
                     opt.JsonSerializerOptions.Converters.Add ( new JsonStringEnumConverter ( ) );
+                     opt.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 } );
 
             var environment = config["ASPNETCORE_ENVIRONMENT"] ?? "Development";
@@ -79,6 +80,7 @@ namespace API.Extensions
                 {
                     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                     options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.Domain = null; //TODO: remove when docking
                 }
                 else
                 {
@@ -87,7 +89,7 @@ namespace API.Extensions
                 }
             } );
 
-             services.AddSingleton(x => 
+            services.AddSingleton(x => 
              new BlobServiceClient(config.GetConnectionString("AzureStorage")));
 
 

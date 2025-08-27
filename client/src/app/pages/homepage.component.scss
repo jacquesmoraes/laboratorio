@@ -1,7 +1,6 @@
 // Importa as cores do projeto
 @use '../../styles.scss';
 
-
 // Variáveis específicas da homepage
 :root {
   --homepage-primary: #014359;
@@ -95,10 +94,10 @@ html.dark .footer-bottom {
     font-family: 'Poppins', sans-serif;
   }
 }
+
 .nav-link, .mobile-nav-link {
   cursor: pointer;
 }
-
 
 // Container
 .container {
@@ -135,6 +134,7 @@ html.dark .footer-bottom {
 .logo {
   height: 3.5rem;
   width: auto;
+  transition: opacity 0.3s ease;
 }
 
 .nav-desktop {
@@ -215,9 +215,6 @@ html.dark .footer-bottom {
       display: none;
     }
   }
-}
-.logo {
-  transition: opacity 0.3s ease;
 }
 
 .theme-icon {
@@ -426,13 +423,13 @@ html.dark .footer-bottom {
   border: none;
   cursor: pointer;
 
- 
-
   &.btn-primary {
     background: var(--homepage-primary);
     color: white;
 
-    
+    &:hover {
+      background: #013a4a; // Versão mais escura do azul primário
+    }
   }
 
   &.btn-secondary {
@@ -440,7 +437,7 @@ html.dark .footer-bottom {
     color: white;
 
     &:hover {
-      opacity: 0.9;
+      background: #b89a6a; // Versão mais escura do dourado
     }
   }
 
@@ -449,7 +446,7 @@ html.dark .footer-bottom {
     color: var(--homepage-primary);
 
     &:hover {
-      opacity: 0.9;
+      background: #f5f5f5; // Versão mais escura do branco
     }
   }
 
@@ -1162,7 +1159,27 @@ html.dark .footer-bottom {
   animation: fadeIn 0.6s ease-out forwards;
 }
 
-// Responsive adjustments
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Focus states
+:focus-visible {
+  outline: 2px solid var(--homepage-accent);
+  outline-offset: 2px;
+}
+
+// ========================================
+// MEDIA QUERIES PARA COLAR NO SCSS GLOBAL
+// ========================================
+
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.5rem;
@@ -1195,20 +1212,267 @@ html.dark .footer-bottom {
     grid-template-columns: 1fr;
   }
 }
+.mobile-menu {
+  display: none;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
-// Accessibility
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  &.open {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  html.dark & {
+    background: var(--homepage-dark-bg);
+    border-top-color: var(--homepage-dark-card);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (min-width: 1024px) {
+    display: none !important;
   }
 }
 
-// Focus states
-:focus-visible {
-  outline: 2px solid var(--homepage-accent);
-  outline-offset: 2px;
+.mobile-nav {
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  color: var(--homepage-dark);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+
+  &:hover {
+    color: var(--homepage-primary);
+    background: rgba(1, 67, 89, 0.05);
+    transform: translateX(0.5rem);
+  }
+
+  &:active {
+    background: rgba(1, 67, 89, 0.1);
+  }
+
+  &.mobile-nav-cta {
+    background: var(--homepage-primary);
+    color: white;
+    text-align: center;
+    border-radius: 0;
+    padding: 1.25rem 2rem;
+    margin: 1rem 2rem 0;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(1, 67, 89, 0.2);
+
+    &:hover {
+      color: white;
+      background: var(--homepage-primary);
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(1, 67, 89, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(1, 67, 89, 0.2);
+    }
+
+    html.dark & {
+      color: white !important;
+      background: var(--homepage-primary);
+    }
+  }
+
+  html.dark & {
+    color: var(--homepage-light);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background: rgba(1, 67, 89, 0.2);
+    }
+
+    &:active {
+      background: rgba(1, 67, 89, 0.3);
+    }
+  }
+
+  // Melhorias para telas muito pequenas
+  @media (max-width: 480px) {
+    padding: 1.25rem 1.5rem;
+    font-size: 1rem;
+
+    &.mobile-nav-cta {
+      margin: 0.75rem 1.5rem 0;
+      padding: 1rem 1.5rem;
+    }
+  }
+
+  // Melhorias para telas pequenas
+  @media (max-width: 640px) {
+    &:hover {
+      transform: translateX(0.25rem);
+    }
+  }
+}
+
+// Animação para o menu mobile
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Melhorias no botão do menu hamburger
+.mobile-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  &:active {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  html.dark & {
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &:active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    display: none;
+  }
+
+  // Melhorias para telas muito pequenas
+  @media (max-width: 480px) {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+.menu-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--homepage-dark);
+  transition: transform 0.3s ease;
+
+  html.dark & {
+    color: var(--homepage-light);
+  }
+
+  // Animação do ícone quando o menu está aberto
+  .mobile-menu.open & {
+    transform: rotate(90deg);
+  }
+
+  // Melhorias para telas muito pequenas
+  @media (max-width: 480px) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+// Melhorias no header para mobile
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e2e8f0;
+  z-index: 50;
+  transition: all 0.3s ease;
+
+  html.dark & {
+    background: rgba(26, 26, 26, 0.95);
+    border-bottom-color: var(--homepage-dark-card);
+  }
+
+  // Melhorias para telas pequenas
+  @media (max-width: 768px) {
+    backdrop-filter: blur(15px);
+  }
+
+  @media (max-width: 480px) {
+    backdrop-filter: blur(20px);
+  }
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+
+  // Melhorias para telas pequenas
+  @media (max-width: 480px) {
+    padding: 0.75rem 0;
+  }
+}
+
+// Melhorias no logo para mobile
+.logo {
+  height: 3.5rem;
+  width: auto;
+  transition: opacity 0.3s ease;
+
+  // Melhorias para telas pequenas
+  @media (max-width: 768px) {
+    height: 3rem;
+  }
+
+  @media (max-width: 480px) {
+    height: 2.5rem;
+  }
+}
+
+// Melhorias nos controles mobile
+.mobile-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  @media (min-width: 1024px) {
+    display: none;
+  }
+
+  // Melhorias para telas pequenas
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
 }

@@ -33,31 +33,6 @@
   letter-spacing: -0.025em;
 }
 
-
-
-// Loading
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 4rem 2rem;
-  min-height: 300px;
-}
-
-.loading-spinner {
-  width: 3rem;
-  height: 3rem;
-  border: 4px solid var(--border-color);
-  border-top: 4px solid var(--primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 // Card de Detalhes
 .details-card {
   background: linear-gradient(135deg, var(--white) 0%, #fafafa 100%);
@@ -190,7 +165,10 @@
   line-height: 1.5;
 }
 
-// Responsividade
+// ========================================
+// MEDIA QUERIES PARA COLAR NO SCSS GLOBAL
+// ========================================
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -243,4 +221,3 @@
     font-size: 1.25rem;
   }
 }
-

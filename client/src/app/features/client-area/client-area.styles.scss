@@ -22,7 +22,7 @@ $client-area-white: #ffffff;
 }
 
 @mixin button-primary {
-background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($client-area-primary, $lightness: -10%) 100%);
+  background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($client-area-primary, $lightness: -10%) 100%);
   color: $client-area-white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -226,36 +226,6 @@ background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($clien
   }
 }
 
-// Responsive
-@media (max-width: 768px) {
-  .header-container {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
-  
-  .lab-info {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .lab-contact {
-    justify-content: center;
-    gap: 1rem;
-  }
-  
-  .lab-address {
-    text-align: center;
-  }
-  
-  .lab-details h1 {
-    font-size: 1.5rem;
-  }
-  
-  .contact-item {
-    font-size: 0.85rem;
-  }
-}
 .client-area {
 
   // Status badges
@@ -572,6 +542,13 @@ background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($clien
         text-decoration: underline;
       }
     }
+
+    .details-btn {
+      @include button-primary;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      min-width: 100px;
+    }
   }
 
   // Paginação
@@ -602,12 +579,9 @@ background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($clien
   }
 }
 
-
-
 // =========================
 // SIDEBAR COMPONENTS
 // =========================
-
 
 .sidebar-actions {
   margin-top: auto;
@@ -642,8 +616,6 @@ background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($clien
   }
 }
 
-
-
 .logout-btn {
   display: flex;
   align-items: center;
@@ -669,6 +641,7 @@ background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($clien
     height: 18px;
   }
 }
+
 .upcoming-deliveries {
   margin-top: 2rem;
   
@@ -753,21 +726,6 @@ background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($clien
     }
   }
 }
-
-// Responsive adjustments
-@media (max-width: 768px) {
-  .deliveries-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .delivery-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-}
-
-
 
 // =========================
 // UTILITY CLASSES
@@ -1083,5 +1041,49 @@ background: linear-gradient(135deg, $client-area-primary 0%, color.adjust($clien
         }
       }
     }
+  }
+}
+
+// Header responsive
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .lab-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .lab-contact {
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .lab-address {
+    text-align: center;
+  }
+  
+  .lab-details h1 {
+    font-size: 1.5rem;
+  }
+  
+  .contact-item {
+    font-size: 0.85rem;
+  }
+}
+
+// Deliveries responsive
+@media (max-width: 768px) {
+  .deliveries-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .delivery-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 }

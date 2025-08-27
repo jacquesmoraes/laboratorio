@@ -18,6 +18,7 @@ import { TablePriceService } from '../../../table-price/services/table-price.ser
 import { TablePriceOption } from '../../../table-price/table-price.interface';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CepService } from '../../../../core/services/cep.service';
 
 @Component({
   selector: 'app-client-form',
@@ -41,11 +42,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class ClientFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private clientService = inject(ClientService);
+  private cepService = inject(CepService);
   private tablePriceService = inject(TablePriceService);
-  
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+
   clientForm!: FormGroup;
   loading = signal(false);
   isEditMode = signal(false);
@@ -53,6 +55,7 @@ export class ClientFormComponent implements OnInit {
   tablePriceOptions = signal<TablePriceOption[]>([]);
   loadingTablePrices = signal(false);
   clientToLoad = signal<Client | null>(null);
+  searchingCep = signal(false);
   
   billingModes = Object.entries(BillingModeLabels).map(([value, label]) => ({
     value: parseInt(value),
@@ -86,7 +89,47 @@ export class ClientFormComponent implements OnInit {
         city: ['', Validators.required]
       })
     });
+
+    // Adiciona listener para busca automática de CEP
+    this.clientForm.get('address.cep')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(cep => {
+        if (cep && cep.replace(/\D/g, '').length === 8) {
+          this.searchCep(cep);
+        }
+      });
   }
+
+  searchCep(cep: string) {
+  this.searchingCep.set(true);
+
+  this.cepService.searchCep(cep)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (response) => {
+        this.searchingCep.set(false);
+
+        if (response && !response.erro) {
+          this.clientForm.patchValue({
+            address: {
+              street: response.logradouro,
+              neighborhood: response.bairro,
+              city: response.localidade,
+              complement: response.complemento || ''
+            }
+          });
+        }
+      },
+      error: () => {
+        this.searchingCep.set(false);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro na busca',
+          text: 'Erro ao buscar o CEP. Tente novamente.',
+        });
+      }
+    });
+}
 
   private checkEditMode() {
     const id = this.route.snapshot.paramMap.get('id');

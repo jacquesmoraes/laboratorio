@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { WebsiteCase } from '../../../models/website-case.interface';
 import { WebsiteCaseService } from '../../../services/website-case.service';
 
-
 @Component({
   selector: 'app-case-details',
   standalone: true,
@@ -24,6 +23,9 @@ export class WebsiteCaseDetailsComponent implements OnInit {
   readonly isAdminContext = signal(false);
 
   ngOnInit(): void {
+    // Verificar se está no contexto admin baseado na URL atual
+    const currentUrl = this.router.url;
+    this.isAdminContext.set(currentUrl.includes('/admin/'));
     this.loadCaseDetails();
   }
 
@@ -78,5 +80,5 @@ export class WebsiteCaseDetailsComponent implements OnInit {
   
   onImageError(event: any): void {
     event.target.src = 'assets/images/placeholder-image.jpg';
-}
+  }
 }

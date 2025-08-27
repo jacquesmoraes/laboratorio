@@ -12,21 +12,17 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { WebsiteCaseService } from '../../../services/website-case.service';
 import { 
   CreateWebsiteCaseDto, 
   UpdateWebsiteCaseDto,
-  WebsiteCaseAdmin,
   WebsiteCaseImage,
 } from '../../../models/website-case.interface';
-    
-import { ModalService } from '../../shared/services/modal.service';
 import { ErrorMappingService } from '../../../../../core/services/error.mapping.service';
-import { LoadingService } from '../../../../../core/services/loading.service';
-import Swal, { SweetAlertResult } from 'sweetalert2';
+import { WebsiteCaseImageManagerComponent } from '../website-case-image-manager-component/website-case-image-manager.component';
 
 @Component({
   selector: 'app-website-case-form',
@@ -43,6 +39,7 @@ import Swal, { SweetAlertResult } from 'sweetalert2';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatChipsModule,
+    WebsiteCaseImageManagerComponent,
     MatDialogModule
   ],
   templateUrl: './website-case-form.component.html',
@@ -55,11 +52,9 @@ export class WebsiteCaseFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly websiteCaseService = inject(WebsiteCaseService);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly modalService = inject(ModalService);
   private readonly errorMapping = inject(ErrorMappingService);
-  private readonly loadingService = inject(LoadingService);
+  
 
   // Signals
   submitting = signal(false);
@@ -148,7 +143,7 @@ export class WebsiteCaseFormComponent implements OnInit {
       : this.websiteCaseService.create(caseData as CreateWebsiteCaseDto);
 
     request.subscribe({
-      next: (result) => {
+      next: () => {
         this.snackBar.open(
           `Caso ${this.isEditMode() ? 'atualizado' : 'criado'} com sucesso!`, 
           'Fechar', 
@@ -168,90 +163,37 @@ export class WebsiteCaseFormComponent implements OnInit {
     });
   }
 
-  addImage(): void {
-    this.modalService.openImageUploadModal().subscribe(result => {
-      if (result) {
-        const newImage: WebsiteCaseImage = {
-          id: Date.now(), // Temporary ID
-          imageUrl: result.imageUrl,
-          altText: result.altText,
-          caption: result.caption,
-          order: result.order,
-          isMainImage: result.isMainImage,
-          createdAt: new Date().toISOString()
-        };
+ 
 
-        // Se esta imagem for marcada como principal, desmarcar as outras
-        if (result.isMainImage) {
-          this.additionalImages.update(images => 
-            images.map(img => ({ ...img, isMainImage: false }))
-          );
-        }
+  onImageAdded(image: WebsiteCaseImage): void {
+  this.additionalImages.update(images => [...images, image]);
+}
 
-        this.additionalImages.update(images => [...images, newImage]);
-        this.snackBar.open('Imagem adicionada com sucesso!', 'Fechar', { duration: 3000 });
-      }
+onImageUpdated(event: { id: number, image: Partial<WebsiteCaseImage> }): void {
+  this.additionalImages.update(images => 
+    images.map(img => img.id === event.id ? { ...img, ...event.image } : img)
+  );
+}
+
+onImageDeleted(imageId: number): void {
+  this.additionalImages.update(images => images.filter(img => img.id !== imageId));
+}
+
+onImageReordered(event: { fromIndex: number, toIndex: number }): void {
+  this.additionalImages.update(images => {
+    const reordered = [...images];
+    const [movedImage] = reordered.splice(event.fromIndex, 1);
+    reordered.splice(event.toIndex, 0, movedImage);
+    
+    // Atualizar a ordem
+    reordered.forEach((image, index) => {
+      image.order = index + 1;
+      image.isMainImage = index === 0;
     });
-  }
-
-  editImage(image: WebsiteCaseImage): void {
-    const imageData = {
-      imageUrl: image.imageUrl,
-      altText: image.altText,
-      caption: image.caption,
-      order: image.order,
-      isMainImage: image.isMainImage
-    };
-
-    this.modalService.openImageUploadModal(imageData).subscribe(result => {
-      if (result) {
-        const updatedImage: WebsiteCaseImage = {
-          ...image,
-          imageUrl: result.imageUrl,
-          altText: result.altText,
-          caption: result.caption,
-          order: result.order,
-          isMainImage: result.isMainImage
-        };
-
-        // Se esta imagem for marcada como principal, desmarcar as outras
-        if (result.isMainImage) {
-          this.additionalImages.update(images => 
-            images.map(img => ({ 
-              ...img, 
-              isMainImage: img.id === image.id ? true : false 
-            }))
-          );
-        } else {
-          this.additionalImages.update(images => 
-            images.map(img => img.id === image.id ? updatedImage : img)
-          );
-        }
-
-        this.snackBar.open('Imagem atualizada com sucesso!', 'Fechar', { duration: 3000 });
-      }
-    });
-  }
-
-  removeImage(image: WebsiteCaseImage): void {
-    Swal.fire({
-      title: 'Confirmar remoção',
-      text: `Tem certeza que deseja remover a imagem "${image.caption}"?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sim, remover!',
-      cancelButtonText: 'Cancelar'
-    }).then((result: SweetAlertResult) => {
-      if (result.isConfirmed) {
-        this.additionalImages.update(images => 
-          images.filter(img => img.id !== image.id)
-        );
-        this.snackBar.open('Imagem removida com sucesso!', 'Fechar', { duration: 3000 });
-      }
-    });
-  }
+    
+    return reordered;
+  });
+}
 
   clearMainImage(): void {
     this.caseForm.patchValue({ mainImageUrl: '' });

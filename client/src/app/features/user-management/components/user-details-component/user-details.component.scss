@@ -37,8 +37,6 @@
   flex-wrap: wrap;
 }
 
-
-
 // Content
 .content {
   display: grid;
@@ -155,35 +153,10 @@
   }
 }
 
-// Loading e Error
-.loading-container,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
-  color: var(--text-muted);
-  
-  mat-icon {
-    font-size: 3rem;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: 1rem;
-  }
-  
-  p {
-    margin: 0 0 1rem 0;
-    font-size: 1.125rem;
-  }
-}
+// ========================================
+// MEDIA QUERIES PARA COLAR NO SCSS GLOBAL
+// ========================================
 
-.error-container mat-icon {
-  color: var(--warn);
-}
-
-// Responsivo
 @media (max-width: 768px) {
   .user-details-container {
     padding: 1rem;
