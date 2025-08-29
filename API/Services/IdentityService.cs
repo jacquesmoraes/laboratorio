@@ -100,7 +100,7 @@ namespace API.Services
             if ( !string.IsNullOrEmpty ( parameters.Search ) )
             {
                 query = query.Where ( u =>
-                    (u.Email ?? "").Contains ( parameters.Search ) ||
+                    ( u.Email ?? "" ).Contains ( parameters.Search ) ||
                     u.DisplayName.Contains ( parameters.Search ) );
             }
 
@@ -206,17 +206,17 @@ namespace API.Services
                 ?? throw new UnauthorizedAccessException("Invalid credentials.");
 
             if ( !user.IsActive )
-    {
-        // Diferenciar entre usuário não ativado (primeiro acesso) e usuário bloqueado
-        if ( user.IsFirstLogin )
-        {
-            throw new UnauthorizedAccessException ( "Account is not activated." );
-        }
-        else
-        {
-            throw new UnauthorizedAccessException ( "Account is deactivated." );
-        }
-    }
+            {
+                // Diferenciar entre usuário não ativado (primeiro acesso) e usuário bloqueado
+                if ( user.IsFirstLogin )
+                {
+                    throw new UnauthorizedAccessException ( "Account is not activated." );
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException ( "Account is deactivated." );
+                }
+            }
             if ( !await _userManager.CheckPasswordAsync ( user, dto.Password ) )
             {
                 _logger?.LogWarning ( "Incorrect password for email: {Email}", dto.Email );
@@ -283,38 +283,38 @@ namespace API.Services
             }
         }
 
-       public async Task<string> RegenerateAccessCodeByUserIdAsync(string userId)
-{
-    var user = await _userManager.FindByIdAsync(userId)
+        public async Task<string> RegenerateAccessCodeByUserIdAsync ( string userId )
+        {
+            var user = await _userManager.FindByIdAsync(userId)
         ?? throw new NotFoundException("Usuário não encontrado.");
 
-    if (!user.IsFirstLogin)
-        throw new BadRequestException("Usuário já completou o primeiro acesso.");
+            if ( !user.IsFirstLogin )
+                throw new BadRequestException ( "Usuário já completou o primeiro acesso." );
 
-    user.AccessCode = GenerateAccessCode();
-    user.AccessCodeExpiresAt = DateTime.UtcNow.AddHours(24);
+            user.AccessCode = GenerateAccessCode ( );
+            user.AccessCodeExpiresAt = DateTime.UtcNow.AddHours ( 24 );
 
-    var result = await _userManager.UpdateAsync(user);
-    if (!result.Succeeded)
-        throw new Exception("Falha ao atualizar o código de acesso.");
+            var result = await _userManager.UpdateAsync(user);
+            if ( !result.Succeeded )
+                throw new Exception ( "Falha ao atualizar o código de acesso." );
 
-    _logger.LogInformation("Novo código de acesso gerado para o usuário {UserId} ({Email})", user.Id, user.Email);
+            _logger.LogInformation ( "Novo código de acesso gerado para o usuário {UserId} ({Email})", user.Id, user.Email );
 
-    return user.AccessCode;
-}
+            return user.AccessCode;
+        }
 
-public async Task<string> ForgotPasswordAsync(ForgotPasswordDto dto)
-{
-    var user = await _userManager.FindByEmailAsync(dto.Email)
+        public async Task<string> ForgotPasswordAsync ( ForgotPasswordDto dto )
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email)
         ?? throw new NotFoundException("User not found.");
 
-    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-    
-    // Criar o link de redefinição de senha
-    var resetLink = $"{_config["Frontend:BaseUrl"]}/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email!)}";
-    
-    // Template HTML mais profissional
-    var emailBody = $@"
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            // Criar o link de redefinição de senha
+            var resetLink = $"{_config["Frontend:BaseUrl"]}/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email!)}";
+
+            // Template HTML mais profissional
+            var emailBody = $@"
         <!DOCTYPE html>
         <html>
         <head>
@@ -358,39 +358,39 @@ public async Task<string> ForgotPasswordAsync(ForgotPasswordDto dto)
                 <hr style='border: none; border-top: 1px solid #ccc; margin: 30px 0;'>
                 
                 <p style='font-size: 12px; color: #666; text-align: center; margin: 0;'>
-                    © 2024 Sistema Laboratório. Todos os direitos reservados.
+                    © 2025 Sistema Laboratório. Todos os direitos reservados.
                 </p>
             </div>
         </body>
         </html>
     ";
-    
-    // Enviar o email
-    await _emailService.SendEmailAsync(user.Email!, "Redefinição de Senha - Sistema Laboratório", emailBody);
-    
-    _logger.LogInformation("Password reset email sent to user {UserId} ({Email})", user.Id, user.Email);
-    
-    return "Link de redefinição de senha enviado para seu email.";
-}
+
+            // Enviar o email
+            await _emailService.SendEmailAsync ( user.Email!, "Redefinição de Senha - Sistema Laboratório", emailBody );
+
+            _logger.LogInformation ( "Password reset email sent to user {UserId} ({Email})", user.Id, user.Email );
+
+            return "Link de redefinição de senha enviado para seu email.";
+        }
 
 
-public async Task<string> ResetPasswordAsync(ResetPasswordDto dto)
-{
-    var user = await _userManager.FindByEmailAsync(dto.Email)
+        public async Task<string> ResetPasswordAsync ( ResetPasswordDto dto )
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email)
         ?? throw new NotFoundException("User not found.");
 
-    var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
-    
-    if (!result.Succeeded)
-    {
-        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-        throw new BadRequestException($"Failed to reset password: {errors}");
-    }
+            var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
 
-    _logger.LogInformation("Password reset successfully for user {UserId} ({Email})", user.Id, user.Email);
-    
-    return "Password has been reset successfully.";
-}
+            if ( !result.Succeeded )
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new BadRequestException ( $"Failed to reset password: {errors}" );
+            }
+
+            _logger.LogInformation ( "Password reset successfully for user {UserId} ({Email})", user.Id, user.Email );
+
+            return "Password has been reset successfully.";
+        }
 
 
 

@@ -1,7 +1,5 @@
 ﻿using System.Net;
 using System.Net.Mail;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace API.Services
 {
@@ -10,7 +8,7 @@ namespace API.Services
         private readonly IConfiguration _config = config;
         private readonly ILogger<EmailService> _logger = logger;
 
-        public async Task SendEmailAsync(string toEmail, string subject, string body)
+        public async Task SendEmailAsync ( string toEmail, string subject, string body )
         {
             var smtpSettings = _config.GetSection("SmtpSettings");
 
@@ -26,7 +24,8 @@ namespace API.Services
             {
                 EnableSsl = enableSsl,
                 Credentials = new NetworkCredential(smtpUsername, smtpPassword),
-                DeliveryMethod = SmtpDeliveryMethod.Network
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 30000 // 30 segundos timeout
             };
 
             using var message = new MailMessage
@@ -37,17 +36,26 @@ namespace API.Services
                 IsBodyHtml = true
             };
 
-            message.To.Add(toEmail);
+            message.To.Add ( toEmail );
 
             try
             {
-                await client.SendMailAsync(message);
-                _logger.LogInformation("E-mail enviado com sucesso para {To}", toEmail);
+                _logger.LogInformation ( "Tentando enviar e-mail para {To} via {Server}:{Port} com SSL: {Ssl}",
+                    toEmail, smtpServer, smtpPort, enableSsl );
+
+                await client.SendMailAsync ( message );
+                _logger.LogInformation ( "E-mail enviado com sucesso para {To}", toEmail );
             }
-            catch (Exception ex)
+            catch ( SmtpException smtpEx )
             {
-                _logger.LogError(ex, "Erro ao enviar e-mail para {To}", toEmail);
-                throw new InvalidOperationException("Erro ao enviar e-mail. Verifique o log para detalhes.");
+                _logger.LogError ( smtpEx, "Erro SMTP ao enviar e-mail para {To}. Status: {StatusCode}, Response: {Response}",
+                    toEmail, smtpEx.StatusCode, smtpEx.StatusCode.ToString ( ) );
+                throw new InvalidOperationException ( $"Erro SMTP: {smtpEx.StatusCode} - {smtpEx.Message}" );
+            }
+            catch ( Exception ex )
+            {
+                _logger.LogError ( ex, "Erro inesperado ao enviar e-mail para {To}", toEmail );
+                throw new InvalidOperationException ( $"Erro ao enviar e-mail: {ex.Message}" );
             }
         }
     }

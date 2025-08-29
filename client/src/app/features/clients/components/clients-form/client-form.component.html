@@ -153,9 +153,7 @@
             <mat-form-field appearance="outline" class="w-50">
               <mat-label>CEP</mat-label>
               <input matInput formControlName="cep" placeholder="00000-000" maxlength="9" />
-              <mat-icon matSuffix>
-              
-              </mat-icon>
+              <mat-icon matSuffix>search</mat-icon>
               <mat-hint>apenas numeros</mat-hint>
             </mat-form-field>
           </div>
@@ -194,9 +192,6 @@
             type="submit" 
             class="submit-btn"
             [disabled]="clientForm.invalid || loading()">
-            @if (loading()) {
-              <mat-spinner diameter="20"></mat-spinner>
-            }
             <mat-icon>{{ isEditMode() ? 'update' : 'add' }}</mat-icon>
             {{ isEditMode() ? 'Atualizar' : 'Salvar' }}
           </button>

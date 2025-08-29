@@ -11,8 +11,6 @@ public record ClientDashboardRecord
     public string? City { get; init; }
     public string? PhoneNumber { get; init; }
 
-    public decimal TotalInvoiced { get; init; }
-    public decimal TotalPaid { get; init; }
-    public decimal Balance { get; init; }
-    public List<UpcomingDeliveriesRecord> UpcomingDeliveries { get; init; } = new();
+    public List<MonthlyBalanceRecord> monthlyBalances { get; init; } = [];
+    public List<UpcomingDeliveriesRecord> UpcomingDeliveries { get; init; } = [];
 }

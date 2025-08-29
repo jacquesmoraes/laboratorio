@@ -19,6 +19,8 @@ import { TablePriceOption } from '../../../table-price/table-price.interface';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CepService } from '../../../../core/services/cep.service';
+import { ErrorService } from '../../../../core/services/error.service';
+import { ErrorMappingService } from '../../../../core/services/error.mapping.service';
 
 @Component({
   selector: 'app-client-form',
@@ -47,6 +49,8 @@ export class ClientFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private errorService = inject(ErrorService);
+  private errorMapping = inject(ErrorMappingService);
 
   clientForm!: FormGroup;
   loading = signal(false);
@@ -55,7 +59,6 @@ export class ClientFormComponent implements OnInit {
   tablePriceOptions = signal<TablePriceOption[]>([]);
   loadingTablePrices = signal(false);
   clientToLoad = signal<Client | null>(null);
-  searchingCep = signal(false);
   
   billingModes = Object.entries(BillingModeLabels).map(([value, label]) => ({
     value: parseInt(value),
@@ -101,35 +104,40 @@ export class ClientFormComponent implements OnInit {
   }
 
   searchCep(cep: string) {
-  this.searchingCep.set(true);
-
-  this.cepService.searchCep(cep)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (response) => {
-        this.searchingCep.set(false);
-
-        if (response && !response.erro) {
-          this.clientForm.patchValue({
-            address: {
-              street: response.logradouro,
-              neighborhood: response.bairro,
-              city: response.localidade,
-              complement: response.complemento || ''
-            }
-          });
+    this.cepService.searchCep(cep)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          if (response && !response.erro) {
+            this.clientForm.patchValue({
+              address: {
+                street: response.logradouro,
+                neighborhood: response.bairro,
+                city: response.localidade,
+                complement: response.complemento || ''
+              }
+            });
+          } else {
+            // CEP não encontrado
+            this.errorService.showError('CEP não encontrado. Verifique se está correto.');
+          }
+        },
+        error: (error) => {
+          // Tratar diferentes tipos de erro
+          let errorMessage = 'Erro ao buscar CEP';
+          
+          if (error.status === 404) {
+            errorMessage = 'CEP não encontrado. Verifique se está correto.';
+          } else if (error.status === 400) {
+            errorMessage = error.error?.message || 'CEP inválido';
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
+          this.errorService.showError(errorMessage);
         }
-      },
-      error: () => {
-        this.searchingCep.set(false);
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro na busca',
-          text: 'Erro ao buscar o CEP. Tente novamente.',
-        });
-      }
-    });
-}
+      });
+  }
 
   private checkEditMode() {
     const id = this.route.snapshot.paramMap.get('id');

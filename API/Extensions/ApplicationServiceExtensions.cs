@@ -80,7 +80,7 @@ namespace API.Extensions
                 {
                     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                     options.Cookie.SameSite = SameSiteMode.Lax;
-                    options.Cookie.Domain = null; //TODO: remove when docking
+                   
                 }
                 else
                 {

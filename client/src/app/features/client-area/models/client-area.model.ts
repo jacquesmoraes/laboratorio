@@ -11,11 +11,20 @@ export interface ClientDashboard {
   neighborhood: string;
   city: string;
   phoneNumber: string;
-  totalInvoiced: number;
-  totalPaid: number;
-  balance: number;
+  monthlyBalances: MonthlyBalanceRecord[];
   upcomingDeliveries: UpcomingDeliveries[]; 
 }
+
+export interface MonthlyBalanceRecord {
+  year: number;
+  month: number;
+  monthName: string;
+  invoiced: number;
+  paid: number;
+  balance: number;
+  isCurrentMonth: boolean;
+}
+
 export interface UpcomingDeliveries {
   scheduleId: number;
   serviceOrderId: number;

@@ -43,6 +43,13 @@ export class ForgotPasswordComponent {
       return;
     }
 
+    // Validação básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email())) {
+      this.error.set('Digite um email válido');
+      return;
+    }
+
     this.loading.set(true);
     this.error.set('');
     this.success.set('');
@@ -52,13 +59,21 @@ export class ForgotPasswordComponent {
         next: (response) => {
           this.success.set(response.message);
           this.loading.set(false);
+          // Limpar o campo de email após sucesso
+          this.email.set('');
         },
         error: (error) => {
-          this.error.set('Erro ao enviar email de recuperação');
+          console.error('Erro no forgot password:', error);
+          if (error.status === 404) {
+            this.error.set('Email não encontrado no sistema');
+          } else {
+            this.error.set('Erro ao enviar email de recuperação. Tente novamente.');
+          }
           this.loading.set(false);
         }
       });
     } catch (error) {
+      console.error('Erro inesperado:', error);
       this.error.set('Erro inesperado');
       this.loading.set(false);
     }

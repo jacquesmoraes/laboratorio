@@ -31,7 +31,7 @@ export const routes: Routes = [
   },
   {
     path: 'reset-password',
-    loadChildren: () => import('./core/auth/auth.routes').then(m => m.AUTH_ROUTES)
+    loadComponent: () => import('./core/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
   },
   
   // Área administrativa

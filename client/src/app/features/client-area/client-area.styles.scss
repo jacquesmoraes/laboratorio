@@ -579,6 +579,149 @@ $client-area-white: #ffffff;
   }
 }
 
+.current-balance {
+  margin: 2rem 0;
+  
+  h3 {
+    color: #334a52;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+  
+  .balance-card {
+    background: linear-gradient(135deg, #f4f1ee 0%, #96afb8 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(39, 102, 120, 0.1);
+    
+    .amount {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 0 0 0.5rem 0;
+      
+      &.positive {
+        color: #28a745;
+      }
+      
+      &.negative {
+        color: #dc3545;
+      }
+      
+      &.neutral {
+        color: #6c757d;
+      }
+    }
+    
+    .balance-label {
+      font-size: 1rem;
+      font-weight: 500;
+      
+      &.positive {
+        color: #28a745;
+      }
+      
+      &.negative {
+        color: #dc3545;
+      }
+      
+      &.neutral {
+        color: #6c757d;
+      }
+    }
+  }
+}
+
+.monthly-balances {
+  margin: 2rem 0;
+  
+  h3 {
+    color: #334a52;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+  }
+  
+  .months-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    
+    .month-tab {
+      background: #f4f1ee;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      color: #334a52;
+      
+      &:hover {
+        background: #96afb8;
+        color: white;
+      }
+      
+      &.active {
+        background: #276678;
+        color: white;
+        border-color: #276678;
+      }
+      
+      &.current-month {
+        border-color: #a288a9;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  .month-details {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(39, 102, 120, 0.1);
+    
+    .month-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      
+      .summary-card {
+        text-align: center;
+        padding: 1rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        
+        h4 {
+          color: #334a52;
+          margin: 0 0 0.5rem 0;
+          font-size: 0.9rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .amount {
+          font-size: 1.5rem;
+          font-weight: bold;
+          margin: 0;
+          
+          &.positive {
+            color: #28a745;
+          }
+          
+          &.negative {
+            color: #dc3545;
+          }
+          
+          &.neutral {
+            color: #6c757d;
+          }
+        }
+      }
+    }
+  }
+}
+
 // =========================
 // SIDEBAR COMPONENTS
 // =========================

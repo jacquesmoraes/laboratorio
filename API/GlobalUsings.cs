@@ -21,12 +21,7 @@ global using Applications.Contracts;
 // ==========================
 global using Applications.Contracts.Identity;
 
-// ===========================
-//  sendgrid email service
-// ===========================
 
-global using SendGrid;
-global using SendGrid.Helpers.Mail;
 // ==========================
 // DTOs
 // ==========================

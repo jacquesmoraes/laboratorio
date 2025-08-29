@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface ViaCepResponse {
@@ -27,17 +27,14 @@ export class CepService {
   private http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/cep`;
 
-  searchCep(cep: string): Observable<ViaCepResponse | null> {
+  searchCep(cep: string): Observable<ViaCepResponse> {
     // Remove caracteres não numéricos
     const cleanCep = cep.replace(/\D/g, '');
     
     if (cleanCep.length !== 8) {
-      return of(null);
+      return throwError(() => new Error('CEP deve conter 8 dígitos'));
     }
 
-    return this.http.get<ViaCepResponse>(`${this.apiUrl}/${cleanCep}`)
-      .pipe(
-        catchError(() => of(null))
-      );
+    return this.http.get<ViaCepResponse>(`${this.apiUrl}/${cleanCep}`);
   }
 }

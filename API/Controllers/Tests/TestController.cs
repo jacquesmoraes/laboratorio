@@ -29,7 +29,7 @@
         public IActionResult ThrowUnexpected ( ) => throw new Exception ( "Erro inesperado" );
 
         [HttpGet ( "auth-required" )]
-        [Authorize] // ← obrigatório
+        [Authorize] 
         public IActionResult RequiresAuth ( ) => Ok ( "Sucesso" );
 
         //
@@ -40,17 +40,18 @@
         public async Task<IActionResult> SendTestEmail ( [FromServices] EmailService emailService )
         {
             await emailService.SendEmailAsync (
-                "jacquesbarrosmoraes@gmail.com",
+                "emelinepg@gmail.com",
                 "✅ Teste SMTP HostGator funcionando!",
                 """
-        <p>Este é um teste de envio via <strong>SMTP da HostGator (Titan)</strong>.</p>
-        <p>Se você recebeu este e-mail, sua API no Docker está <strong>enviando e-mails com sucesso!</strong></p>
-        <p>🚀</p>
-        """
+                <p>Este é um teste de envio via <strong>via lab eltite API </strong>.</p>                        
+                <p>Se você recebeu este e-mail, sua API no Docker está <strong>enviando e-mails com sucesso!</strong></p>
+                <p>🚀</p>
+                """
             );
 
-            return Ok ( "E-mail enviado." );
+            return Ok ( "E-mail enviado com sucesso." );
         }
+
 
 
 

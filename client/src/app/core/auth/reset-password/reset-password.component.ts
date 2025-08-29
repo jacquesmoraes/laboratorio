@@ -52,7 +52,7 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if(!this.token() || !this.email() || !this.newPassword()) {
+    if (!this.token() || !this.email() || !this.newPassword()) {
       this.error.set('Todos os campos são obrigatórios');
       return;
     }
@@ -88,11 +88,17 @@ export class ResetPasswordComponent implements OnInit {
           }, 3000);
         },
         error: (error) => {
-          this.error.set('Erro ao redefinir senha. Verifique o token e tente novamente.');
+          console.error('Erro no reset password:', error);
+          if (error.status === 400) {
+            this.error.set('Token inválido ou expirado. Solicite um novo link de recuperação.');
+          } else {
+            this.error.set('Erro ao redefinir senha. Tente novamente.');
+          }
           this.loading.set(false);
         }
       });
     } catch (error) {
+      console.error('Erro inesperado:', error);
       this.error.set('Erro inesperado');
       this.loading.set(false);
     }
