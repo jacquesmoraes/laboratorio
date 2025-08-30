@@ -1,12 +1,12 @@
 ﻿using Infra.Data;
 using Infra.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using Tests.Integration.Seeder;
 
 namespace Tests.Integration.Infrastructure
@@ -18,73 +18,47 @@ namespace Tests.Integration.Infrastructure
         {
             builder.UseEnvironment ( "Test" );
 
-            builder.ConfigureAppConfiguration ( ( context, config ) =>
+            builder.ConfigureServices ( async services =>
             {
-                var testConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "AppSettings.Tests.json");
-                if ( File.Exists ( testConfigPath ) )
+                // Forçar configuração de autenticação para testes
+                services.Configure<JwtBearerOptions> ( JwtBearerDefaults.AuthenticationScheme, options =>
                 {
-                    config.AddJsonFile ( testConfigPath, optional: false );
-                }
-                else
-                {
-                    config.AddInMemoryCollection ( new Dictionary<string, string?>
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ["Jwt:Key"] = "chave-fake-segura-para-testes-com-32-caracteres",
-                        ["Jwt:Issuer"] = "LabSystem",
-                        ["Jwt:Audience"] = "LabSystemClient"
-                    } );
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateIssuerSigningKey = false,
+                        SignatureValidator = ( token, parameters ) => new JwtSecurityToken ( token ),
+                        ValidateLifetime = false
+                    };
+                } );
+
+                // Criar service provider e popular banco
+                var serviceProvider = services.BuildServiceProvider();
+
+                using ( var scope = serviceProvider.CreateScope ( ) )
+                {
+                    var scopedServices = scope.ServiceProvider;
+                    var db = scopedServices.GetRequiredService<ApplicationContext>();
+                    var identityDb = scopedServices.GetRequiredService<AppIdentityDbContext>();
+                    var logger = scopedServices.GetRequiredService<ILogger<CustomWebApplicationFactory<TProgram>>>();
+
+                    try
+                    {
+                        // Garantir que os bancos sejam criados
+                        db.Database.EnsureCreated ( );
+                        identityDb.Database.EnsureCreated ( );
+
+                        // Popular dados de teste
+                        await IdentityTestSeeder.SeedTestUsersAsync ( scopedServices );
+                    }
+                    catch ( Exception ex )
+                    {
+                        logger.LogError ( ex, "Erro ao popular banco de testes." );
+                        throw;
+                    }
                 }
             } );
-
-            builder.ConfigureServices ( services =>
-     {
-         // Remove contextos com providers reais
-         var descriptorApp = services.SingleOrDefault(
-        d => d.ServiceType == typeof(DbContextOptions<ApplicationContext>));
-         if ( descriptorApp != null ) services.Remove ( descriptorApp );
-
-         var descriptorIdentity = services.SingleOrDefault(
-        d => d.ServiceType == typeof(DbContextOptions<AppIdentityDbContext>));
-         if ( descriptorIdentity != null ) services.Remove ( descriptorIdentity );
-
-         // Adiciona contextos com banco in-memory
-         services.AddDbContext<ApplicationContext> ( options =>
-             options.UseInMemoryDatabase ( "TestAppDb" ) );
-
-         services.AddDbContext<AppIdentityDbContext> ( options =>
-             options.UseInMemoryDatabase ( "TestIdentityDb" ) );
-
-         // Registra Identity para testes
-         services.AddIdentity<ApplicationUser, IdentityRole> ( )
-             .AddEntityFrameworkStores<AppIdentityDbContext> ( )
-             .AddDefaultTokenProviders ( );
-
-         // Cria banco e popula com dados
-         var sp = services.BuildServiceProvider();
-         using var scope = sp.CreateScope();
-         var scopedServices = scope.ServiceProvider;
-
-         var appDb = scopedServices.GetRequiredService<ApplicationContext>();
-         var identityDb = scopedServices.GetRequiredService<AppIdentityDbContext>();
-         var userManager = scopedServices.GetRequiredService<UserManager<ApplicationUser>>();
-         var roleManager = scopedServices.GetRequiredService<RoleManager<IdentityRole>>();
-         var logger = scopedServices.GetRequiredService<ILogger<CustomWebApplicationFactory<TProgram>>>();
-
-         appDb.Database.EnsureCreated ( );
-         identityDb.Database.EnsureCreated ( );
-
-         try
-         {
-             IdentityTestSeeder.SeedTestUsersAsync ( scopedServices ).Wait ( );
-         }
-         catch ( Exception ex )
-         {
-             logger.LogError ( ex, "Erro ao popular banco de testes." );
-         }
-     } );
-
-
-
         }
     }
 }

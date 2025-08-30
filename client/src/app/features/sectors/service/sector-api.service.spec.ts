@@ -1,13 +1,17 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { SectorService } from './sector.service';
 
-import { SectorApi } from './sector-api.service';
 
-describe('SectorApi', () => {
-  let service: SectorApi;
+describe('SectorService', () => {
+  let service: SectorService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(SectorApi);
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [SectorService]
+    });
+    service = TestBed.inject(SectorService);
   });
 
   it('should be created', () => {

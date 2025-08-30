@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { ClientAreaService } from '../services/client-area.services';
+import { ClientAreaService } from '../services/client-area.service';
 import { ClientAreaServiceOrderDetails, orderStatusLabels } from '../models/client-area.model';
 
 @Component({

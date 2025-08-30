@@ -204,6 +204,9 @@ namespace API.Services
         {
             var user = await _userManager.FindByEmailAsync(dto.Email)
                 ?? throw new UnauthorizedAccessException("Invalid credentials.");
+             var userRoles = await _userManager.GetRolesAsync(user);
+    if (userRoles == null || !userRoles.Any())
+        throw new UnauthorizedAccessException("User has no role assigned.");
 
             if ( !user.IsActive )
             {
@@ -447,10 +450,23 @@ namespace API.Services
             return Random.Shared.Next ( 100000, 999999 ).ToString ( );
         }
 
-        private async Task EnsureRoleExistsAsync ( string roleName )
+        private async Task EnsureRoleExistsAsync(string roleName)
+{
+    if (!await _roleManager.RoleExistsAsync(roleName))
+    {
+        var role = new ApplicationRole
         {
-            if ( !await _roleManager.RoleExistsAsync ( roleName ) )
-                await _roleManager.CreateAsync ( new ApplicationRole { Name = roleName } );
+            Name = roleName,
+            NormalizedName = roleName.ToUpperInvariant()
+        };
+
+        var result = await _roleManager.CreateAsync(role);
+        if (!result.Succeeded)
+        {
+            throw new Exception($"Erro ao criar a role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
+    }
+}
+
     }
 }

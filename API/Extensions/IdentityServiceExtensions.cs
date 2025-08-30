@@ -2,26 +2,39 @@
 {
     public static class IdentityServiceExtensions
     {
-        public static IServiceCollection AddIdentityServices ( this IServiceCollection services, IConfiguration config )
+        public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
-            services.AddDbContext<AppIdentityDbContext> ( opt =>
-            {
-                opt.UseNpgsql ( config.GetConnectionString ( "IdentityConnection" ) );
-            } );
+            var environment = config["ASPNETCORE_ENVIRONMENT"] ?? "Development";
 
-            services.AddIdentityCore<ApplicationUser> ( opt =>
+            if (environment == "Test")
+            {
+                // Para testes, usar InMemory
+                services.AddDbContext<AppIdentityDbContext>(opt =>
+                {
+                    opt.UseInMemoryDatabase("TestIdentityDb");
+                });
+            }
+            else
+            {
+                // Para produção/desenvolvimento, usar PostgreSQL
+                services.AddDbContext<AppIdentityDbContext>(opt =>
+                {
+                    opt.UseNpgsql(config.GetConnectionString("IdentityConnection"));
+                });
+            }
+
+            services.AddIdentityCore<ApplicationUser>(opt =>
             {
                 opt.Password.RequireDigit = true;
                 opt.Password.RequiredLength = 6;
                 opt.Password.RequireUppercase = false;
                 opt.Password.RequireLowercase = false;
                 opt.Password.RequireNonAlphanumeric = false;
-
-            } )
-            .AddRoles<ApplicationRole> ( )
-            .AddEntityFrameworkStores<AppIdentityDbContext> ( )
-            .AddSignInManager<SignInManager<ApplicationUser>> ( )
-            .AddDefaultTokenProviders ( );
+            })
+            .AddRoles<ApplicationRole>()
+            .AddEntityFrameworkStores<AppIdentityDbContext>()
+            .AddSignInManager<SignInManager<ApplicationUser>>()
+            .AddDefaultTokenProviders();
 
             var jwtKey = config["Jwt:Key"];
             var jwtIssuer = config["Jwt:Issuer"] ?? "LabSystem";

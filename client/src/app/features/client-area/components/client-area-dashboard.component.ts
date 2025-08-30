@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ClientAreaService } from '../services/client-area.services';
+import { ClientAreaService } from '../services/client-area.service';
 import { ClientDashboard, MonthlyBalanceRecord   } from '../models/client-area.model';
 
 @Component({

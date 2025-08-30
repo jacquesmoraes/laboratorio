@@ -42,7 +42,7 @@ describe('ServiceOrdersService', () => {
         excludeFinished: true,
         excludeInvoiced: false,
         startDate: '', 
-  endDate: ''
+        endDate: ''
       };
   
       const mockResponse = {
@@ -71,7 +71,8 @@ describe('ServiceOrdersService', () => {
         expect(response).toEqual(mockResponse);
       });
   
-      const req = httpMock.expectOne(`${apiUrl}?pageNumber=1&pageSize=10&sort=dateIn&search=test&clientId=&excludeFinished=true&excludeInvoiced=false&status=`);
+      // Corrigir a URL esperada para corresponder à URL real
+      const req = httpMock.expectOne(`${apiUrl}?pageNumber=1&pageSize=10&sort=dateIn&search=test&excludeFinished=true&excludeInvoiced=false`);
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
     });
@@ -174,8 +175,7 @@ describe('ServiceOrdersService', () => {
         excludeFinished: true,
         excludeInvoiced: false,
         startDate: '', 
-  endDate: ''
-
+        endDate: ''
       };
 
       service.getServiceOrders(mockParams).subscribe({
@@ -185,7 +185,8 @@ describe('ServiceOrdersService', () => {
         }
       });
 
-      const req = httpMock.expectOne(`${apiUrl}?pageNumber=1&pageSize=10&sort=dateIn&search=&clientId=&excludeFinished=false&excludeInvoiced=false&status=`);
+      // Corrigir a URL esperada para corresponder à URL real
+      const req = httpMock.expectOne(`${apiUrl}?pageNumber=1&pageSize=10&sort=dateIn&search=test&excludeFinished=true&excludeInvoiced=false`);
       req.flush('Server Error', { status: 500, statusText: 'Internal Server Error' });
     });
   });

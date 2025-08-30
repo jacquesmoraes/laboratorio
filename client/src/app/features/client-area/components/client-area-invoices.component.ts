@@ -7,7 +7,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { ClientAreaService } from '../services/client-area.services';
+import { ClientAreaService } from '../services/client-area.service';
 
 import { Pagination } from '../../service-order/models/service-order.interface';
 import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusValues } from '../models/client-area.model';
@@ -75,7 +75,8 @@ import { ClientAreaInvoice, InvoiceStatus, invoiceStatusLabels, invoiceStatusVal
                 </span>
               </td>
               <td>
-                <a class="action-link" (click)="downloadPdf(invoice.billingInvoiceId)">Baixar PDF</a>
+                <a class="action-link" (click)="openPdf(invoice.billingInvoiceId)">Ver PDF</a>
+
               </td>
             </tr>
           }
@@ -169,14 +170,15 @@ export class ClientAreaInvoicesComponent {
     }
   }
 
-  downloadPdf(id: number) {
+  openPdf(id: number) {
+    // Usar o método original que faz a requisição com autenticação
     this.service.downloadInvoice(id).subscribe(blob => {
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `invoice-${id}.pdf`;
-      link.click();
-      window.URL.revokeObjectURL(url);
+      // Abrir PDF no navegador
+      window.open(url, '_blank');
+      // Limpar a URL após um tempo para liberar memória
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     });
   }
+
 }

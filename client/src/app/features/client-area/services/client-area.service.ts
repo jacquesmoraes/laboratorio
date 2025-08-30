@@ -38,16 +38,6 @@ export class ClientAreaService {
   });
 }
 
-
-  /**
-   * Baixar PDF da fatura.
-   */
-  downloadInvoice(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/invoices/${id}/download`, {
-      responseType: 'blob'
-    });
-  }
-
   /**
    * Paginação de ordens de serviço do cliente.
    */
@@ -58,6 +48,19 @@ export class ClientAreaService {
   }
   getOrderDetails(id: number): Observable<ClientAreaServiceOrderDetails> {
   return this.http.get<ClientAreaServiceOrderDetails>(`${this.apiUrl}/orders/${id}`);
+}
+
+/**
+ * Baixar PDF da fatura.
+ */
+downloadInvoice(id: number): Observable<Blob> {
+  return this.http.get(`${this.apiUrl}/invoices/${id}/download`, {
+    responseType: 'blob'
+  });
+}
+
+getInvoicePdfUrl(id: number): string {
+  return `${environment.apiUrl}/client-area/invoices/${id}/download`;
 }
 
 

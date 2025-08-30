@@ -7,7 +7,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {  Pagination } from '../../service-order/models/service-order.interface';
-import { ClientAreaService } from '../services/client-area.services';
+import { ClientAreaService } from '../services/client-area.service';
 import { 
   ClientAreaServiceOrder, 
   ClientAreaOrderStatus,

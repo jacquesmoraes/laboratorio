@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Payment, PaymentParams } from '../../payments/models/payment.interface';
 import { Pagination } from '../../service-order/models/service-order.interface';
-import { ClientAreaService } from '../services/client-area.services';
+import { ClientAreaService } from '../services/client-area.service';
 
 
 @Component({

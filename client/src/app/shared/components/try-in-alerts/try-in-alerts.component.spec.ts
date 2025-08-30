@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TryInAlertsComponent } from './try-in-alerts.component';
+import { ServiceOrdersService } from '../../../features/service-order/services/service-order.service';
 
 describe('TryInAlertsComponent', () => {
   let component: TryInAlertsComponent;
@@ -8,7 +10,12 @@ describe('TryInAlertsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TryInAlertsComponent]
+      imports: [
+        TryInAlertsComponent,
+        HttpClientTestingModule,
+        NoopAnimationsModule
+      ],
+      providers: [ServiceOrdersService]
     })
     .compileComponents();
 

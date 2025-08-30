@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
-    apiUrl: 'http://localhost:5229/api',//to docker just change to :5229
-    apiBaseUrl: 'http://localhost:5229'
+    apiUrl: 'https://localhost:7058/api',//to docker just change to :5229
+    apiBaseUrl: 'https://localhost:7058'
   };
   

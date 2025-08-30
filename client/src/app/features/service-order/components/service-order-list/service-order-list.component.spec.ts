@@ -10,6 +10,7 @@ import { ServiceOrdersService } from '../../services/service-order.service';
 import { signal, computed } from '@angular/core';
 import { of } from 'rxjs';
 import { OrderStatus } from '../../models/service-order.interface';
+import { fakeAsync, tick } from '@angular/core/testing';
 
 describe('ServiceOrderListComponent', () => {
   let component: ServiceOrderListComponent;
@@ -19,7 +20,7 @@ describe('ServiceOrderListComponent', () => {
 
   beforeEach(async () => {
     const serviceOrderListServiceSpy = jasmine.createSpyObj('ServiceOrderListService', [
-      'loadServiceOrders', 'updateParams', 'toggleSelection', 'destroy'
+      'loadServiceOrders', 'updateParams', 'toggleSelection', 'destroy', 'sendToTryIn', 'moveToStage', 'reopenOrder', 'finishSelectedOrders'
     ], {
       serviceOrders: signal([]),
       selectedOrderIds: signal([]),
@@ -74,14 +75,9 @@ describe('ServiceOrderListComponent', () => {
     expect(serviceOrderListService.loadServiceOrders).toHaveBeenCalled();
   });
 
-  it('should handle filter changes', () => {
-    const filterEvent = {
-      search: 'test',
-      status: OrderStatus.Production,
-      sortBy: 'dateIn',
-      showFinishedOrders: false
-    };
-
+  it('should handle search filter changes with debounce', fakeAsync(() => {
+    const searchValue = 'test';
+    
     serviceOrderListService.updateParams.and.returnValue();
     serviceOrderListService.loadServiceOrders.and.returnValue(of({
       pageNumber: 1,
@@ -91,12 +87,119 @@ describe('ServiceOrderListComponent', () => {
       data: []
     }));
 
-    component.onFilterChange(filterEvent);
+    // Simular mudança no filtro de busca
+    component.onSearchChange(searchValue);
 
+    // Avançar o tempo para simular o debounce
+    tick(500); // 500ms é o tempo padrão do debounce
+
+    // Verificar se os métodos foram chamados
     expect(serviceOrderListService.updateParams).toHaveBeenCalledWith({
-      search: 'test',
-      status: OrderStatus.Production,
-      sort: 'dateIn',
+      search: searchValue,
+      status: undefined,
+      sort: 'DateIn',
+      excludeFinished: true,
+      pageNumber: 1
+    });
+    expect(serviceOrderListService.loadServiceOrders).toHaveBeenCalled();
+  }));
+
+  it('should handle status filter changes', () => {
+    const statusValue = OrderStatus.Production;
+    
+    serviceOrderListService.updateParams.and.returnValue();
+    serviceOrderListService.loadServiceOrders.and.returnValue(of({
+      pageNumber: 1,
+      pageSize: 10,
+      totalItems: 0,
+      totalPages: 1,
+      data: []
+    }));
+
+    // Simular mudança no filtro de status
+    component.onStatusChange(statusValue);
+
+    // Verificar se os métodos foram chamados
+    expect(serviceOrderListService.updateParams).toHaveBeenCalledWith({
+      search: '',
+      status: statusValue,
+      sort: 'DateIn',
+      excludeFinished: true,
+      pageNumber: 1
+    });
+    expect(serviceOrderListService.loadServiceOrders).toHaveBeenCalled();
+  });
+
+  it('should handle sort filter changes', () => {
+    const sortValue = 'PatientName';
+    
+    serviceOrderListService.updateParams.and.returnValue();
+    serviceOrderListService.loadServiceOrders.and.returnValue(of({
+      pageNumber: 1,
+      pageSize: 10,
+      totalItems: 0,
+      totalPages: 1,
+      data: []
+    }));
+
+    // Simular mudança no filtro de ordenação
+    component.onSortChange(sortValue);
+
+    // Verificar se os métodos foram chamados
+    expect(serviceOrderListService.updateParams).toHaveBeenCalledWith({
+      search: '',
+      status: undefined,
+      sort: sortValue,
+      excludeFinished: true,
+      pageNumber: 1
+    });
+    expect(serviceOrderListService.loadServiceOrders).toHaveBeenCalled();
+  });
+
+  it('should handle show finished orders filter changes', () => {
+    const showFinished = true;
+    
+    serviceOrderListService.updateParams.and.returnValue();
+    serviceOrderListService.loadServiceOrders.and.returnValue(of({
+      pageNumber: 1,
+      pageSize: 10,
+      totalItems: 0,
+      totalPages: 1,
+      data: []
+    }));
+
+    // Simular mudança no filtro de mostrar ordens finalizadas
+    component.onShowFinishedOrdersChange(showFinished);
+
+    // Verificar se os métodos foram chamados
+    expect(serviceOrderListService.updateParams).toHaveBeenCalledWith({
+      search: '',
+      status: undefined,
+      sort: 'DateIn',
+      excludeFinished: !showFinished,
+      pageNumber: 1
+    });
+    expect(serviceOrderListService.loadServiceOrders).toHaveBeenCalled();
+  });
+
+  it('should clear all filters', () => {
+    serviceOrderListService.updateParams.and.returnValue();
+    serviceOrderListService.loadServiceOrders.and.returnValue(of({
+      pageNumber: 1,
+      pageSize: 10,
+      totalItems: 0,
+      totalPages: 1,
+      data: []
+    }));
+
+    // Simular limpeza dos filtros
+    component.clearFilters();
+
+    // Verificar se os métodos foram chamados
+    expect(serviceOrderListService.updateParams).toHaveBeenCalledWith({
+      search: '',
+      status: undefined,
+      sort: 'DateIn',
       excludeFinished: true,
       pageNumber: 1
     });

@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ScaleListComponent } from './scale-list.component';
+import { ScaleService } from '../../../services/scale.service';
 
 describe('ScaleListComponent', () => {
   let component: ScaleListComponent;
@@ -8,7 +11,13 @@ describe('ScaleListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ScaleListComponent]
+      imports: [
+        ScaleListComponent,
+        HttpClientTestingModule,
+        RouterTestingModule,
+        NoopAnimationsModule
+      ],
+      providers: [ScaleService]
     })
     .compileComponents();
 

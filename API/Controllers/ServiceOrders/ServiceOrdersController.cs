@@ -59,7 +59,7 @@
             {
                 var spec = ServiceOrderSpecification.ServiceOrderSpecs.ByIdFull(id);
                 var entity = await _serviceOrderService.GetEntityWithSpecAsync(spec);
-                if ( entity == null ) return NoContent ( );
+                if ( entity == null ) return NotFound ( );
                 var response = _mapper.Map<ServiceOrderDetailsProjection>(entity);
                 return Ok ( response );
             }

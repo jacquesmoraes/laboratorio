@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BillingInvoiceDetailsComponent } from './billing-invoice-details.component';
+import { BillingInvoiceService } from '../../services/billing-invoice.service';
 
 describe('BillingInvoiceDetailsComponent', () => {
   let component: BillingInvoiceDetailsComponent;
@@ -8,7 +11,13 @@ describe('BillingInvoiceDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BillingInvoiceDetailsComponent]
+      imports: [
+        BillingInvoiceDetailsComponent,
+        HttpClientTestingModule,
+        RouterTestingModule,
+        NoopAnimationsModule
+      ],
+      providers: [BillingInvoiceService]
     })
     .compileComponents();
 
