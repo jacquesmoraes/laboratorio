@@ -72,7 +72,8 @@
           </h1>
           <p class="hero-subtitle">Transformando sorrisos com tecnologia e precisão</p>
           <div class="hero-actions">
-            <a (click)="scrollToSection('contato')" class="btn btn-primary">Agende uma visita</a>
+            <a href="https://wa.me/53984227966"class="btn btn-primary">Seja cliente</a>
+            
             <a (click)="scrollToSection('servicos')" class="btn btn-secondary">Nossos serviços</a>
           </div>
         </div>
@@ -112,8 +113,8 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">Por que trabalhar conosco?</h2>
-        <p class="section-subtitle">Combinamos tecnologia de ponta com artesanato tradicional para criar próteses
-          perfeitas</p>
+        <p class="section-subtitle">Combinamos tecnologia com expertise para resultados
+          perfeitos</p>
       </div>
 
       <div class="features-grid">
@@ -180,7 +181,7 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">Casos Clínicos</h2>
-        <p class="section-subtitle">Conheça alguns dos nossos trabalhos</p>
+        <p class="section-subtitle">veja alguns dos casos resolvidos</p>
       </div>
   
       <div class="cases-grid">
@@ -198,49 +199,83 @@
     </div>
   </section>
 
-  <!-- DEPOIMENTOS -->
-  <section class="testimonials">
+   <!-- CLIENT AREA PROMO -->
+  <section class="client-area-promo">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">O que dizem nossos clientes</h2>
-        <p class="section-subtitle">Depoimentos de quem já conhece nosso trabalho</p>
+        <h2 class="section-title">Área Exclusiva do Cliente</h2>
+        <p class="section-subtitle">Acesse suas informações e gerencie seus serviços de forma simples e eficiente</p>
       </div>
 
-      <div class="testimonials-grid">
-        <div class="testimonial-card">
-          <div class="testimonial-header">
-            <img src="assets/images/logo1.png" alt="Dr. Silva" class="testimonial-avatar" />
-            <div class="testimonial-info">
-              <h3 class="testimonial-name">Dr. João Silva</h3>
-              <div class="testimonial-rating">★★★★★</div>
-            </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
           </div>
-          <p class="testimonial-text">"A qualidade das próteses é excepcional. Meus pacientes sempre ficam satisfeitos
-            com o resultado final."</p>
+          <h3 class="feature-title">Dashboard Completo</h3>
+          <p class="feature-description">Visualize seu saldo atual, histórico financeiro dos últimos 12 meses e acompanhe suas próximas entregas em tempo real.</p>
         </div>
 
-        <div class="testimonial-card">
-          <div class="testimonial-header">
-            <img src="assets/images/logo1.png" alt="Dr. Silva" class="testimonial-avatar" />
-            <div class="testimonial-info">
-              <h3 class="testimonial-name">Dra. Maria Souza</h3>
-              <div class="testimonial-rating">★★★★★</div>
-            </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
           </div>
-          <p class="testimonial-text">"O atendimento é personalizado e a equipe está sempre pronta para ajudar em
-            qualquer necessidade."</p>
+          <h3 class="feature-title">Controle de Pagamentos</h3>
+          <p class="feature-description">Acompanhe todos os seus pagamentos, visualize faturas e mantenha o controle total da sua situação financeira.</p>
         </div>
 
-        <div class="testimonial-card">
-          <div class="testimonial-header">
-            <img src="assets/images/logo1.png" alt="Dr. Silva" class="testimonial-avatar" />
-            <div class="testimonial-info">
-              <h3 class="testimonial-name">Dr. Carlos Lima</h3>
-              <div class="testimonial-rating">★★★★★</div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 12l2 2 4-4"/>
+              <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"/>
+              <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"/>
+              <path d="M12 3c0 1-1 2-2 2s-2-1-2-2 1-2 2-2 2 1 2 2z"/>
+              <path d="M12 21c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Ordens de Serviço</h3>
+          <p class="feature-description">Acompanhe o status de todas as suas ordens de serviço, desde a criação até a entrega final.</p>
+        </div>
+      </div>
+
+      <div class="cta-section">
+        <div class="cta-content">
+          <h3 class="cta-title">Acesse sua área exclusiva</h3>
+          <p class="cta-description">Faça login e tenha acesso completo a todas as funcionalidades do seu painel personalizado.</p>
+          <div class="cta-buttons">
+            <a href="/login" class="btn btn-primary">Fazer Login</a>
+            
+          </div>
+        </div>
+        <div class="cta-visual">
+          <div class="dashboard-preview">
+            <div class="preview-header">
+              <div class="preview-dot"></div>
+              <div class="preview-dot"></div>
+              <div class="preview-dot"></div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-card">
+                <div class="preview-title">Saldo Atual</div>
+                <div class="preview-value positive">R$ 2.450,00</div>
+              </div>
+              <div class="preview-card">
+                <div class="preview-title">Próximas Entregas</div>
+                <div class="preview-items">
+                  <div class="preview-item">OS 12345 - 15/01</div>
+                  <div class="preview-item">OS 12346 - 18/01</div>
+                </div>
+              </div>
             </div>
           </div>
-          <p class="testimonial-text">"A precisão e o acabamento das próteses são impecáveis. Recomendo sempre para meus
-            colegas."</p>
         </div>
       </div>
     </div>
@@ -255,7 +290,7 @@
         <p class="cta-subtitle">Entre em contato e descubra como podemos ajudar a transformar sorrisos</p>
         <div class="cta-actions">
           <a href="tel:+551100000000" class="btn btn-secondary">Ligue agora</a>
-          <a href="https://wa.me/5511900000000" class="btn btn-white">WhatsApp</a>
+          <a href="https://wa.me/53984227966" class="btn btn-white">WhatsApp</a>
           <button (click)="goToLogin()" class="btn btn-outline">Área do Cliente</button>
         </div>
       </div>
@@ -267,16 +302,15 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h3 class="footer-title">LabDental</h3>
-          <p class="footer-text">Excelência em prótese dentária desde 2008</p>
+          <h3 class="footer-title">Elite laboratório</h3>
+          <p class="footer-text">Excelência em prótese dentária desde 2012</p>
         </div>
 
         <div class="footer-section">
           <h4 class="footer-subtitle">Contato</h4>
           <ul class="footer-list">
-            <li>Tel: (11) 0000-0000</li>
-            <li>WhatsApp: (11) 90000-0000</li>
-            <li>Email: contato&commat;laboratorio.com</li>
+              <li>WhatsApp: (53) 98422-7966</li>
+            <li>Email: elitelab&commat;elitelaboratorio.com.br</li>
           </ul>
         </div>
 
@@ -285,7 +319,7 @@
           <ul class="footer-list">
             <li>Rua Santos Dumont, 154/202</li>
             <li>Pelotas – RS</li>
-            <li>CRO-SP 12345</li>
+            
           </ul>
         </div>
 
