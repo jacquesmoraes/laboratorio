@@ -71,7 +71,7 @@ namespace Applications.Services.ClientAreaServices
                 ServiceOrderId = s.ServiceOrderId,
                 OrderNumber = s.ServiceOrder.OrderNumber,
                 PatientName = s.ServiceOrder.PatientName,
-                ScheduledDate = s.ScheduledDate!.Value, 
+                ScheduledDate = s.ScheduledDate!.Value,
                 DeliveryType = s.DeliveryType ?? ScheduledDeliveryType.FinalDelivery,
                 IsOverdue = s.ScheduledDate < DateTime.Today && !s.IsDelivered
             }).ToList();
@@ -105,37 +105,40 @@ namespace Applications.Services.ClientAreaServices
             var monthlyBalances = new List<MonthlyBalanceRecord>();
             var currentDate = DateTime.Today;
 
-            for ( int i = 0; i < months; i++ )
+            // Primeiro dia do mês mais antigo da janela
+            var startOfWindow = new DateTime(currentDate.Year, currentDate.Month, 1).AddMonths(-(months - 1));
+
+            // Saldo de abertura (antes da janela)
+            var openingInvoiceSum = await _invoiceRepo.SumAsync(
+                i => i.ClientId == clientId && i.Status != InvoiceStatus.Cancelled && i.CreatedAt < startOfWindow,
+                i => i.TotalServiceOrdersAmount);
+            var openingPaymentSum = await _paymentRepo.SumAsync(
+                p => p.ClientId == clientId && p.PaymentDate < startOfWindow,
+                p => p.AmountPaid);
+
+            var runningBalance = openingPaymentSum - openingInvoiceSum; // negativo = dívida, positivo = crédito
+
+            // Iterar do mais antigo até o mês atual
+            for ( int j = 0; j < months; j++ )
             {
-                var monthStopwatch = Stopwatch.StartNew();
-                var targetDate = currentDate.AddMonths(-i);
+                var targetDate = startOfWindow.AddMonths(j);
                 var startOfMonth = new DateTime(targetDate.Year, targetDate.Month, 1);
                 var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
 
-                // Calcular faturado do mês
-                var invoiceStopwatch = Stopwatch.StartNew();
                 var monthlyInvoiced = await _invoiceRepo.SumAsync(
-                    i => i.ClientId == clientId &&
-                         i.Status != InvoiceStatus.Cancelled &&
-                         i.CreatedAt >= startOfMonth &&
-                         i.CreatedAt <= endOfMonth,
-                    i => i.TotalServiceOrdersAmount);
-                invoiceStopwatch.Stop ( );
+        i => i.ClientId == clientId &&
+             i.Status != InvoiceStatus.Cancelled &&
+             i.CreatedAt >= startOfMonth &&
+             i.CreatedAt <= endOfMonth,
+        i => i.TotalServiceOrdersAmount);
 
-                // Calcular pago do mês
-                var paymentStopwatch = Stopwatch.StartNew();
                 var monthlyPaid = await _paymentRepo.SumAsync(
-                    p => p.ClientId == clientId &&
-                         p.PaymentDate >= startOfMonth &&
-                         p.PaymentDate <= endOfMonth,
-                    p => p.AmountPaid);
-                paymentStopwatch.Stop ( );
+        p => p.ClientId == clientId &&
+             p.PaymentDate >= startOfMonth &&
+             p.PaymentDate <= endOfMonth,
+        p => p.AmountPaid);
 
-                monthStopwatch.Stop ( );
-
-                _logger.LogDebug ( "Month {Month}/{Year} calculated in {ElapsedMs}ms (Invoice: {InvoiceMs}ms, Payment: {PaymentMs}ms) for client {ClientId}",
-                    targetDate.Month, targetDate.Year, monthStopwatch.ElapsedMilliseconds,
-                    invoiceStopwatch.ElapsedMilliseconds, paymentStopwatch.ElapsedMilliseconds, clientId );
+                runningBalance += ( monthlyPaid - monthlyInvoiced );
 
                 monthlyBalances.Add ( new MonthlyBalanceRecord
                 {
@@ -144,16 +147,20 @@ namespace Applications.Services.ClientAreaServices
                     MonthName = targetDate.ToString ( "MMMM yyyy", new CultureInfo ( "pt-BR" ) ),
                     Invoiced = monthlyInvoiced,
                     Paid = monthlyPaid,
-                    Balance = monthlyPaid - monthlyInvoiced,
-                    IsCurrentMonth = i == 0
+                    Balance = runningBalance,
+                    IsCurrentMonth = targetDate.Year == currentDate.Year && targetDate.Month == currentDate.Month
                 } );
             }
+
+            // Deixar mês atual primeiro (como já era)
+            monthlyBalances.Reverse ( );
 
             totalStopwatch.Stop ( );
             _logger.LogInformation ( "Monthly balances calculation completed in {ElapsedMs}ms for client {ClientId}. Generated {Count} monthly records",
                 totalStopwatch.ElapsedMilliseconds, clientId, monthlyBalances.Count );
 
             return monthlyBalances;
+
         }
     }
 }

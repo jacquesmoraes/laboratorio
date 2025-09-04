@@ -4,8 +4,9 @@ export interface RegisterClientUserRequest {
   clientId: number;
   displayName: string;
   email: string;
-  password: string;
-  confirmPassword: string;
+  // ✅ REMOVER: Campos de senha desnecessários
+  // password: string;
+  // confirmPassword: string;
 }
 
 // ========== RESPONSE INTERFACES ==========

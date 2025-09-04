@@ -382,6 +382,9 @@ html.dark .footer-bottom {
 
 .hero-highlight {
   color: var(--homepage-primary);
+   html.dark & {
+    color:rgb(200, 169, 120);
+   }
 }
 
 .hero-subtitle {
@@ -713,6 +716,11 @@ html.dark .footer-bottom {
 
   html.dark & {
     background: rgba(1, 67, 89, 0.2);
+     svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--homepage-accent);
+  }
 
     .feature-card:hover & {
       background: rgba(1, 67, 89, 0.3);

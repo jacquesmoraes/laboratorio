@@ -19,6 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { PasswordStrengthValidatorComponent } from '../../../shared/components/password-strength-validator';
 
 @Component({
   selector: 'app-register',
@@ -34,7 +35,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatIconModule,
     MatSelectModule,
     MatRadioModule,
-    MatDividerModule
+    MatDividerModule,
+    PasswordStrengthValidatorComponent
   ],
   templateUrl: './register-component.html',
   styleUrls: ['./register-component.scss']

@@ -67,31 +67,30 @@
             </mat-form-field>
           </div>
 
-          @if (!isEditMode()) {
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="w-50">
-                <mat-label>Senha</mat-label>
-                <input matInput type="password" formControlName="password" placeholder="Mínimo 6 caracteres" />
-                <mat-error *ngIf="userForm.get('password')?.hasError('required')">
-                  Senha é obrigatória
-                </mat-error>
-                <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
-                  Senha deve ter pelo menos 6 caracteres
-                </mat-error>
-              </mat-form-field>
+          <!-- ✅ REMOVER: Campos de senha desnecessários -->
+          <!-- <div class="form-row">
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>Senha</mat-label>
+              <input matInput type="password" formControlName="password" placeholder="Mínimo 6 caracteres" />
+              <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+                Senha é obrigatória
+              </mat-error>
+              <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+                Senha deve ter pelo menos 6 caracteres
+              </mat-error>
+            </mat-form-field>
 
-              <mat-form-field appearance="outline" class="w-50">
-                <mat-label>Confirmar Senha</mat-label>
-                <input matInput type="password" formControlName="confirmPassword" placeholder="Confirme a senha" />
-                <mat-error *ngIf="userForm.get('confirmPassword')?.hasError('required')">
-                  Confirmação de senha é obrigatória
-                </mat-error>
-                <mat-error *ngIf="userForm.get('confirmPassword')?.hasError('passwordMismatch')">
-                  As senhas não coincidem
-                </mat-error>
-              </mat-form-field>
-            </div>
-          }
+            <mat-form-field appearance="outline" class="w-50">
+              <mat-label>Confirmar Senha</mat-label>
+              <input matInput type="password" formControlName="confirmPassword" placeholder="Confirme a senha" />
+              <mat-error *ngIf="userForm.get('confirmPassword')?.hasError('required')">
+                Confirmação de senha é obrigatória
+              </mat-error>
+              <mat-error *ngIf="userForm.get('confirmPassword')?.hasError('passwordMismatch')">
+                As senhas não coincidem
+              </mat-error>
+            </mat-form-field>
+          </div> -->
         </div>
 
         <!-- Informações Importantes -->

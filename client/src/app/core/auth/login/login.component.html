@@ -21,21 +21,22 @@
           <mat-icon matSuffix>email</mat-icon>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Senha</mat-label>
-          <input 
-            matInput 
-            type="password" 
-            [(ngModel)]="credentials().password" 
-            name="password"
-            required
-            [disabled]="loading()"
-            placeholder="Sua senha"
-          />
-          <mat-icon matSuffix>lock</mat-icon>
-        </mat-form-field>
+        @if (!isFirstAccess()) {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Senha</mat-label>
+            <input 
+              matInput 
+              type="password" 
+              [(ngModel)]="credentials().password" 
+              name="password"
+              required
+              [disabled]="loading()"
+              placeholder="Sua senha"
+            />
+            <mat-icon matSuffix>lock</mat-icon>
+          </mat-form-field>
+        }
 
-        <!-- Checkbox para primeiro acesso -->
         <div class="first-access-section">
           <mat-checkbox [(ngModel)]="isFirstAccess" name="isFirstAccess" (change)="onFirstAccessChange()">
             Primeiro acesso? (Use código de acesso)
@@ -55,6 +56,24 @@
             />
             <mat-icon matSuffix>key</mat-icon>
           </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nova Senha</mat-label>
+            <input 
+              matInput 
+              type="password" 
+              [(ngModel)]="credentials().password" 
+              name="newPassword"
+              required
+              [disabled]="loading()"
+              placeholder="Digite sua nova senha"
+            />
+            <mat-icon matSuffix>lock</mat-icon>
+          </mat-form-field>
+
+          <app-password-strength-validator 
+            [password]="credentials().password">
+          </app-password-strength-validator>
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Confirmar Nova Senha</mat-label>
@@ -83,7 +102,12 @@
           color="primary" 
           type="submit"
           class="full-width"
-          [disabled]="loading() || !credentials().email || !credentials().password || (isFirstAccess() && !accessCode() )"
+          [disabled]="
+            loading() 
+            || !credentials().email 
+            || !credentials().password 
+            || (isFirstAccess() && (!accessCode() || !passwordIsValid()))
+          "
         >
           @if (loading()) {
             <mat-spinner diameter="20"></mat-spinner>
@@ -93,7 +117,6 @@
               <mat-icon>login</mat-icon>
               <span>{{ isFirstAccess() ? 'Completar Primeiro Acesso' : 'Entrar' }}</span>
             </ng-container>
-            
           }
         </button>
         <div class="forgot-password-link">

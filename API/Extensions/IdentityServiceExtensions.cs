@@ -27,9 +27,9 @@
             {
                 opt.Password.RequireDigit = true;
                 opt.Password.RequiredLength = 6;
-                opt.Password.RequireUppercase = false;
-                opt.Password.RequireLowercase = false;
-                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = true;
+                opt.Password.RequireLowercase = true;
+                opt.Password.RequireNonAlphanumeric = true;
             })
             .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<AppIdentityDbContext>()

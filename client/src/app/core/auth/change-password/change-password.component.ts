@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
 import { ErrorMappingService } from '../../services/error.mapping.service';
 import { ChangePasswordRequest } from '../../models/auth.interface';
+import { PasswordStrengthValidatorComponent } from '../../../shared/components/password-strength-validator';
 
 @Component({
   selector: 'app-change-password',
@@ -24,7 +25,8 @@ import { ChangePasswordRequest } from '../../models/auth.interface';
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    PasswordStrengthValidatorComponent
   ],
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
@@ -43,6 +45,11 @@ export class ChangePasswordComponent {
   
   loading = signal(false);
   error = signal('');
+
+  // Adicionar computed para validação em tempo real
+  isNewPasswordValid = computed(() => {
+    return this.formData().newPassword.length >= 6;
+  });
 
   async onSubmit(): Promise<void> {
     if (!this.formData().currentPassword || !this.formData().newPassword || !this.formData().confirmNewPassword) {

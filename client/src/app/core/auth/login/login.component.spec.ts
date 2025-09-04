@@ -3,17 +3,17 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { FirstAccessComponent } from './first-access-component';
+import { LoginComponent } from './login.component';
 import { AuthService } from '../../services/auth.service';
 
-describe('FirstAccessComponent', () => {
-  let component: FirstAccessComponent;
-  let fixture: ComponentFixture<FirstAccessComponent>;
+describe('LoginComponent', () => {
+  let component: LoginComponent;
+  let fixture: ComponentFixture<LoginComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        FirstAccessComponent,
+        LoginComponent,
         HttpClientTestingModule,
         RouterTestingModule,
         ReactiveFormsModule,
@@ -23,7 +23,7 @@ describe('FirstAccessComponent', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(FirstAccessComponent);
+    fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

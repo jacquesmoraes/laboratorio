@@ -3,20 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { PasswordValidationService } from '../../../core/services/password-validation.service';
 import { CompleteFirstAccessRequest, LoginRequest } from '../../../core/models/auth.interface';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { PasswordStrengthValidatorComponent } from '../../../shared/components/password-strength-validator';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule,
+  imports: [
+    CommonModule,
     FormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -25,14 +27,16 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    PasswordStrengthValidatorComponent
   ],
-  templateUrl: './login-component.html',
-  styleUrls: ['./login-component.scss']
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private passwordValidationService = inject(PasswordValidationService);
 
   credentials = signal<LoginRequest>({
     email: '',
@@ -76,7 +80,7 @@ export class LoginComponent {
         email: this.credentials().email,
         accessCode: this.accessCode(),
         newPassword: this.credentials().password,
-        confirmNewPassword: this.confirmPassword() // Usar a confirmação separada
+        confirmNewPassword: this.confirmPassword()
       };
 
       const result = await this.authService.completeFirstAccess(firstAccessData);
@@ -107,12 +111,19 @@ export class LoginComponent {
 
     this.loading.set(false);
   }
+
+  // Validação da senha para o fluxo de primeiro acesso
+  passwordIsValid(): boolean {
+    const pwd = this.credentials().password;
+    if (!pwd) return false;
+    return this.passwordValidationService.validatePassword(pwd).isValid;
+  }
+
   goToForgotPassword(): void {
     console.log('Navegando para forgot-password...');
     this.router.navigate(['/forgot-password/forgot-password']);
   }
 
-   
   onFirstAccessChange(): void {
     this.error.set('');
     // Limpar campos específicos do primeiro acesso quando desmarcado
@@ -121,5 +132,4 @@ export class LoginComponent {
       this.confirmPassword.set('');
     }
   }
-
 }

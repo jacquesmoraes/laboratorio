@@ -65,8 +65,7 @@ namespace API.Services
                 CreatedAt = DateTime.UtcNow,
             };
 
-            var tempPassword = Guid.NewGuid().ToString("N")[..10];
-            var result = await _userManager.CreateAsync(user, tempPassword);
+            var result = await _userManager.CreateAsync(user);
             if ( !result.Succeeded )
                 throw new BadRequestException ( "Error while registering client user." );
 

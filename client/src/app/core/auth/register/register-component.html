@@ -76,6 +76,10 @@
             <mat-icon matSuffix>lock</mat-icon>
           </mat-form-field>
 
+          <app-password-strength-validator 
+            [password]="adminData().password" #adminPwd>
+          </app-password-strength-validator>
+
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Confirmar Senha</mat-label>
             <input 
@@ -101,7 +105,7 @@
             color="primary" 
             type="submit"
             class="full-width"
-            [disabled]="loading()"
+            [disabled]="loading() || !adminPwd.isValid"
           >
             @if (loading()) {
               <mat-spinner diameter="20"></mat-spinner>
@@ -177,6 +181,10 @@
             <mat-icon matSuffix>lock</mat-icon>
           </mat-form-field>
 
+          <app-password-strength-validator 
+            [password]="clientData().password" #clientPwd>
+          </app-password-strength-validator>
+
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Confirmar Senha</mat-label>
             <input 
@@ -202,7 +210,7 @@
             color="primary" 
             type="submit"
             class="full-width"
-            [disabled]="loading()"
+            [disabled]="loading() || !clientPwd.isValid"
           >
             @if (loading()) {
               <mat-spinner diameter="20"></mat-spinner>

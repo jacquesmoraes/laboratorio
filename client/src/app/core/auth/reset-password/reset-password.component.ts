@@ -10,8 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
 import { ResetPasswordRequest } from '../../models/auth.interface';
-
-
+import { PasswordStrengthValidatorComponent } from '../../../shared/components/password-strength-validator';
 
 @Component({
   selector: 'app-reset-password',
@@ -24,7 +23,8 @@ import { ResetPasswordRequest } from '../../models/auth.interface';
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    PasswordStrengthValidatorComponent
   ],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss'],

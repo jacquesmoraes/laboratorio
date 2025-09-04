@@ -71,23 +71,8 @@ export class UserFormComponent implements OnInit {
     this.userForm = this.fb.group({
       clientId: [null, Validators.required],
       displayName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
-    }, { validators: this.passwordMatchValidator });
-  }
-
-  private passwordMatchValidator(group: any) {
-    const password = group.get('password');
-    const confirmPassword = group.get('confirmPassword');
-    
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    } else {
-      confirmPassword?.setErrors(null);
-      return null;
-    }
+      email: ['', [Validators.required, Validators.email]]
+    });
   }
 
   private checkEditMode() {
@@ -135,8 +120,6 @@ export class UserFormComponent implements OnInit {
       clientId: user.clientId,
       displayName: user.clientName,
       email: user.email,
-      password: '',
-      confirmPassword: ''
     });
 
     // Desabilitar campos que não devem ser editados
@@ -178,9 +161,7 @@ export class UserFormComponent implements OnInit {
       const request: RegisterClientUserRequest = {
         clientId: formValue.clientId,
         displayName: formValue.displayName,
-        email: formValue.email,
-        password: formValue.password,
-        confirmPassword: formValue.confirmPassword
+        email: formValue.email
       };
 
       this.userManagementService.registerClientUser(request)
