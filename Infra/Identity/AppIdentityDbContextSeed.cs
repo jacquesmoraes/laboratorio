@@ -1,24 +1,22 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace Infra.Identity
+﻿namespace Infra.Identity
 {
     public class AppIdentityDbContextSeed
     {
-        public static async Task SeedUsersAsync(
+        public static async Task SeedUsersAsync (
             UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager)
+            RoleManager<ApplicationRole> roleManager )
         {
             // Criar roles se não existirem
             var roles = new[] { "admin", "client" };
-            foreach (var role in roles)
+            foreach ( var role in roles )
             {
-                if (!await roleManager.RoleExistsAsync(role))
-                    await roleManager.CreateAsync(new ApplicationRole { Name = role });
+                if ( !await roleManager.RoleExistsAsync ( role ) )
+                    await roleManager.CreateAsync ( new ApplicationRole { Name = role } );
             }
 
             // Criar admin user se não existir
             var adminEmail = "admin@sistema.com";
-            if (await userManager.FindByEmailAsync(adminEmail) is null)
+            if ( await userManager.FindByEmailAsync ( adminEmail ) is null )
             {
                 var admin = new ApplicationUser
                 {
@@ -32,8 +30,8 @@ namespace Infra.Identity
 
                 var result = await userManager.CreateAsync(admin, "Pa$$w0rd");
 
-                if (result.Succeeded)
-                    await userManager.AddToRoleAsync(admin, "admin");
+                if ( result.Succeeded )
+                    await userManager.AddToRoleAsync ( admin, "admin" );
             }
         }
     }

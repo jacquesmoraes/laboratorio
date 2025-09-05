@@ -92,6 +92,8 @@ namespace API.Extensions
             services.AddSingleton(x => 
              new BlobServiceClient(config.GetConnectionString("AzureStorage")));
 
+            services.AddHttpContextAccessor();
+
 
             services.AddScoped ( typeof ( IGenericRepository<> ), typeof ( GenericRepository<> ) );
             services.AddScoped ( typeof ( IGenericService<> ), typeof ( GenericService<> ) );

@@ -11,13 +11,13 @@
       type="text"
       class="filter-input"
       placeholder="Buscar por cliente ou paciente..."
-      [(ngModel)]="searchFilter"
+      [ngModel]="searchFilter()"
       (ngModelChange)="onSearchChange($event)" />
 
     <!-- Filtro por Status -->
     <select
       class="filter-input"
-      [(ngModel)]="statusFilter"
+      [ngModel]="statusFilter()"
       (ngModelChange)="onStatusChange($event)">
       <option value="">Todos os Status</option>
       <option [value]="1">Em Produção</option>
@@ -28,7 +28,7 @@
     <!-- Ordenação -->
     <select
       class="filter-input"
-      [(ngModel)]="sortFilter"
+      [ngModel]="sortFilter()"
       (ngModelChange)="onSortChange($event)">
       <option value="DateIn">Data de Entrada</option>
       <option value="ClientName">Nome do Cliente</option>
@@ -40,7 +40,7 @@
     <label class="checkbox-label">
       <input
         type="checkbox"
-        [(ngModel)]="showFinishedOrders"
+        [ngModel]="showFinishedOrders()"
         (ngModelChange)="onShowFinishedOrdersChange($event)" />
       Mostrar Finalizadas
     </label>

@@ -3,6 +3,7 @@ using System;
 using Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infra.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20250905011404_repeatResponsible")]
+    partial class repeatResponsible
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,7 +62,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("BillingInvoice", (string)null);
+                    b.ToTable("BillingInvoice");
                 });
 
             modelBuilder.Entity("Core.Models.Clients.Client", b =>
@@ -105,7 +108,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("TablePriceId");
 
-                    b.ToTable("Clients", (string)null);
+                    b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("Core.Models.LabSettings.SystemSettings", b =>
@@ -144,7 +147,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SystemSettings", (string)null);
+                    b.ToTable("SystemSettings");
                 });
 
             modelBuilder.Entity("Core.Models.Payments.Payment", b =>
@@ -176,7 +179,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("ClientPayments", (string)null);
+                    b.ToTable("ClientPayments");
                 });
 
             modelBuilder.Entity("Core.Models.Pricing.TablePrice", b =>
@@ -198,7 +201,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TablePrices", (string)null);
+                    b.ToTable("TablePrices");
                 });
 
             modelBuilder.Entity("Core.Models.Pricing.TablePriceItem", b =>
@@ -224,7 +227,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkTypeId");
 
-                    b.ToTable("TablePriceItems", (string)null);
+                    b.ToTable("TablePriceItems");
                 });
 
             modelBuilder.Entity("Core.Models.Production.Scale", b =>
@@ -241,7 +244,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Scales", (string)null);
+                    b.ToTable("Scales");
                 });
 
             modelBuilder.Entity("Core.Models.Production.Shade", b =>
@@ -263,7 +266,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ScaleId");
 
-                    b.ToTable("Shades", (string)null);
+                    b.ToTable("Shades");
                 });
 
             modelBuilder.Entity("Core.Models.Schedule.ServiceOrderSchedule", b =>
@@ -333,7 +336,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ServiceOrderId");
 
-                    b.ToTable("ProductionStages", (string)null);
+                    b.ToTable("ProductionStages");
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.Sector", b =>
@@ -350,7 +353,7 @@ namespace Infra.Migrations
 
                     b.HasKey("SectorId");
 
-                    b.ToTable("Sectors", (string)null);
+                    b.ToTable("Sectors");
                 });
 
             modelBuilder.Entity("Core.Models.ServiceOrders.ServiceOrder", b =>
@@ -402,7 +405,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("ServiceOrders", (string)null);
+                    b.ToTable("ServiceOrders");
                 });
 
             modelBuilder.Entity("Core.Models.WebSite.WebsiteCase", b =>
@@ -459,7 +462,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WebsiteCases", (string)null);
+                    b.ToTable("WebsiteCases");
                 });
 
             modelBuilder.Entity("Core.Models.WebSite.WebsiteCaseImage", b =>
@@ -498,7 +501,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WebsiteCaseId");
 
-                    b.ToTable("WebsiteCaseImages", (string)null);
+                    b.ToTable("WebsiteCaseImages");
                 });
 
             modelBuilder.Entity("Core.Models.WebSite.WebsiteWorkType", b =>
@@ -532,7 +535,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkTypeId");
 
-                    b.ToTable("WebsiteWorkTypes", (string)null);
+                    b.ToTable("WebsiteWorkTypes");
                 });
 
             modelBuilder.Entity("Core.Models.Works.Work", b =>
@@ -577,7 +580,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkTypeId");
 
-                    b.ToTable("Works", (string)null);
+                    b.ToTable("Works");
                 });
 
             modelBuilder.Entity("Core.Models.Works.WorkSection", b =>
@@ -594,7 +597,7 @@ namespace Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WorkSections", (string)null);
+                    b.ToTable("WorkSections");
                 });
 
             modelBuilder.Entity("Core.Models.Works.WorkType", b =>
@@ -622,7 +625,7 @@ namespace Infra.Migrations
 
                     b.HasIndex("WorkSectionId");
 
-                    b.ToTable("WorkTypes", (string)null);
+                    b.ToTable("WorkTypes");
                 });
 
             modelBuilder.Entity("Core.Models.Billing.BillingInvoice", b =>
@@ -667,7 +670,7 @@ namespace Infra.Migrations
 
                             b1.HasKey("ClientId");
 
-                            b1.ToTable("Clients", (string)null);
+                            b1.ToTable("Clients");
 
                             b1.WithOwner()
                                 .HasForeignKey("ClientId");
@@ -740,7 +743,7 @@ namespace Infra.Migrations
 
                             b1.HasKey("SystemSettingsId");
 
-                            b1.ToTable("SystemSettings", (string)null);
+                            b1.ToTable("SystemSettings");
 
                             b1.WithOwner()
                                 .HasForeignKey("SystemSettingsId");

@@ -1,10 +1,15 @@
+export enum RepeatResponsible {
+  Client = 1,
+  Laboratory = 2
+}
+
 export interface ServiceOrder {
   billingInvoiceId: any;
   serviceOrderId: number;
   orderNumber: string;
   dateIn: string;
   patientName: string;
-  status: OrderStatus;
+  status: OrderStatus | string;
   clientName: string;
   clientId: number;
   orderTotal: number;
@@ -18,6 +23,8 @@ export interface ServiceOrderDetails extends ServiceOrder {
   client: ClientInvoice;
   works: Work[];
   stages: Stage[];
+  isRepeat: boolean;
+  repeatResponsible?: RepeatResponsible | string;
 }
 
 export interface ServiceOrderAlert {
@@ -73,6 +80,8 @@ export interface CreateServiceOrderDto {
   patientName: string;
   firstSectorId: number;
   works: CreateWorkDto[];
+  isRepeat?: boolean;
+  repeatResponsible?: RepeatResponsible | null;
 }
 
 export interface CreateWorkDto {

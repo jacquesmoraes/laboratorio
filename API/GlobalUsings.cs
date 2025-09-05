@@ -108,6 +108,7 @@ global using Core.Specifications;
 global using Infra.Data;
 global using Infra.Data.Repositories;
 global using Infra.Identity;
+global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Identity;

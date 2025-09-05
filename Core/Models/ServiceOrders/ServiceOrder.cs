@@ -26,6 +26,9 @@ namespace Core.Models.ServiceOrders
 
         public int ClientId { get; set; }
         public required Client Client { get; set; }
+        public bool IsRepeat { get; set; }
+        public RepeatResponsible? RepeatResponsible { get; set; }
+
 
         public bool IsBillable => Status == OrderStatus.Finished;
 

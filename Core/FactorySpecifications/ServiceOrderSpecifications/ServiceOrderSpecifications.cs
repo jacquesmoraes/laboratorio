@@ -83,7 +83,18 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
                 spec.AddInclude ( o => o.Works );
                 spec.AddInclude ( o => o.Stages );
                 spec.AddInclude ( "Stages.Sector" );
-                spec.ApplySorting ( p.Sort );
+                // Sorting (com suporte a ClientName)
+                var sort = p.Sort ?? string.Empty;
+                if ( sort.StartsWith ( "ClientName", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    var desc = sort.EndsWith ( "Desc", StringComparison.OrdinalIgnoreCase );
+                    if ( desc ) spec.AddOrderByDescending ( o => o.Client.ClientName );
+                    else spec.AddOrderBy ( o => o.Client.ClientName );
+                }
+                else
+                {
+                    spec.ApplySorting ( p.Sort );
+                }
                 spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
 
                 return spec;
@@ -106,7 +117,18 @@ namespace Core.FactorySpecifications.ServiceOrderSpecifications
                 spec.AddInclude ( o => o.Client );
                 spec.AddInclude ( o => o.Stages ); // necessário para último setor
                 spec.AddInclude("Stages.Sector");
-                spec.ApplySorting ( p.Sort );
+                // Sorting (com suporte a ClientName)
+                var sort = p.Sort ?? string.Empty;
+                if ( sort.StartsWith ( "ClientName", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    var desc = sort.EndsWith ( "Desc", StringComparison.OrdinalIgnoreCase );
+                    if ( desc ) spec.AddOrderByDescending ( o => o.Client.ClientName );
+                    else spec.AddOrderBy ( o => o.Client.ClientName );
+                }
+                else
+                {
+                    spec.ApplySorting ( p.Sort );
+                }
                 spec.ApplyPaging ( ( p.PageNumber - 1 ) * p.PageSize, p.PageSize );
 
                 return spec;

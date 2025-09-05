@@ -133,13 +133,19 @@ export class ServiceOrderTableComponent {
   readonly action = output<TableActionEvent>();
 
   readonly displayedColumns = SERVICE_ORDER_LIST_CONFIG.displayedColumns;
-  readonly statusMap = SERVICE_ORDER_LIST_CONFIG.statusMap;
   readonly statusClasses = SERVICE_ORDER_LIST_CONFIG.statusClasses;
 
+  private normalizeStatus(status: OrderStatus | string | number): OrderStatus | null {
+    if (typeof status === 'number') return status as OrderStatus;
+    const s = (status ?? '').toString().toLowerCase();
+    if (s === 'production') return OrderStatus.Production;
+    if (s === 'tryin') return OrderStatus.TryIn;
+    if (s === 'finished') return OrderStatus.Finished;
+    return null;
+  }
+
   isFinished(status: OrderStatus | string | number): boolean {
-    // Resolve status mesmo que venha como string
-    const resolved = typeof status === 'string' ? this.statusMap[status] : Number(status);
-    return resolved === OrderStatus.Finished;
+    return this.normalizeStatus(status) === OrderStatus.Finished;
   }
   onSelectionChange(orderId: number) {
     this.selectionChange.emit(orderId);
@@ -153,14 +159,17 @@ export class ServiceOrderTableComponent {
     this.action.emit({ type, orderId });
   }
 
-  getStatusLabel(status: OrderStatus): string {
-    const statusNum = this.statusMap[status as any];
-    return statusNum ? this.getStatusLabelFromEnum(statusNum as OrderStatus) : String(status);
+  getStatusLabel(status: OrderStatus | string | number): string {
+    const s = this.normalizeStatus(status);
+    return s !== null ? this.getStatusLabelFromEnum(s) : String(status ?? '');
   }
 
-  getStatusColorClass(status: OrderStatus): string {
-    const statusNum = this.statusMap[status as any] ?? -1;
-    return this.statusClasses[statusNum] ?? 'status-default';
+  getStatusColorClass(status: OrderStatus | string | number): string {
+    const s = this.normalizeStatus(status);
+    if (s === OrderStatus.Production) return 'status-production';
+    if (s === OrderStatus.TryIn)      return 'status-tryin';
+    if (s === OrderStatus.Finished)   return 'status-finished';
+    return 'status-default';
   }
 
 

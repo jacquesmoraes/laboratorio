@@ -16,8 +16,8 @@
                 ? $"{src.OrderNumber}-{src.ClientId}": "" ) )
                 .ForMember ( dest => dest.FinishedAt, opt => opt.MapFrom ( src =>
                 src.DateOutFinal ?? src.DateOut ) )
-                .ForMember ( dest => dest.Subtotal, opt => opt.MapFrom ( src =>
-                src.Works != null ? src.Works.Sum ( w => w.Quantity * w.PriceUnit ) : 0 ) );
+                .ForMember(dest => dest.Subtotal, opt => opt.MapFrom(src => src.OrderTotal));
+
 
             
             CreateMap<ServiceOrder, ServiceOrderListDto>()
@@ -34,7 +34,9 @@
                 .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status.ToString ( ) ) )
                 .ForMember ( dest => dest.Client, opt => opt.MapFrom ( src => src.Client ) )
                 .ForMember ( dest => dest.OrderTotal, opt => opt.MapFrom ( src => src.OrderTotal ) )
-                .ForMember ( dest => dest.CurrentSectorName, opt => opt.MapFrom<CurrentSectorNameResolver> ( ) );
+                .ForMember ( dest => dest.CurrentSectorName, opt => opt.MapFrom<CurrentSectorNameResolver> ( ) )
+                .ForMember(dest => dest.RepeatResponsible,opt => opt.MapFrom
+                (src => src.RepeatResponsible.HasValue? src.RepeatResponsible.Value.ToString(): null));
 
             CreateMap<ServiceOrder, ServiceOrderListProjection> ( )
                 .ForMember ( dest => dest.Status, opt => opt.MapFrom ( src => src.Status.ToString ( ) ) )

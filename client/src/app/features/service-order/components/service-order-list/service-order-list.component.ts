@@ -6,6 +6,7 @@ import {
   OnInit,
   OnDestroy,
   ChangeDetectionStrategy,
+  effect,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -74,8 +75,9 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
   showFinishedOrders = signal(false);
 
   ngOnInit() {
-    this.setupSearchDebounce();
-    this.loadServiceOrders();
+    
+  this.setupSearchDebounce();
+  this.loadServiceOrders();
   }
 
   ngOnDestroy() {
@@ -185,6 +187,7 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
     this.serviceOrderListService.finishSelectedOrders().subscribe();
   }
 
+
   // Métodos para os filtros inline com debounce
   private searchDebounceTimeout?: number;
 
@@ -216,6 +219,15 @@ export class ServiceOrderListComponent implements OnInit, OnDestroy {
     this.showFinishedOrders.set(value);
     this.updateFilters();
   }
+
+private readonly syncFiltersEffect = effect(() => {
+  const p = this.currentParams();
+  this.searchFilter.set(p.search ?? '');
+  this.statusFilter.set((p.status ?? '') as any);
+  this.sortFilter.set(p.sort ?? 'DateIn');
+  this.showFinishedOrders.set(!p.excludeFinished);
+});
+
 
   clearFilters() {
     this.searchFilter.set('');

@@ -7,13 +7,17 @@ namespace API.Services
         RoleManager<ApplicationRole> roleManager,
         IConfiguration config,
         ILogger<IdentityService> logger,
-        EmailService emailService ) : IIdentityService
+        EmailService emailService,
+        AppIdentityDbContext identityDbContext,
+        IHttpContextAccessor httpContextAccessor ) : IIdentityService
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
         private readonly IConfiguration _config = config;
         private readonly EmailService _emailService = emailService;
         private readonly ILogger<IdentityService> _logger = logger;
+        private readonly AppIdentityDbContext _identityDb = identityDbContext;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<AuthResponseRecord> RegisterAdminUserAsync ( RegisterAdminUserDto dto )
         {
@@ -124,7 +128,7 @@ namespace API.Services
             {
                 UserId = u.Id,
                 ClientId = u.ClientId!.Value,
-                ClientName = u.DisplayName, // Nome do cliente
+                ClientName = u.DisplayName, 
                 Email = u.Email ?? "",
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt,
@@ -151,6 +155,12 @@ namespace API.Services
             if ( !user.ClientId.HasValue )
                 throw new BadRequestException ( "Usuário não é vinculado a um cliente." );
 
+            var history = await _identityDb.UserLoginHistories
+                .Where(h => h.UserId == user.Id)
+                .OrderByDescending(h => h.LoginAt)
+                .Take(20)
+                .ToListAsync();
+
             return new ClientUserDetailsRecord
             {
                 UserId = user.Id,
@@ -164,7 +174,12 @@ namespace API.Services
                 AccessCode = user.AccessCode,
                 AccessCodeExpiresAt = user.AccessCodeExpiresAt,
                 IsAccessCodeValid = user.AccessCodeExpiresAt.HasValue && user.AccessCodeExpiresAt > DateTime.UtcNow,
-                LoginHistory = null
+                LoginHistory = history.Select(h => new LoginHistoryRecord
+                {
+                    LoginAt = h.LoginAt,
+                    IpAddress = h.IpAddress,
+                    UserAgent = h.UserAgent
+                }).ToList()
             };
         }
 
@@ -209,7 +224,7 @@ namespace API.Services
 
             if ( !user.IsActive )
             {
-                // Diferenciar entre usuário não ativado (primeiro acesso) e usuário bloqueado
+                
                 if ( user.IsFirstLogin )
                 {
                     throw new UnauthorizedAccessException ( "Account is not activated." );
@@ -227,6 +242,26 @@ namespace API.Services
 
             user.LastLoginAt = DateTime.UtcNow;
             await _userManager.UpdateAsync ( user );
+
+            // Registro de histórico de login
+            try
+            {
+                var ip = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? string.Empty;
+                var userAgent = _httpContextAccessor?.HttpContext?.Request?.Headers["User-Agent"].ToString() ?? string.Empty;
+
+                _identityDb.UserLoginHistories.Add(new UserLoginHistory
+                {
+                    UserId = user.Id,
+                    LoginAt = DateTime.UtcNow,
+                    IpAddress = ip,
+                    UserAgent = userAgent
+                });
+                await _identityDb.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Failed to register login history for user {UserId}", user.Id);
+            }
 
             var roles = await _userManager.GetRolesAsync(user);
             return BuildAuthResponse ( user, roles.FirstOrDefault ( ) ?? "client" );
@@ -262,7 +297,28 @@ namespace API.Services
             user.IsActive = true;
             user.IsFirstLogin = false;
 
+            user.LastLoginAt = DateTime.UtcNow;
             await _userManager.UpdateAsync ( user );
+
+            // Registrar histórico de login para primeiro acesso concluído
+            try
+            {
+                var ip = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? string.Empty;
+                var userAgent = _httpContextAccessor?.HttpContext?.Request?.Headers["User-Agent"].ToString() ?? string.Empty;
+
+                _identityDb.UserLoginHistories.Add(new UserLoginHistory
+                {
+                    UserId = user.Id,
+                    LoginAt = DateTime.UtcNow,
+                    IpAddress = ip,
+                    UserAgent = userAgent
+                });
+                await _identityDb.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Failed to register first-access login history for user {UserId}", user.Id);
+            }
 
             var roles = await _userManager.GetRolesAsync(user);
             return BuildAuthResponse ( user, roles.FirstOrDefault ( ) ?? "client" );

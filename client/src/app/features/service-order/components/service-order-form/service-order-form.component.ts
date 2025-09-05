@@ -18,7 +18,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   CreateServiceOrderDto,
-  CreateWorkDto
+  CreateWorkDto,
+  RepeatResponsible
 } from '../../models/service-order.interface';
 import { ServiceOrdersService } from '../../services/service-order.service';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -42,6 +43,8 @@ import {
   ShadeFormData,
   WorkTypeFormData
 } from '../../../sectors/models/serviceOrderForm.interface';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
 
 @Component({
   selector: 'app-service-order-form',
@@ -54,6 +57,7 @@ import {
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
+    MatCheckboxModule,
     MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
@@ -73,7 +77,7 @@ export class ServiceOrderFormComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private tablePriceService = inject(TablePriceService);
-
+  RepeatResponsible = RepeatResponsible;
   serviceOrderForm!: FormGroup;
   isEditMode = signal(false);
   loading = signal(false);
@@ -90,7 +94,7 @@ export class ServiceOrderFormComponent implements OnInit {
 
   ngOnInit() {
     this.initializeForm();
-    
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       // ======== MODO EDIÇÃO ========
@@ -112,7 +116,19 @@ export class ServiceOrderFormComponent implements OnInit {
       dateIn: ['', Validators.required],
       patientName: ['', [Validators.required, Validators.minLength(3)]],
       firstSectorId: ['', Validators.required],
+      isRepeat: [false],
+      repeatResponsible: [null],
       works: this.fb.array([])
+    });
+    this.serviceOrderForm.get('isRepeat')?.valueChanges.subscribe(isRepeat => {
+      const rr = this.serviceOrderForm.get('repeatResponsible');
+      if (isRepeat) {
+        rr?.addValidators(Validators.required);
+      } else {
+        rr?.clearValidators();
+        rr?.setValue(null);
+      }
+      rr?.updateValueAndValidity();
     });
 
     this.serviceOrderForm.get('clientId')?.valueChanges.subscribe(clientId => {
@@ -145,7 +161,7 @@ export class ServiceOrderFormComponent implements OnInit {
   // ======== MODO EDIÇÃO ========
   private loadEditMode(id: number) {
     this.loading.set(true);
-    
+
     // No modo edição, carregamos TUDO de uma vez
     this.serviceOrdersService.getBasicFormData().subscribe({
       next: basicData => {
@@ -165,11 +181,18 @@ export class ServiceOrderFormComponent implements OnInit {
             this.serviceOrdersService.getServiceOrderById(id).subscribe({
               next: order => {
                 // Patch básicos
+
                 this.serviceOrderForm.patchValue({
                   clientId: order.client.clientId,
                   dateIn: new Date(order.dateIn),
                   patientName: order.patientName,
-                  firstSectorId: this.getSectorIdByName(order.currentSectorName) ?? ''
+                  firstSectorId: this.getSectorIdByName(order.currentSectorName) ?? '',
+                  isRepeat: (order as any).isRepeat ?? false,
+                  repeatResponsible: order.repeatResponsible
+                    ? (order.repeatResponsible === 'Laboratory'
+                      ? RepeatResponsible.Laboratory
+                      : RepeatResponsible.Client)
+                    : null
                 });
 
                 // Adicionar works existentes
@@ -291,7 +314,9 @@ export class ServiceOrderFormComponent implements OnInit {
       dateIn: (formValue.dateIn as Date).toISOString(),
       patientName: formValue.patientName,
       firstSectorId: formValue.firstSectorId,
-      works: formValue.works
+      works: formValue.works,
+      isRepeat: !!formValue.isRepeat,
+      repeatResponsible: formValue.isRepeat ? formValue.repeatResponsible : null
     };
 
     const request = this.isEditMode()
@@ -347,7 +372,7 @@ export class ServiceOrderFormComponent implements OnInit {
     const filtered = scaleId
       ? this.shades().filter(shade => shade.scaleId === scaleId)
       : this.shades();
-  
+
     // Não precisa mais do mapeamento!
     this.shadesByWorkIndex.update(state => ({ ...state, [index]: filtered }));
   }
@@ -402,36 +427,36 @@ export class ServiceOrderFormComponent implements OnInit {
   }
 
   getErrorMessage(controlName: string): string {
-  const control = this.serviceOrderForm.get(controlName);
-  if (control?.hasError('required')) return 'Este campo é obrigatório';
-  if (control?.hasError('minlength')) {
-    return `Mínimo de ${control.errors?.['minlength'].requiredLength} caracteres`;
+    const control = this.serviceOrderForm.get(controlName);
+    if (control?.hasError('required')) return 'Este campo é obrigatório';
+    if (control?.hasError('minlength')) {
+      return `Mínimo de ${control.errors?.['minlength'].requiredLength} caracteres`;
+    }
+    if (control?.hasError('min')) {
+      return `Valor mínimo é ${control.errors?.['min'].min}`;
+    }
+    return '';
   }
-  if (control?.hasError('min')) {
-    return `Valor mínimo é ${control.errors?.['min'].min}`;
+
+  getWorkErrorMessage(index: number, controlName: string): string {
+    const control = (this.worksArray.at(index) as FormGroup).get(controlName);
+    if (control?.hasError('required')) return 'Este campo é obrigatório';
+    if (control?.hasError('min')) {
+      return `Valor mínimo é ${control.errors?.['min'].min}`;
+    }
+    return '';
   }
-  return '';
-}
 
-getWorkErrorMessage(index: number, controlName: string): string {
-  const control = (this.worksArray.at(index) as FormGroup).get(controlName);
-  if (control?.hasError('required')) return 'Este campo é obrigatório';
-  if (control?.hasError('min')) {
-    return `Valor mínimo é ${control.errors?.['min'].min}`;
+  getShadesForWork(index: number) {
+    const filteredShades = this.shadesByWorkIndex()[index];
+    if (filteredShades) {
+      return filteredShades;
+    }
+    return this.shades();
   }
-  return '';
-}
 
-getShadesForWork(index: number) {
-  const filteredShades = this.shadesByWorkIndex()[index];
-  if (filteredShades) {
-    return filteredShades; 
-    } 
-  return this.shades();
-}
-
-cancel() {
-  this.router.navigate(['/admin/service-orders']);
-}
+  cancel() {
+    this.router.navigate(['/admin/service-orders']);
+  }
 
 }

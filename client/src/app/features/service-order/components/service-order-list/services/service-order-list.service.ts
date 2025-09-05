@@ -73,7 +73,7 @@ export class ServiceOrderListService {
   readonly hasSelection = computed(() => this.selectedOrderIds().length > 0);
 
   constructor() {
-    this.loadSectors();
+    
   }
   
 
@@ -163,47 +163,75 @@ export class ServiceOrderListService {
     });
   }
 
-  moveToStage(orderId: number): Observable<void> {
-    const dialogRef = this.dialog.open(MoveToStageDialogComponent, {
-      width: '400px',
-      data: {
-        sectors: this.sectors(),
-        orderId: orderId,
-      },
-    });
-
-    return new Observable(observer => {
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          const moveToStageDto: MoveToStageDto = {
-            serviceOrderId: orderId,
-            sectorId: result.sectorId,
-            dateIn: result.dateIn,
-          };
-
-          this.setLoading(true);
-          this.serviceOrdersService.moveToStage(moveToStageDto).subscribe({
-            next: () => {
-              this.showSuccess(SERVICE_ORDER_MESSAGES.success.movedToStage);
-              this.loadServiceOrders().subscribe();
-              this.setLoading(false);
-              observer.next();
-              observer.complete();
-            },
-            error: (err: HttpErrorResponse) => {
-              console.error('Error moving to stage:', err);
-              const errorMessage = this.extractErrorMessage(err);
-              this.showError(errorMessage);
-              this.setLoading(false);
-              observer.error(err);
-            },
-          });
-        } else {
-          observer.complete();
-        }
+   moveToStage(orderId: number): Observable<void> {
+    const openDialog = () => {
+      const dialogRef = this.dialog.open(MoveToStageDialogComponent, {
+        width: '400px',
+        data: {
+          sectors: this.sectors(),
+          orderId: orderId,
+        },
       });
-    });
+
+      return new Observable<void>(observer => {
+        dialogRef.afterClosed().subscribe((result) => {
+          if (result) {
+            const moveToStageDto: MoveToStageDto = {
+              serviceOrderId: orderId,
+              sectorId: result.sectorId,
+              dateIn: result.dateIn,
+            };
+
+            this.setLoading(true);
+            this.serviceOrdersService.moveToStage(moveToStageDto).subscribe({
+              next: () => {
+                this.showSuccess(SERVICE_ORDER_MESSAGES.success.movedToStage);
+                this.loadServiceOrders().subscribe();
+                this.setLoading(false);
+                observer.next();
+                observer.complete();
+              },
+              error: (err: HttpErrorResponse) => {
+                console.error('Error moving to stage:', err);
+                const errorMessage = this.extractErrorMessage(err);
+                this.showError(errorMessage);
+                this.setLoading(false);
+                observer.error(err);
+              },
+            });
+          } else {
+            observer.complete();
+          }
+        });
+      });
+    };
+
+    // Lazy load de setores: só busca se ainda não estiver em memória
+    if (this.sectors().length === 0) {
+      return new Observable<void>(observer => {
+        this.sectorService.getAll().subscribe({
+          next: (sectors) => {
+            this.state.update(state => ({ ...state, sectors }));
+            // Depois de carregar, abre o diálogo
+            openDialog().subscribe({
+              next: () => observer.next(),
+              error: (e) => observer.error(e),
+              complete: () => observer.complete()
+            });
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('Error loading sectors:', err);
+            this.showError(SERVICE_ORDER_MESSAGES.error.loadSectors);
+            observer.error(err);
+          },
+        });
+      });
+    }
+
+    // Já tem setores em memória
+    return openDialog();
   }
+
 
   finishSelectedOrders(): Observable<void> {
     const selectedIds = this.selectedOrderIds();

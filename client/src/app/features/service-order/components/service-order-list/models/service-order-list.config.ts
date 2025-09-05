@@ -2,7 +2,6 @@ import { OrderStatus, OrderStatusLabels } from '../../../models/service-order.in
 
 export interface ServiceOrderListConfig {
   readonly displayedColumns: string[];
-  readonly statusMap: Record<string, OrderStatus>;
   readonly orderStatuses: Array<{ value: OrderStatus; label: string }>;
   readonly statusClasses: Record<number, string>;
   readonly sortOptions: Array<{ value: string; label: string }>;
@@ -24,12 +23,6 @@ export const SERVICE_ORDER_LIST_CONFIG: ServiceOrderListConfig = {
     'currentSectorName',
     'actions',
   ],
-
-  statusMap: {
-    Production: OrderStatus.Production,
-    TryIn: OrderStatus.TryIn,
-    Finished: OrderStatus.Finished,
-  },
 
   orderStatuses: [
     { value: OrderStatus.Production, label: OrderStatusLabels[OrderStatus.Production] },

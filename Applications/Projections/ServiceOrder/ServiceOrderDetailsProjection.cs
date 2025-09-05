@@ -14,5 +14,8 @@
         public ClientInvoiceRecord Client { get; init; } = new ( );
         public List<WorkRecord> Works { get; init; } = [];
         public List<StageRecord> Stages { get; init; } = [];
+        public bool IsRepeat { get; init; }
+        public string? RepeatResponsible { get; init; }
+
     }
 }

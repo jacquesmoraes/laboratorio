@@ -42,6 +42,11 @@ namespace Applications.Services
                 order.Status = OrderStatus.Production;
                 order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
 
+                if ( order.IsRepeat && order.RepeatResponsible == RepeatResponsible.Laboratory )
+                {
+                    order.OrderTotal = 0;
+                }
+
                 var firstSector = await _sectorRepo.GetEntityWithSpec(SectorSpecs.ById(dto.FirstSectorId))
             ?? throw new NotFoundException("Initial sector not found.");
 
@@ -170,13 +175,13 @@ namespace Applications.Services
 
             foreach ( var order in serviceOrders )
             {
-                // Valida data de finalização
+                // validate finish date
                 ServiceOrderDateValidator.ValidateFinishDate ( order, dateOutUtc );
 
-                // Finaliza a OS
+                // finalize order
                 order.Finish ( dateOutUtc );
 
-                // Remove agendamento ativo, se existir
+                // Remove schedule, if any
                 var existingSchedule = await _scheduleRepo.GetEntityWithSpec(ScheduleSpecs.ActiveByServiceOrderId(order.ServiceOrderId));
                 if ( existingSchedule is not null )
                 {
@@ -222,11 +227,17 @@ namespace Applications.Services
 
             order.PatientName = dto.PatientName;
             order.DateIn = DateTime.SpecifyKind ( dto.DateIn, DateTimeKind.Utc );
+            order.IsRepeat = dto.IsRepeat;
+            order.RepeatResponsible = dto.RepeatResponsible;
 
             // Update works
             order.Works.Clear ( );
             order.Works = _mapper.Map<List<Work>> ( dto.Works );
             order.OrderTotal = order.Works.Sum ( w => w.PriceTotal );
+            if ( order.IsRepeat && order.RepeatResponsible == RepeatResponsible.Laboratory )
+            {
+                order.OrderTotal = 0;
+            }
 
             await _uow.SaveChangesAsync ( );
             return order;
